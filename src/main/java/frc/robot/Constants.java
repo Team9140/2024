@@ -15,6 +15,8 @@ public final class Constants {
   public static final double wheelBase = Units.inchesToMeters(0);
   public static final double trackWidth = Units.inchesToMeters(0);
 
+  public static final int kencoderCountsPerRev = 0;
+
   public static final class Drivetrain {
     public static final int frontLeftDrivePort = 1;
     public static final int frontLeftTurnPort = 1;
