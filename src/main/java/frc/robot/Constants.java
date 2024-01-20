@@ -14,21 +14,21 @@ public final class Constants {
   public static final double wheelBase = Units.inchesToMeters(0);
   public static final double trackWidth = Units.inchesToMeters(0);
 
-//  public static final double fieldx = Units.inchesToMeters(501);
-//  public static final double fieldy = Units.inchesToMeters(323.28);
-  public static final int kencoderCountsPerRev = 0;
-//  public static final double fieldx = Units.inchesToMeters(501);
-//  public static final double fieldy = Units.inchesToMeters(323.28);
+  //  public static final double fieldx = Units.inchesToMeters(501);
+  //  public static final double fieldy = Units.inchesToMeters(323.28);
+  public static final int kencoderCountsPerRev = 1;
+  //  public static final double fieldx = Units.inchesToMeters(501);
+  //  public static final double fieldy = Units.inchesToMeters(323.28);
 
   public static final class Drivetrain {
     public static final int frontLeftDrivePort = 1;
-    public static final int frontLeftTurnPort = 1;
-    public static final int frontRightDrivePort = 1;
-    public static final int frontRightTurnPort = 1;
-    public static final int backLeftDrivePort = 1;
-    public static final int backLeftTurnPort = 1;
-    public static final int backRightDrivePort = 1;
-    public static final int backRightTurnPort = 1;
+    public static final int frontLeftTurnPort = 2;
+    public static final int frontRightDrivePort = 3;
+    public static final int frontRightTurnPort = 4;
+    public static final int backLeftDrivePort = 5;
+    public static final int backLeftTurnPort = 6;
+    public static final int backRightDrivePort = 7;
+    public static final int backRightTurnPort = 8;
   }
 
   public static class Ports {

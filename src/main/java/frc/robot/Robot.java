@@ -10,9 +10,12 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.PhotonVision;
+import org.photonvision.proto.Photon;
 
 public class Robot extends TimedRobot {
   private Drivetrain drive;
+  private PhotonVision camera;
   CommandXboxController xb = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 
   public Robot() {
@@ -23,6 +26,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     Constants.UpdateSettings();
     this.drive = Drivetrain.getInstance();
+    this.camera = PhotonVision.getInstance();
 
     drive.setDefaultCommand(
         Commands.run(

@@ -10,6 +10,7 @@ import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
+  private static PhotonVision camera;
   private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(Constants.Ports.GYRO);
 
   private static SwerveModule frontLeft;
@@ -24,7 +25,7 @@ public class Drivetrain extends SubsystemBase {
   public static SwerveDriveOdometry swerveOdometry;
 
   private Drivetrain() {
-    swerveKinematics =
+    this.swerveKinematics =
         new SwerveDriveKinematics(
             new Translation2d(Constants.wheelBase / 2, Constants.trackWidth / 2),
             new Translation2d(Constants.wheelBase / 2, -Constants.trackWidth / 2),
@@ -43,8 +44,10 @@ public class Drivetrain extends SubsystemBase {
     backRight =
         new SwerveModule(
             Constants.Drivetrain.backRightDrivePort, Constants.Drivetrain.backRightTurnPort);
-        swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new
-     SwerveModulePosition(0.0, rotation));
+    this.swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new SwerveModulePosition(0.0, rotation));
+    //    swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new
+    // SwerveModulePosition(0.0, rotation));
+    this.camera = PhotonVision.getInstance();
   }
 
   public static Drivetrain getInstance() {
