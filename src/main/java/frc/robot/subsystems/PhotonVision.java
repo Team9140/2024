@@ -9,15 +9,19 @@ import org.photonvision.targeting.PhotonPipelineResult;
 
 public class PhotonVision extends SubsystemBase {
   private static PhotonVision instance;
-  private PhotonCamera camera = new PhotonCamera("ProblemCamera");
+  private PhotonCamera camera;
 
   // gets last result from camera.
-  PhotonPipelineResult result = camera.getLatestResult();
+//  PhotonPipelineResult result = camera.getLatestResult();
 
   public static PhotonVision getInstance() {
     return PhotonVision.instance == null
       ? PhotonVision.instance = new PhotonVision()
       : PhotonVision.instance;
+  }
+
+  public PhotonVision() {
+    this.camera = new PhotonCamera(Constants.Ports.CAMERA);
   }
 
   public void getDistanceFromBigTarget() {
@@ -32,7 +36,7 @@ public class PhotonVision extends SubsystemBase {
 
   @Override
   public void periodic() {
-      SmartDashboard.putString("Camera Results", String.valueOf(camera.getLatestResult().hasTargets()));
+      SmartDashboard.putString("Camera Results", String.valueOf(this.camera.getLatestResult().hasTargets()));
   }
 
   //private class VisionData {}

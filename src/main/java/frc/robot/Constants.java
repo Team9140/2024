@@ -34,6 +34,7 @@ public final class Constants {
   public static class Ports {
     public static final int INPUT_CONTROLLER = 0;
     public static final int GYRO = 0;
+    public static final String CAMERA = "ProblemCamera";
   }
 
   public static Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
