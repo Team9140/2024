@@ -7,15 +7,19 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.Drivetrain;
 
 public class Robot extends TimedRobot {
+  private Drivetrain drive;
+  CommandXboxController xb = new CommandXboxController(Constants.Ports.CONTROLLER);
 
-
-
-  @Override
-  public void robotInit() {
+  public Robot() {
+    super(Constants.LOOP_INTERVAL);
   }
 
+  @Override
+  public void robotInit() {}
 
   @Override
   public void robotPeriodic() {
@@ -29,29 +33,22 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {}
 
   @Override
-  public void autonomousInit() {
-  }
-
+  public void autonomousInit() {}
 
   /** This method is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {}
 
-
   @Override
-  public void teleopInit() {
-  }
-
+  public void teleopInit() {}
 
   @Override
   public void teleopPeriodic() {}
-
 
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
   }
-
 
   /** This method is called periodically during test mode. */
   @Override
