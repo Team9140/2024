@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import frc.robot.Constants;
 
 public class Drivetrain {
@@ -24,7 +23,8 @@ public class Drivetrain {
             new Translation2d(-Constants.wheelBase / 2, Constants.trackWidth / 2),
             new Translation2d(-Constants.wheelBase / 2, -Constants.trackWidth / 2));
     Rotation2d rotation = gyro.getRotation2d();
-//    swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new SwerveModulePosition(0.0, rotation));
+    //    swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new
+    // SwerveModulePosition(0.0, rotation));
   }
 
   public Drivetrain getInstance() {
