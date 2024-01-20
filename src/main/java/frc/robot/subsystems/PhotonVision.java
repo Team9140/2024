@@ -17,17 +17,17 @@ public class PhotonVision extends SubsystemBase {
         switch(Constants.alliance.orElse(DriverStation.Alliance.Red)) {
             case Red:
 
-                break;
+            break;
 
             case Blue:
 
-                break;
+            break;
 
         }
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putString("Camera Results", camera.getLatestResult().toString());
+        SmartDashboard.putString("Camera Results", String.valueOf(camera.getLatestResult().hasTargets()));
     }
 }

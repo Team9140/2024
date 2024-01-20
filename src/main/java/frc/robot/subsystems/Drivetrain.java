@@ -42,8 +42,8 @@ public class Drivetrain {
     backRight =
         new SwerveModule(
             Constants.Drivetrain.backRightDrivePort, Constants.Drivetrain.backRightTurnPort);
-    //    swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new
-    // SwerveModulePosition(0.0, rotation));
+        swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new
+     SwerveModulePosition(0.0, rotation));
   }
 
   public Drivetrain getInstance() {
