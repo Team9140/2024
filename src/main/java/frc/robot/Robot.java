@@ -7,6 +7,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Drivetrain;
 
@@ -19,7 +20,17 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void robotInit() {}
+  public void robotInit() {
+    Constants.UpdateSettings();
+    this.drive = Drivetrain.getInstance();
+
+    drive.setDefaultCommand(
+        Commands.run(
+            () -> {
+              drive.swerveDrive(xb.getLeftY(), xb.getLeftX(), xb.getRightX());
+            },
+            drive));
+  }
 
   @Override
   public void robotPeriodic() {

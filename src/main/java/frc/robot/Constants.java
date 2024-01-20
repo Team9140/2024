@@ -7,7 +7,6 @@ package frc.robot;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-
 import java.util.Optional;
 
 public final class Constants {
