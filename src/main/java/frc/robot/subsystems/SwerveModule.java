@@ -1,8 +1,8 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkAbsoluteEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 
 public class SwerveModule extends SubsystemBase {
   private CANSparkMax driveMotor;
@@ -15,8 +15,10 @@ public class SwerveModule extends SubsystemBase {
     FAULT
   }
 
-  private volatile SwerveState currentState;
-  private volatile SwerveState targetState;
+  private SwerveState currentState;
+
+  private volatile int targetAngle;
+  private volatile int targetVelocity;
 
   public SwerveModule(int drivePort, int turnPort) {
     this.driveMotor = new CANSparkMax(drivePort, CANSparkMax.MotorType.kBrushless);
@@ -29,9 +31,11 @@ public class SwerveModule extends SubsystemBase {
     switch (currentState) {
       case STARTUP:
         turnMotor.getAlternateEncoder(0);
-        initalOffset = turnMotor.getAlternateEncoder(Constants.kencoderCountsPerRev).getPosition();
+        initalOffset =
+            turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition();
         break;
       case POSITION:
+            turnMotor.getPIDController().setReference(targetAngle, ControlType.kPosition);
         break;
       case FAULT:
         break;

@@ -5,9 +5,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class Drivetrain {
+public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
   private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(Constants.Ports.GYRO);
 
@@ -46,9 +47,11 @@ public class Drivetrain {
     // SwerveModulePosition(0.0, rotation));
   }
 
-  public Drivetrain getInstance() {
+  public static Drivetrain getInstance() {
     return Drivetrain.instance == null
         ? Drivetrain.instance = new Drivetrain()
         : Drivetrain.instance;
   }
+
+  public void swerveDrive(double leftY, double leftX, double rightX) {}
 }
