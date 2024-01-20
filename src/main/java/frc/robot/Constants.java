@@ -15,6 +15,9 @@ public final class Constants {
   public static final double wheelBase = Units.inchesToMeters(0);
   public static final double trackWidth = Units.inchesToMeters(0);
 
+//  public static final double fieldx = Units.inchesToMeters(501);
+//  public static final double fieldy = Units.inchesToMeters(323.28);
+
   public static final class Drivetrain {
     public static final int frontLeftDrivePort = 1;
     public static final int frontLeftTurnPort = 1;
@@ -31,7 +34,7 @@ public final class Constants {
     public static final int GYRO = 0;
   }
 
-  public static Optional<DriverStation.Alliance> alliance = Optional.empty();
+  public static Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
