@@ -30,10 +30,18 @@ public class Drivetrain {
             new Translation2d(-Constants.wheelBase / 2, Constants.trackWidth / 2),
             new Translation2d(-Constants.wheelBase / 2, -Constants.trackWidth / 2));
     Rotation2d rotation = gyro.getRotation2d();
-    frontLeft = new SwerveModule(Constants.Drivetrain.frontLeftDrivePort, Constants.Drivetrain.frontLeftTurnPort);
-    frontRight = new SwerveModule(Constants.Drivetrain.frontRightDrivePort, Constants.Drivetrain.frontRightTurnPort);
-    backLeft = new SwerveModule(Constants.Drivetrain.backLeftDrivePort, Constants.Drivetrain.backLeftTurnPort);
-    backRight = new SwerveModule(Constants.Drivetrain.backRightDrivePort, Constants.Drivetrain.backRightTurnPort);
+    frontLeft =
+        new SwerveModule(
+            Constants.Drivetrain.frontLeftDrivePort, Constants.Drivetrain.frontLeftTurnPort);
+    frontRight =
+        new SwerveModule(
+            Constants.Drivetrain.frontRightDrivePort, Constants.Drivetrain.frontRightTurnPort);
+    backLeft =
+        new SwerveModule(
+            Constants.Drivetrain.backLeftDrivePort, Constants.Drivetrain.backLeftTurnPort);
+    backRight =
+        new SwerveModule(
+            Constants.Drivetrain.backRightDrivePort, Constants.Drivetrain.backRightTurnPort);
     //    swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new
     // SwerveModulePosition(0.0, rotation));
   }
