@@ -31,7 +31,7 @@ public final class Constants {
     public static final int GYRO = 0;
   }
 
-  public static Optional<DriverStation.Alliance> alliance = null;
+  public static Optional<DriverStation.Alliance> alliance = Optional.empty();
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
