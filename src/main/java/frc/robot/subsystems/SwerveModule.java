@@ -1,8 +1,9 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class SwerveModule {
+public class SwerveModule extends SubsystemBase {
   private CANSparkMax driveMotor;
   private CANSparkMax turnMotor;
 
@@ -25,7 +26,7 @@ public class SwerveModule {
     SwerveState nextSwerveState = targetState;
     switch (nextSwerveState) {
       case STARTUP:
-        turnMotor.getAlternateEncoder();
+        turnMotor.getAlternateEncoder(0);
     }
   }
 }

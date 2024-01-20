@@ -6,6 +6,9 @@
 package frc.robot;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+
+import java.util.Optional;
 
 public final class Constants {
   public static final double LOOP_INTERVAL = 0.020;
@@ -13,7 +16,6 @@ public final class Constants {
   public static final double trackWidth = Units.inchesToMeters(0);
 
   public static final class Drivetrain {
-    public static final int Gyro = 0;
     public static final int frontLeftDrivePort = 1;
     public static final int frontLeftTurnPort = 1;
     public static final int frontRightDrivePort = 1;
@@ -26,5 +28,12 @@ public final class Constants {
 
   public static class Ports {
     public static final int INPUT_CONTROLLER = 0;
+    public static final int GYRO = 0;
+  }
+
+  public static Optional<DriverStation.Alliance> alliance = null;
+
+  public static void UpdateSettings() {
+    Constants.alliance = DriverStation.getAlliance();
   }
 }

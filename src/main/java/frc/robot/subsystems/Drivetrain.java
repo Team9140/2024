@@ -9,7 +9,7 @@ import frc.robot.Constants;
 
 public class Drivetrain {
   private static Drivetrain instance;
-  private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(Constants.Drivetrain.Gyro);
+  private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(Constants.Ports.GYRO);
 
   private static SwerveModule frontLeft;
   private static SwerveModule frontRight;
