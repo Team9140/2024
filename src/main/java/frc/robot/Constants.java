@@ -24,4 +24,8 @@ public final class Constants {
     public static final int backRightTurnPort = 1;
 
   }
+
+  public static class Ports {
+    public static final int INPUT_CONTROLLER = 0;
+  }
 }

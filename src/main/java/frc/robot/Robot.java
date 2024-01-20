@@ -12,7 +12,7 @@ import frc.robot.subsystems.Drivetrain;
 
 public class Robot extends TimedRobot {
   private Drivetrain drive;
-  CommandXboxController xb = new CommandXboxController(Constants.Ports.CONTROLLER);
+  CommandXboxController xb = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 
   public Robot() {
     super(Constants.LOOP_INTERVAL);
