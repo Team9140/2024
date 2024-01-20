@@ -14,5 +14,14 @@ public final class Constants {
 
   public static final class Drivetrain {
     public static final int Gyro = 0;
+    public static final int frontLeftDrivePort = 1;
+    public static final int frontLeftTurnPort = 1;
+    public static final int frontRightDrivePort = 1;
+    public static final int frontRightTurnPort = 1;
+    public static final int backLeftDrivePort = 1;
+    public static final int backLeftTurnPort = 1;
+    public static final int backRightDrivePort = 1;
+    public static final int backRightTurnPort = 1;
+
   }
 }
