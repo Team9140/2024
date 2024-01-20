@@ -15,4 +15,8 @@ public final class Constants {
   public static final class Drivetrain {
     public static final int Gyro = 0;
   }
+
+  public static class Ports {
+    public static final int INPUT_CONTROLLER = 0;
+  }
 }
