@@ -7,7 +7,6 @@ package frc.robot;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-
 import java.util.Optional;
 
 public final class Constants {
@@ -15,6 +14,9 @@ public final class Constants {
   public static final double wheelBase = Units.inchesToMeters(0);
   public static final double trackWidth = Units.inchesToMeters(0);
 
+//  public static final double fieldx = Units.inchesToMeters(501);
+//  public static final double fieldy = Units.inchesToMeters(323.28);
+  public static final int kencoderCountsPerRev = 0;
 //  public static final double fieldx = Units.inchesToMeters(501);
 //  public static final double fieldy = Units.inchesToMeters(323.28);
 
