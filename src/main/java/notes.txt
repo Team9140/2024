@@ -1,2 +1,10 @@
 https://github.com/Vector8177/2024-SwerveDriveBase - Vector Swerve
 https://docs.photonvision.org/en/latest/docs/examples/simposeest.html - PhotonVision WPILib Example
+
+ath planner
+choreo
+2056 slew point thingie
+apriltag
+better auton
+swerve ofc
+yagsl

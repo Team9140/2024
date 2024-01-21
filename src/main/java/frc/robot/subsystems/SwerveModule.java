@@ -74,8 +74,7 @@ public class SwerveModule extends SubsystemBase {
         // this.turnMotor.getAbsoluteEncoder.setPositionConversionFactor(2 * Math.PI);
         break;
       case POSITION:
-        this.turnMotor.getPIDController().setReference(targetAngle, CANSparkBase.ControlType.kPosition);
-        this.driveMotor.setVoltage(feedforward.calculate(targetVelocity));
+        //        turnMotor.getPIDController().setReference(targetAngle, ControlType.kPosition);
         break;
       case FAULT:
         break;
