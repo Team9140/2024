@@ -5,13 +5,13 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Drivetrain;
+import org.littletonrobotics.junction.LoggedRobot;
 
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private Drivetrain drive;
   CommandXboxController xb = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 

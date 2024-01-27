@@ -15,9 +15,7 @@ public class Drivetrain extends SubsystemBase {
 
   private static SwerveModule frontLeft;
   private static SwerveModule frontRight;
-
   private static SwerveModule backLeft;
-
   private static SwerveModule backRight;
 
   Translation2d m_frontLeftLocation;
@@ -39,16 +37,16 @@ public class Drivetrain extends SubsystemBase {
     Rotation2d rotation = gyro.getRotation2d();
     frontLeft =
         new SwerveModule(
-            Constants.Drivetrain.frontLeftDrivePort, Constants.Drivetrain.frontLeftTurnPort);
+            Constants.Ports.frontLeftDrivePort, Constants.Ports.frontLeftTurnPort);
     frontRight =
         new SwerveModule(
-            Constants.Drivetrain.frontRightDrivePort, Constants.Drivetrain.frontRightTurnPort);
+            Constants.Ports.frontRightDrivePort, Constants.Ports.frontRightTurnPort);
     backLeft =
         new SwerveModule(
-            Constants.Drivetrain.backLeftDrivePort, Constants.Drivetrain.backLeftTurnPort);
+            Constants.Ports.backLeftDrivePort, Constants.Ports.backLeftTurnPort);
     backRight =
         new SwerveModule(
-            Constants.Drivetrain.backRightDrivePort, Constants.Drivetrain.backRightTurnPort);
+            Constants.Ports.backRightDrivePort, Constants.Ports.backRightTurnPort);
     swerveOdometry =
         new SwerveDriveOdometry(
             swerveKinematics,

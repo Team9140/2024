@@ -10,7 +10,7 @@ import frc.robot.Constants;
 public class SwerveModule extends SubsystemBase {
   private CANSparkMax driveMotor;
   private CANSparkMax turnMotor;
-  private double initalOffset;
+  private double initalOffset = 0.0;
 
   private SparkRelativeEncoder turnEncoder;
   private SparkRelativeEncoder driveEncoder;
@@ -19,6 +19,8 @@ public class SwerveModule extends SubsystemBase {
 
   private enum SwerveState {
     STARTUP,
+
+
     POSITION,
     FAULT
   }
@@ -35,6 +37,7 @@ public class SwerveModule extends SubsystemBase {
     this.driveMotor = new CANSparkMax(drivePort, CANSparkMax.MotorType.kBrushless);
     this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
     this.feedforward = new SimpleMotorFeedforward(ks, kv, ka);
+    this.currentState = SwerveState.STARTUP;
   }
 
   @Override
