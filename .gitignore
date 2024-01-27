@@ -336,3 +336,5 @@ bin/
 # Symlinks
 2023
 
+# Build Constants
+src/main/java/frc/robot/BuildConstants.java
