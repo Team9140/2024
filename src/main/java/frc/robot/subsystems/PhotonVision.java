@@ -65,7 +65,6 @@ public class PhotonVision extends SubsystemBase {
       lastPose = PhotonUtils.estimateFieldToRobot(Constants.Camera.CAMERA_HEIGHT_METERS, pose3d.getZ(), Constants.Camera.CAMERA_PITCH_RADS,
               0.0, pose3d.getRotation().toRotation2d(), new Rotation2d(gyro), pose3d.toPose2d(),
               Constants.Camera.cameraToRobot);
-      lastAmbiguity = result.getBestTarget().getPoseAmbiguity();
 
       return new VisionData(lastTimestamp, lastPose, lastTagNum);
 
