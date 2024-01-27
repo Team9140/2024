@@ -24,12 +24,12 @@ public class Robot extends LoggedRobot {
     Constants.UpdateSettings();
     this.drive = Drivetrain.getInstance();
 
-    drive.setDefaultCommand(
-        Commands.run(
-            () -> {
-              drive.swerveDrive(xb.getLeftY(), xb.getLeftX(), xb.getRightX());
-            },
-            drive));
+    this.drive.setDefaultCommand(Commands.run(() -> drive.swerveDrive(
+      xb.getLeftY() * Constants.Drivetrain.FORWARD_METERS_PER_SECOND,
+      xb.getLeftX() * Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND,
+      xb.getRightX() * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND),
+      drive
+    ));
   }
 
   @Override
@@ -37,31 +37,29 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
   }
 
-  @Override
-  public void disabledInit() {}
+//  @Override
+//  public void disabledInit() {}
+//
+//  @Override
+//  public void disabledPeriodic() {}
+//
+//  @Override
+//  public void autonomousInit() {}
+//
+//  @Override
+//  public void autonomousPeriodic() {}
+//
+//  @Override
+//  public void teleopInit() {}
 
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void autonomousInit() {}
-
-  /** This method is called periodically during autonomous. */
-  @Override
-  public void autonomousPeriodic() {}
-
-  @Override
-  public void teleopInit() {}
-
-  @Override
-  public void teleopPeriodic() {}
+//  @Override
+//  public void teleopPeriodic() {}
 
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
   }
 
-  /** This method is called periodically during test mode. */
-  @Override
-  public void testPeriodic() {}
+//  @Override
+//  public void testPeriodic() {}
 }
