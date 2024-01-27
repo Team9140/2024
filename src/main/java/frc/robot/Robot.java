@@ -5,13 +5,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.PhotonVision;
+import frc.robot.subsystems.Drivetrain;
+import org.littletonrobotics.junction.LoggedRobot;
 
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private PhotonVision camera;
+
+  private Drivetrain drive;
   CommandXboxController xb = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 
   public Robot() {
@@ -22,6 +26,14 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     Constants.UpdateSettings();
     this.camera = PhotonVision.getInstance();
+    this.drive = Drivetrain.getInstance();
+
+    this.drive.setDefaultCommand(Commands.run(() -> drive.swerveDrive(
+      xb.getLeftY() * Constants.Drivetrain.FORWARD_METERS_PER_SECOND,
+      xb.getLeftX() * Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND,
+      xb.getRightX() * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND),
+      drive
+    ));
   }
 
   @Override
@@ -29,31 +41,29 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
   }
 
-  @Override
-  public void disabledInit() {}
+//  @Override
+//  public void disabledInit() {}
+//
+//  @Override
+//  public void disabledPeriodic() {}
+//
+//  @Override
+//  public void autonomousInit() {}
+//
+//  @Override
+//  public void autonomousPeriodic() {}
+//
+//  @Override
+//  public void teleopInit() {}
 
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void autonomousInit() {}
-
-  /** This method is called periodically during autonomous. */
-  @Override
-  public void autonomousPeriodic() {}
-
-  @Override
-  public void teleopInit() {}
-
-  @Override
-  public void teleopPeriodic() {}
+//  @Override
+//  public void teleopPeriodic() {}
 
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
   }
 
-  /** This method is called periodically during test mode. */
-  @Override
-  public void testPeriodic() {}
+//  @Override
+//  public void testPeriodic() {}
 }
