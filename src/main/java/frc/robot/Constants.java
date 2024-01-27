@@ -27,14 +27,14 @@ public final class Constants {
   public static class Ports {
     public static final int INPUT_CONTROLLER = 0;
     public static final int GYRO = 0;
-    public static final int frontLeftDrivePort = 1;
-    public static final int frontLeftTurnPort = 2;
+    public static final int frontLeftDrivePort = 10;
+    public static final int frontLeftTurnPort = 5;
     public static final int frontRightDrivePort = 3;
     public static final int frontRightTurnPort = 4;
-    public static final int backLeftDrivePort = 5;
-    public static final int backLeftTurnPort = 6;
-    public static final int backRightDrivePort = 7;
-    public static final int backRightTurnPort = 8;
+    public static final int backLeftDrivePort = 6;
+    public static final int backLeftTurnPort = 7;
+    public static final int backRightDrivePort = 2;
+    public static final int backRightTurnPort = 1;
   }
 
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();

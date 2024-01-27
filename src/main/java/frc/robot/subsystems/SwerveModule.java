@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -15,7 +16,7 @@ public class SwerveModule extends SubsystemBase {
   private CANSparkMax driveMotor;
   private CANSparkMax turnMotor;
   private double initialOffset = 0.0;
-
+  private String niceName;
   private SimpleMotorFeedforward feedforward;
 
   private enum SwerveState {
@@ -31,7 +32,8 @@ public class SwerveModule extends SubsystemBase {
   private volatile double targetAngle;
   private volatile double targetVelocity;
 
-  public SwerveModule(int drivePort, int turnPort) {
+  public SwerveModule(int drivePort, int turnPort, String niceName) {
+    this.niceName = niceName;
     double ks = 0;
     double kv = 0;
     double ka = 0;
@@ -39,6 +41,10 @@ public class SwerveModule extends SubsystemBase {
     this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
     this.feedforward = new SimpleMotorFeedforward(ks, kv, ka);
     this.currentState = SwerveState.STARTUP;
+  }
+
+  public SwerveModule(int drivePort, int turnPort) {
+    this(drivePort, turnPort, "drive " + drivePort + " turn " + turnPort);
   }
 
   @Override
@@ -60,6 +66,11 @@ public class SwerveModule extends SubsystemBase {
       case FAULT:
         break;
     }
+
+    SmartDashboard.putNumber(this.niceName + " turn angle", this.getTurnAngle());
+    SmartDashboard.putNumber(this.niceName + " turn velocity", this.turnMotor.getEncoder().getVelocity());
+    SmartDashboard.putNumber(this.niceName + " drive velocity", this.driveMotor.getEncoder().getVelocity());
+    SmartDashboard.putNumber(this.niceName + " drive encoder position", this.driveMotor.getEncoder().getPosition());
   }
 
   public void setTarget(SwerveModuleState state) {
