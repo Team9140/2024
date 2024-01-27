@@ -17,6 +17,7 @@ public final class Constants {
   public static final class Drivetrain {
     public static final double positionConversionFactor = 2 * Math.PI;
     public static final double driveWheelDiameter = 4;
+    public static final double DEADBAND = 1.0;
   }
 
   public static class Ports {

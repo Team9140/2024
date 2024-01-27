@@ -1,8 +1,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -17,6 +19,11 @@ public class Drivetrain extends SubsystemBase {
   private static SwerveModule frontRight;
   private static SwerveModule backLeft;
   private static SwerveModule backRight;
+
+  private Translation2d m_frontLeftLocation;
+  private Translation2d m_frontRightLocation;
+  private Translation2d m_backLeftLocation;
+  private Translation2d m_backRightLocation;
 
   public static SwerveDriveKinematics swerveKinematics;
 
@@ -62,5 +69,10 @@ public class Drivetrain extends SubsystemBase {
 
   public void swerveDrive(double leftY, double leftX, double rightX) {}
 
-  
+  public void drive(double vx, double vy, double omega){
+    vx = MathUtil.applyDeadband(vx, Constants.Drivetrain.DEADBAND);
+    vy = MathUtil.applyDeadband(vy, Constants.Drivetrain.DEADBAND);
+    omega = MathUtil.applyDeadband(omega, Constants.Drivetrain.DEADBAND);
+    ChassisSpeeds movent = new ChassisSpeeds(vx, vy, omega);
+  }
 }
