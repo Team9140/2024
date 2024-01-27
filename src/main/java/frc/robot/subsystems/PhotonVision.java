@@ -21,6 +21,8 @@ public class PhotonVision extends SubsystemBase {
   private Pose2d lastPose = null;
   private double lastAmbiguity = 0.0;
 
+  private int lastTagNum = -1;
+
   // gets last result from camera.
 //  PhotonPipelineResult result = camera.getLatestResult();
 
@@ -47,6 +49,11 @@ public class PhotonVision extends SubsystemBase {
   @Override
   public void periodic() {
       SmartDashboard.putString("Camera Results", String.valueOf(this.camera.getLatestResult().hasTargets()));
+      VisionData data = getPosition2d();
+      SmartDashboard.putString("Timestamp", String.valueOf(data.getTimestamp()));
+      SmartDashboard.putString("Pose", data.getPose().toString());
+      SmartDashboard.putString("Ambiguity", String.valueOf(data.getAmbiguity()));
+      SmartDashboard.putString("Tag Number", String.valueOf(data.getTagNum()));
   }
 
   public VisionData getPosition2d(){
@@ -54,18 +61,18 @@ public class PhotonVision extends SubsystemBase {
     //temp
     double gyro = 0.0;
     if(result.hasTargets()){
-      int AprilTagID = result.getBestTarget().getFiducialId();
-      Pose3d pose3d = Constants.Camera.field.getTagPose(AprilTagID).get();
+      lastTagNum = result.getBestTarget().getFiducialId();
+      Pose3d pose3d = Constants.Camera.field.getTagPose(lastTagNum).get();
       lastTimestamp = result.getTimestampSeconds();
       lastPose = PhotonUtils.estimateFieldToRobot(Constants.Camera.CAMERA_HEIGHT_METERS, pose3d.getZ(), Constants.Camera.CAMERA_PITCH_RADS,
               0.0, pose3d.getRotation().toRotation2d(), new Rotation2d(gyro), pose3d.toPose2d(),
               Constants.Camera.cameraToRobot);
       lastAmbiguity = result.getBestTarget().getPoseAmbiguity();
 
-      return new VisionData(lastTimestamp, lastPose, lastAmbiguity);
+      return new VisionData(lastTimestamp, lastPose, lastAmbiguity, lastTagNum);
 
     }else{
-      return new VisionData(lastTimestamp, lastPose, lastAmbiguity);
+      return new VisionData(lastTimestamp, lastPose, lastAmbiguity, lastTagNum);
     }
   }
 
@@ -76,10 +83,13 @@ public class PhotonVision extends SubsystemBase {
     private Pose2d pose;
     private double ambiguity;
 
-    public VisionData(double time, Pose2d pose, double ambiguity){
+    private int tagNum;
+
+    public VisionData(double time, Pose2d pose, double ambiguity, int tagNum){
       this.timestamp = time;
       this.pose = pose;
       this.ambiguity = ambiguity;
+      this.tagNum = tagNum;
     }
 
     public double getTimestamp(){
@@ -92,6 +102,10 @@ public class PhotonVision extends SubsystemBase {
 
     public double getAmbiguity(){
       return this.ambiguity;
+    }
+
+    public double getTagNum(){
+      return this.tagNum;
     }
   }
 }
