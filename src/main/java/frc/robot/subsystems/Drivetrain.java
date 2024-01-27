@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -18,6 +19,11 @@ public class Drivetrain extends SubsystemBase {
   private static SwerveModule backLeft;
 
   private static SwerveModule backRight;
+
+  Translation2d m_frontLeftLocation;
+  Translation2d m_frontRightLocation;
+  Translation2d m_backLeftLocation;
+  Translation2d m_backRightLocation;
 
   public static SwerveDriveKinematics swerveKinematics;
 
@@ -43,8 +49,16 @@ public class Drivetrain extends SubsystemBase {
     backRight =
         new SwerveModule(
             Constants.Drivetrain.backRightDrivePort, Constants.Drivetrain.backRightTurnPort);
-    //    swerveOdometry = new SwerveDriveOdometry(swerveKinematics, rotation, new
-    // SwerveModulePosition(0.0, rotation));
+    swerveOdometry =
+        new SwerveDriveOdometry(
+            swerveKinematics,
+            rotation,
+            new SwerveModulePosition[] {
+              frontLeft.getPosition(),
+              frontRight.getPosition(),
+              backLeft.getPosition(),
+              backRight.getPosition()
+            });
   }
 
   public static Drivetrain getInstance() {

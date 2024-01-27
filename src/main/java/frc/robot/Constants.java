@@ -25,6 +25,8 @@ public final class Constants {
     public static final int backLeftTurnPort = 1;
     public static final int backRightDrivePort = 1;
     public static final int backRightTurnPort = 1;
+    public static final double positionConversionFactor = 2 * Math.PI;
+    public static final double driveWheelDiameter = 4;
   }
 
   public static class Ports {
