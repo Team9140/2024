@@ -1,19 +1,20 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkAbsoluteEncoder;
+import com.revrobotics.SparkRelativeEncoder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class SwerveModule extends SubsystemBase {
   private CANSparkMax driveMotor;
   private CANSparkMax turnMotor;
-  private double initalOffset = 0.0;
-
-  private SparkRelativeEncoder turnEncoder;
-  private SparkRelativeEncoder driveEncoder;
+  private double initialOffset = 0.0;
 
   private SimpleMotorFeedforward feedforward;
 
@@ -44,19 +45,16 @@ public class SwerveModule extends SubsystemBase {
   public void periodic() {
     switch (currentState) {
       case STARTUP:
-        this.turnEncoder = (SparkRelativeEncoder) this.turnMotor.getEncoder();
-        this.turnEncoder.setPosition(
-            this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-        this.turnEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
-        this.driveEncoder = (SparkRelativeEncoder) this.driveMotor.getEncoder();
-        this.driveEncoder.setPositionConversionFactor(
-            Constants.Drivetrain.positionConversionFactor);
-        this.currentState = SwerveState.POSITION;
+        SparkRelativeEncoder turnEncoder = (SparkRelativeEncoder) this.turnMotor.getEncoder();
+        turnEncoder.setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
+        turnEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
+
+        SparkRelativeEncoder driveEncoder = (SparkRelativeEncoder) this.driveMotor.getEncoder();
+        driveEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
+        currentState = SwerveState.POSITION;
         break;
       case POSITION:
-        this.turnMotor
-            .getPIDController()
-            .setReference(targetAngle, CANSparkBase.ControlType.kPosition);
+        this.turnMotor.getPIDController().setReference(targetAngle, CANSparkBase.ControlType.kPosition);
         this.driveMotor.setVoltage(feedforward.calculate(targetVelocity));
         break;
       case FAULT:
@@ -64,14 +62,19 @@ public class SwerveModule extends SubsystemBase {
     }
   }
 
-  public void setTarget(double targetAngle, double targetVelocity) {
-    this.targetAngle = targetAngle % Constants.Drivetrain.positionConversionFactor;
-    this.targetVelocity = targetVelocity;
+  public void setTarget(SwerveModuleState state) {
+    this.targetAngle = state.angle.getRadians();
+    this.targetVelocity = state.speedMetersPerSecond;
   }
 
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
-        this.driveEncoder.getPosition() * Constants.Drivetrain.driveWheelDiameter / 2,
-        new Rotation2d(turnEncoder.getPosition()));
+      this.driveMotor.getEncoder().getPosition() * Constants.Drivetrain.driveWheelDiameter / 2,
+      new Rotation2d(this.turnMotor.getEncoder().getPosition())
+    );
+  }
+
+  public double getTurnAngle() {
+    return this.turnMotor.getEncoder().getPosition();
   }
 }

@@ -17,6 +17,11 @@ public final class Constants {
   public static final class Drivetrain {
     public static final double positionConversionFactor = 2 * Math.PI;
     public static final double driveWheelDiameter = 4;
+    public static final double DEADBAND = 1.0;
+
+    public static final double FORWARD_METERS_PER_SECOND = Units.feetToMeters(16);
+    public static final double HORIZONTAL_METERS_PER_SECOND = Units.feetToMeters(16);
+    public static final double ROTATION_RADIANS_PER_SECOND = Math.PI;
   }
 
   public static class Ports {
