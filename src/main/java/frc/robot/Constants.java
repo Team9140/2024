@@ -40,6 +40,8 @@ public final class Constants {
     public static final int DRIVE_CURRENT_LIMIT = 25;
     public static final int TURN_CURRENT_LIMIT = 25;
 
+    public static final double PID_MIN_INPUT = 0.0;
+    public static final double PID_MAX_INPUT = 2 * Math.PI;
   }
 
   public static class Ports {

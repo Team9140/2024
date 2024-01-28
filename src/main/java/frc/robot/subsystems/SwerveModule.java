@@ -44,6 +44,9 @@ public class SwerveModule extends SubsystemBase {
     pid.setP(Constants.Drivetrain.TURN_P);
     pid.setI(Constants.Drivetrain.TURN_I);
     pid.setD(Constants.Drivetrain.TURN_D);
+    pid.setPositionPIDWrappingEnabled(true);
+    pid.setPositionPIDWrappingMinInput(Constants.Drivetrain.PID_MIN_INPUT);
+    pid.setPositionPIDWrappingMaxInput(Constants.Drivetrain.PID_MAX_INPUT);
   }
 
   public SwerveModule(int drivePort, int turnPort, double kencoderOffset) {
