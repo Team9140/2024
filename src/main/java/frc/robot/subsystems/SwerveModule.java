@@ -77,13 +77,6 @@ public class SwerveModule extends SubsystemBase {
     turnPID.setI(Constants.Drivetrain.TURN_I);
     turnPID.setD(Constants.Drivetrain.TURN_D);
     this.turnMotor.burnFlash();
-
-    // Potentially removable, PID settings for drive motor
-//    SparkPIDController drivePID = this.driveMotor.getPIDController();
-//    drivePID.setFeedbackDevice(this.driveMotor.getEncoder());
-//    turnPID.setP(Constants.Drivetrain.DRIVE_P);
-//    turnPID.setI(Constants.Drivetrain.DRIVE_I);
-//    turnPID.setD(Constants.Drivetrain.DRIVE_D);
   }
 
   /**
