@@ -37,6 +37,7 @@ public class SwerveModule extends SubsystemBase {
     this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
     this.turnMotor.setInverted(true);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
+    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
     this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
     this.feedforward = new SimpleMotorFeedforward(Constants.Drivetrain.MODULE_S, Constants.Drivetrain.MODULE_V, Constants.Drivetrain.MODULE_A);
     this.currentState = SwerveState.STARTUP;
