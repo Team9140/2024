@@ -17,7 +17,7 @@ public final class Constants {
   public static final class Drivetrain {
     public static final double positionConversionFactor = 2 * Math.PI / (150 / 7);
     public static final double driveWheelDiameter = 4;
-    public static final double DRIVE_DEADBAND = 10.0 / 100;
+    public static final double DRIVE_DEADBAND = 0.10;
     public static final double TURN_DEADBAND = 0.10;
 
     public static final double FORWARD_METERS_PER_SECOND = Units.feetToMeters(16);
