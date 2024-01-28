@@ -25,16 +25,17 @@ public class Drivetrain extends SubsystemBase {
 
   private Drivetrain() {
     swerveKinematics = new SwerveDriveKinematics(
-      new Translation2d(Constants.wheelBase / 2, Constants.trackWidth / 2),  // Front Left
-      new Translation2d(Constants.wheelBase / 2, -Constants.trackWidth / 2),  // Front Right
-      new Translation2d(-Constants.wheelBase / 2, Constants.trackWidth / 2),  // Back Left
-      new Translation2d(-Constants.wheelBase / 2, -Constants.trackWidth / 2)  // Back Right
+      new Translation2d(Constants.wheelBase / 2, Constants.trackWidth / 2 - Units.inchesToMeters(1.5)),  // Front Left
+      new Translation2d(Constants.wheelBase / 2, -Constants.trackWidth / 2 - Units.inchesToMeters(1.5)),  // Front Right
+//      new Translation2d(Constants.wheelBase / 2, Constants.trackWidth / 2),  // Back Left
+      new Translation2d(-Constants.wheelBase / 2, Constants.trackWidth / 2 - Units.inchesToMeters(1.5)),  // Back Left
+      new Translation2d(-Constants.wheelBase / 2, -Constants.trackWidth / 2 - Units.inchesToMeters(1.5))  // Back Right
     );
     Rotation2d rotation = gyro.getRotation2d();
-    this.frontLeft = new SwerveModule(Constants.Ports.frontLeftDrivePort, Constants.Ports.frontLeftTurnPort, "front left");
-    this.frontRight = new SwerveModule(Constants.Ports.frontRightDrivePort, Constants.Ports.frontRightTurnPort, "front right");
-    this.backLeft = new SwerveModule(Constants.Ports.backLeftDrivePort, Constants.Ports.backLeftTurnPort, "back left");
-    this.backRight =new SwerveModule(Constants.Ports.backRightDrivePort, Constants.Ports.backRightTurnPort, "back right");
+    this.frontLeft = new SwerveModule(Constants.Ports.frontLeftDrivePort, Constants.Ports.frontLeftTurnPort, Constants.Drivetrain.FRONT_LEFT_KENCODER_OFFSET, "front left");
+    this.frontRight = new SwerveModule(Constants.Ports.frontRightDrivePort, Constants.Ports.frontRightTurnPort, Constants.Drivetrain.FRONT_RIGHT_KENCODER_OFFSET, "front right");
+    this.backLeft = new SwerveModule(Constants.Ports.backLeftDrivePort, Constants.Ports.backLeftTurnPort, Constants.Drivetrain.BACK_LEFT_KENCODER_OFFSET, "back left");
+    this.backRight =new SwerveModule(Constants.Ports.backRightDrivePort, Constants.Ports.backRightTurnPort, Constants.Drivetrain.BACK_RIGHT_KENCODER_OFFSET, "back right");
     this.swerveOdometry = new SwerveDriveOdometry(
       swerveKinematics,
       rotation,
@@ -58,9 +59,9 @@ public class Drivetrain extends SubsystemBase {
     * @param omega Rotational velocity (positive is ccw)
    **/
   public void swerveDrive(double vx, double vy, double omega) {
-    vx = MathUtil.applyDeadband(vx, Constants.Drivetrain.DEADBAND);
-    vy = MathUtil.applyDeadband(vy, Constants.Drivetrain.DEADBAND);
-    omega = MathUtil.applyDeadband(omega, Constants.Drivetrain.DEADBAND);
+    vx = MathUtil.applyDeadband(vx, Constants.Drivetrain.DRIVE_DEADBAND, Constants.Drivetrain.FORWARD_METERS_PER_SECOND);
+    vy = MathUtil.applyDeadband(vy, Constants.Drivetrain.DRIVE_DEADBAND, Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND);
+    omega = MathUtil.applyDeadband(omega, Constants.Drivetrain.TURN_DEADBAND);
 
     SmartDashboard.putNumber("drive vx", vx);
     SmartDashboard.putNumber("drive vy", vy);
@@ -68,6 +69,9 @@ public class Drivetrain extends SubsystemBase {
 
     ChassisSpeeds movement = new ChassisSpeeds(vx, vy, omega);
 
+    SmartDashboard.putNumber("velocity", Math.hypot(vx, vy));
+
+    // TODO: Add % 2pi to fix rotation jitteryness
     SwerveModuleState[] moduleStates = swerveKinematics.toSwerveModuleStates(
       movement, new Translation2d(Units.inchesToMeters(1.5), 0));
     moduleStates[0] = SwerveModuleState.optimize(moduleStates[0], new Rotation2d(frontLeft.getTurnAngle()));

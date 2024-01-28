@@ -25,9 +25,9 @@ public class Robot extends LoggedRobot {
     this.drive = Drivetrain.getInstance();
 
     this.drive.setDefaultCommand(Commands.run(() -> drive.swerveDrive(
-      xb.getLeftY() * Constants.Drivetrain.FORWARD_METERS_PER_SECOND,
-      xb.getLeftX() * Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND,
-      xb.getRightX() * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND),
+      xb.getLeftY() * Constants.Drivetrain.FORWARD_METERS_PER_SECOND * -1,
+      xb.getLeftX() * Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND * -1,
+      xb.getRightX() * Math.abs(xb.getRightX()) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1),
       drive
     ));
   }

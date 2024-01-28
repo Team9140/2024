@@ -11,17 +11,35 @@ import java.util.Optional;
 
 public final class Constants {
   public static final double LOOP_INTERVAL = 0.020;
-  public static final double wheelBase = Units.inchesToMeters(0);
-  public static final double trackWidth = Units.inchesToMeters(0);
+  public static final double trackWidth = Units.inchesToMeters(23.75);
+  public static final double wheelBase = Units.inchesToMeters(20.75);
 
   public static final class Drivetrain {
-    public static final double positionConversionFactor = 2 * Math.PI;
+    public static final double positionConversionFactor = 2 * Math.PI / (150 / 7);
     public static final double driveWheelDiameter = 4;
-    public static final double DEADBAND = 1.0;
+    public static final double DRIVE_DEADBAND = 10.0 / 100;
+    public static final double TURN_DEADBAND = 0.10;
 
     public static final double FORWARD_METERS_PER_SECOND = Units.feetToMeters(16);
     public static final double HORIZONTAL_METERS_PER_SECOND = Units.feetToMeters(16);
-    public static final double ROTATION_RADIANS_PER_SECOND = Math.PI;
+    public static final double ROTATION_RADIANS_PER_SECOND = 4 * Math.PI;
+
+    public static final double MODULE_S = 0;
+    public static final double MODULE_V = 2.43219076;
+    public static final double MODULE_A = 0;
+
+    public static final double FRONT_LEFT_KENCODER_OFFSET = 0.605;
+    public static final double FRONT_RIGHT_KENCODER_OFFSET = 0.795;
+    public static final double BACK_LEFT_KENCODER_OFFSET = 0.320;
+    public static final double BACK_RIGHT_KENCODER_OFFSET = 0.375;
+
+    public static final double TURN_P = 0.4;
+    public static final double TURN_I = 0.0;
+    public static final double TURN_D = 0.0;
+
+    public static final int DRIVE_CURRENT_LIMIT = 25;
+    public static final int TURN_CURRENT_LIMIT = 25;
+
   }
 
   public static class Ports {
