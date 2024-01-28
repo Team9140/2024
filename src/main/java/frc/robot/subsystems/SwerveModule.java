@@ -18,8 +18,6 @@ public class SwerveModule extends SubsystemBase {
 
   private enum SwerveState {
     STARTUP,
-
-
     POSITION,
     FAULT
   }
@@ -58,16 +56,14 @@ public class SwerveModule extends SubsystemBase {
       case STARTUP:
         SparkRelativeEncoder turnEncoder = (SparkRelativeEncoder) this.turnMotor.getEncoder();
         turnEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
-        turnEncoder.setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() * 2 * Math.PI);
-
-
+        this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
+        turnEncoder.setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
         SparkRelativeEncoder driveEncoder = (SparkRelativeEncoder) this.driveMotor.getEncoder();
         driveEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
         currentState = SwerveState.POSITION;
         break;
       case POSITION:
         this.turnMotor.getPIDController().setReference(targetAngle, CANSparkBase.ControlType.kPosition);
-//        this.turnMotor.setVoltage(0.0);
         this.driveMotor.setVoltage(feedforward.calculate(targetVelocity));
         break;
       case FAULT:
@@ -93,11 +89,11 @@ public class SwerveModule extends SubsystemBase {
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
       this.driveMotor.getEncoder().getPosition() * Constants.Drivetrain.driveWheelDiameter / 2,
-      new Rotation2d(this.turnMotor.getEncoder().getPosition())
+      new Rotation2d(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition())
     );
   }
 
   public double getTurnAngle() {
-    return this.turnMotor.getEncoder().getPosition();
+    return this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition();
   }
 }
