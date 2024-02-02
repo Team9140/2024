@@ -12,7 +12,6 @@ import frc.robot.Constants;
 public class SwerveModule extends SubsystemBase {
   private CANSparkMax driveMotor;
   private CANSparkMax turnMotor;
-  private double initialOffset = 0.0;
   private String niceName;
   private SimpleMotorFeedforward feedforward;
 
@@ -33,20 +32,24 @@ public class SwerveModule extends SubsystemBase {
     this.driveMotor.setInverted(true);
     this.driveMotor.setSmartCurrentLimit(Constants.Drivetrain.DRIVE_CURRENT_LIMIT);
     this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
+    this.turnMotor.restoreFactoryDefaults();
     this.turnMotor.setInverted(true);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
     this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
     this.feedforward = new SimpleMotorFeedforward(Constants.Drivetrain.MODULE_S, Constants.Drivetrain.MODULE_V, Constants.Drivetrain.MODULE_A);
-    this.currentState = SwerveState.STARTUP;
+    this.currentState = SwerveState.POSITION;
 
     SparkPIDController pid = this.turnMotor.getPIDController();
+    pid.setFeedbackDevice(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle));
     pid.setPositionPIDWrappingEnabled(true);
     pid.setPositionPIDWrappingMinInput(Constants.Drivetrain.PID_MIN_INPUT);
     pid.setPositionPIDWrappingMaxInput(Constants.Drivetrain.PID_MAX_INPUT);
     pid.setP(Constants.Drivetrain.TURN_P);
     pid.setI(Constants.Drivetrain.TURN_I);
     pid.setD(Constants.Drivetrain.TURN_D);
+
+    this.turnMotor.burnFlash();
   }
 
   public SwerveModule(int drivePort, int turnPort, double kencoderOffset) {
@@ -57,13 +60,18 @@ public class SwerveModule extends SubsystemBase {
   public void periodic() {
     switch (currentState) {
       case STARTUP:
-        SparkRelativeEncoder turnEncoder = (SparkRelativeEncoder) this.turnMotor.getEncoder();
-        turnEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
-        this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
-        turnEncoder.setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-        SparkRelativeEncoder driveEncoder = (SparkRelativeEncoder) this.driveMotor.getEncoder();
-        driveEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
+        // SparkRelativeEncoder turnEncoder = (SparkRelativeEncoder) this.turnMotor.getEncoder();
+        // turnEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
+        // this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
+        // turnEncoder.setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
+        // SparkRelativeEncoder driveEncoder = (SparkRelativeEncoder) this.driveMotor.getEncoder();
+        // driveEncoder.setPositionConversionFactor(Constants.Drivetrain.positionConversionFactor);
         currentState = SwerveState.POSITION;
+
+        // SparkPIDController oof = this.turnMotor.getPIDController();
+        // this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setAverageDepth(128);
+        // oof.setFeedbackDevice(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle));
+        // this.turnMotor.getAbsoluteEncoder.setPositionConversionFactor(2 * Math.PI);
         break;
       case POSITION:
         this.turnMotor.getPIDController().setReference(targetAngle, CANSparkBase.ControlType.kPosition);

@@ -18,10 +18,10 @@ public final class Constants {
     public static final double positionConversionFactor = 2 * Math.PI / (150 / 7);
     public static final double driveWheelDiameter = 4;
     public static final double DRIVE_DEADBAND = 0.10;
-    public static final double TURN_DEADBAND = 0.10;
+    public static final double TURN_DEADBAND = 0.15;
 
-    public static final double FORWARD_METERS_PER_SECOND = Units.feetToMeters(16);
-    public static final double HORIZONTAL_METERS_PER_SECOND = Units.feetToMeters(16);
+    public static final double FORWARD_METERS_PER_SECOND = Units.feetToMeters(8);
+    public static final double HORIZONTAL_METERS_PER_SECOND = Units.feetToMeters(8);
     public static final double ROTATION_RADIANS_PER_SECOND = 4 * Math.PI;
 
     public static final double MODULE_S = 0;

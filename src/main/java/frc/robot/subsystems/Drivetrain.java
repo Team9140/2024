@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.*;
@@ -59,9 +58,9 @@ public class Drivetrain extends SubsystemBase {
     * @param omega Rotational velocity (positive is ccw)
    **/
   public void swerveDrive(double vx, double vy, double omega) {
-    vx = MathUtil.applyDeadband(vx, Constants.Drivetrain.DRIVE_DEADBAND, Constants.Drivetrain.FORWARD_METERS_PER_SECOND);
-    vy = MathUtil.applyDeadband(vy, Constants.Drivetrain.DRIVE_DEADBAND, Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND);
-    omega = MathUtil.applyDeadband(omega, Constants.Drivetrain.TURN_DEADBAND);
+    // vx = MathUtil.applyDeadband(vx, Constants.Drivetrain.DRIVE_DEADBAND, Constants.Drivetrain.FORWARD_METERS_PER_SECOND);
+    // vy = MathUtil.applyDeadband(vy, Constants.Drivetrain.DRIVE_DEADBAND, Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND);
+    // omega = MathUtil.applyDeadband(omega, Constants.Drivetrain.TURN_DEADBAND);
 
     SmartDashboard.putNumber("drive vx", vx);
     SmartDashboard.putNumber("drive vy", vy);
@@ -71,7 +70,6 @@ public class Drivetrain extends SubsystemBase {
 
     SmartDashboard.putNumber("velocity", Math.hypot(vx, vy));
 
-    // TODO: Add % 2pi to fix rotation jitteryness
     SwerveModuleState[] moduleStates = swerveKinematics.toSwerveModuleStates(
       movement, new Translation2d(Units.inchesToMeters(1.5), 0));
     moduleStates[0] = SwerveModuleState.optimize(moduleStates[0], new Rotation2d(frontLeft.getTurnAngle()));
