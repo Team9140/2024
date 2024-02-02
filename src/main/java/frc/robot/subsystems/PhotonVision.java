@@ -1,22 +1,18 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
-import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
-
-import java.util.Optional;
 
 public class PhotonVision extends SubsystemBase {
   private static PhotonVision instance;
   private PhotonCamera camera;
+  private PhotonPipelineResult latestResult = null;
   private double lastTimestamp = 0.0;
   private Pose2d lastPose = null;
 
@@ -35,67 +31,60 @@ public class PhotonVision extends SubsystemBase {
     this.camera = new PhotonCamera(Constants.Ports.CAMERA);
   }
 
-  public void getDistanceFromBigTarget() {
-    switch (Constants.alliance.orElse(DriverStation.Alliance.Red)) {
-      case Red:
-        break;
+  public Offset getAngleOffBigTarget(){
+    Offset ret = null;
+    Pose3d robotPose = getRobotPose();
+    Transform3d transform;
+    if(robotPose != null) {
+      switch (Constants.alliance.orElse(DriverStation.Alliance.Red)) {
+        case Red:
+          Pose3d tagPoseRed = Constants.Camera.field.getTagPose(4).get();
+          transform = new Transform3d(robotPose, tagPoseRed);
+          ret = new Offset(Math.sqrt(Math.pow(transform.getX(), 2) + Math.pow(transform.getY(), 2)),
+                  transform.getRotation().toRotation2d().getRadians());
+          break;
 
-      case Blue:
-        break;
+        case Blue:
+          Pose3d tagPoseBlue = Constants.Camera.field.getTagPose(7).get();
+          transform = new Transform3d(robotPose, tagPoseBlue);
+          ret = new Offset(Math.sqrt(Math.pow(transform.getX(), 2) + Math.pow(transform.getY(), 2)),
+                  transform.getRotation().toRotation2d().getRadians());
+          break;
+      }
     }
+    return ret;
   }
 
   @Override
   public void periodic() {
-      SmartDashboard.putString("Camera Results", String.valueOf(this.camera.getLatestResult().hasTargets()));
-      VisionData data = getPosition2d();
-      SmartDashboard.putString("Timestamp", String.valueOf(data.getTimestamp()));
-      SmartDashboard.putString("Pose", data.getPose().toString());
-      SmartDashboard.putString("Tag Number", String.valueOf(data.getTagNum()));
+    latestResult = camera.getLatestResult();
+    SmartDashboard.putString("Camera Results", String.valueOf(this.camera.getLatestResult().hasTargets()));
   }
 
-  public VisionData getPosition2d(){
-    PhotonPipelineResult result = this.camera.getLatestResult();
-    //temp
-    double gyro = 0.0;
-    if(result.hasTargets()){
-      lastTagNum = result.getBestTarget().getFiducialId();
-      Pose3d pose3d = Constants.Camera.field.getTagPose(lastTagNum).get();
-      lastTimestamp = result.getTimestampSeconds();
-      lastPose = PhotonUtils.estimateFieldToRobot(Constants.Camera.CAMERA_HEIGHT_METERS, pose3d.getZ(), Constants.Camera.CAMERA_PITCH_RADS,
-              0.0, pose3d.getRotation().toRotation2d(), new Rotation2d(gyro), pose3d.toPose2d(),
-              Constants.Camera.cameraToRobot);
-
-      return new VisionData(lastTimestamp, lastPose, lastTagNum);
-
+  public Pose3d getRobotPose(){
+    if(latestResult.hasTargets()) {
+      return PhotonUtils.estimateFieldToRobotAprilTag(latestResult.getBestTarget().getBestCameraToTarget(),
+              Constants.Camera.field.getTagPose(latestResult.getBestTarget().getFiducialId()).get(), Constants.Camera.cameraToRobot);
     }else{
-      return new VisionData(lastTimestamp, lastPose, lastTagNum);
+      return null;
     }
   }
 
-  //Contains the 2d location of the robot, when that information is from, and how 'good' of a view the robot had
-  // of the april tag which could help to inform on the accuracy.
-  private class VisionData {
-    private double timestamp;
-    private Pose2d pose;
-    private int tagNum;
+  public class Offset {
+    private double distance;
+    private double rotation;
 
-    public VisionData(double time, Pose2d pose, int tagNum){
-      this.timestamp = time;
-      this.pose = pose;
-      this.tagNum = tagNum;
+    public Offset(double distance, double rotation){
+      this.distance = distance;
+      this.rotation = rotation;
     }
 
-    public double getTimestamp(){
-      return this.timestamp;
+    public double getDistance() {
+      return distance;
     }
 
-    public Pose2d getPose(){
-      return this.pose;
-    }
-
-    public double getTagNum(){
-      return this.tagNum;
+    public double getRotation() {
+      return rotation;
     }
   }
 }

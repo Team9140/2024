@@ -9,6 +9,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.io.IOException;
@@ -51,6 +52,7 @@ public final class Constants {
     public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
     public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
     public static final AprilTagFieldLayout field;
+    public static final Transform3d cameraToRobot = new Transform3d();
 
     static {
       try {
@@ -59,8 +61,6 @@ public final class Constants {
         throw new RuntimeException(e);
       }
     }
-
-    public static final Transform2d cameraToRobot = new Transform2d(12, 12, new Rotation2d(0));
   }
 
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();

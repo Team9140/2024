@@ -6,12 +6,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
-  private final WPI_PigeonIMU gyro = new WPI_PigeonIMU(Constants.Ports.GYRO);
+  private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
   private static SwerveModule frontLeft;
   private static SwerveModule frontRight;
