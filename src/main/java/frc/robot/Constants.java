@@ -77,7 +77,6 @@ public final class Constants {
     public static final int BACK_RIGHT_TURN = 1;
   }
 
-  public static final double EPSILON = 0.00000001;
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
 
   public static void UpdateSettings() {

@@ -15,6 +15,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import lib.swerve.SwerveKinematicLimits;
+import lib.swerve.SwerveSetpoint;
+import lib.swerve.SwerveStateGenerator;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
@@ -29,6 +32,7 @@ public class Drivetrain extends SubsystemBase {
   public static SwerveDriveKinematics swerveKinematics;
 
   public static SwerveDriveOdometry swerveOdometry;
+  private SwerveSetpoint prevSetpoint;
 
   private Drivetrain() {
     this.gyro.calibrate();
@@ -54,6 +58,8 @@ public class Drivetrain extends SubsystemBase {
         this.backRight.getPosition()
       }
     );
+
+    this.prevSetpoint = new SwerveSetpoint(this.getSpeed(), swerveKinematics.toSwerveModuleStates(this.getSpeed()));
 
     AutoBuilder.configureHolonomic(
       this::getPosition,
@@ -120,12 +126,14 @@ public class Drivetrain extends SubsystemBase {
     * @param movement The requested ChassisSpeeds
    **/
   private void swerveDrive(ChassisSpeeds movement) {
-    SwerveModuleState[] moduleStates = swerveKinematics.toSwerveModuleStates(movement, new Translation2d(Units.inchesToMeters(1.5), 0));
-    moduleStates[0] = SwerveModuleState.optimize(moduleStates[0], new Rotation2d(this.frontLeft.getTurnAngle()));
-    moduleStates[1] = SwerveModuleState.optimize(moduleStates[1], new Rotation2d(this.frontRight.getTurnAngle()));
-    moduleStates[2] = SwerveModuleState.optimize(moduleStates[2], new Rotation2d(this.backLeft.getTurnAngle()));
-    moduleStates[3] = SwerveModuleState.optimize(moduleStates[3], new Rotation2d(this.backRight.getTurnAngle()));
+    SwerveStateGenerator swerveStateGenerator = new SwerveStateGenerator(swerveKinematics);
+    this.prevSetpoint = swerveStateGenerator.generateSetpoint(new SwerveKinematicLimits(Constants.Drivetrain.METERS_PER_SECOND, Constants.Drivetrain.ACCELERATION, Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND), this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
+    SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
+//    moduleStates[0] = SwerveModuleState.optimize(moduleStates[0], new Rotation2d(this.frontLeft.getTurnAngle()));
+//    moduleStates[1] = SwerveModuleState.optimize(moduleStates[1], new Rotation2d(this.frontRight.getTurnAngle()));
+//    moduleStates[2] = SwerveModuleState.optimize(moduleStates[2], new Rotation2d(this.backLeft.getTurnAngle()));
+//    moduleStates[3] = SwerveModuleState.optimize(moduleStates[3], new Rotation2d(this.backRight.getTurnAngle()));
     this.frontLeft.setTarget(moduleStates[0]);
     this.frontRight.setTarget(moduleStates[1]);
     this.backLeft.setTarget(moduleStates[2]);

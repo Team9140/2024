@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import frc.robot.Constants;
+import lib.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class SwerveStateGenerator {
      * @return The parameter value 's' that interpolating between 0 and 1 that corresponds to the (approximate) root.
      */
     private double findRoot(Function2d func, double x_0, double y_0, double f_0, double x_1, double y_1, double f_1, int iterations_left) {
-        if (iterations_left < 0 || epsilonEquals(f_0, f_1)) {
+        if (iterations_left < 0 || Util.epsilonEquals(f_0, f_1)) {
             return 1.0;
         }
         var s_guess = Math.max(0.0, Math.min(1.0, -f_0 / (f_1 - f_0)));
@@ -100,16 +100,6 @@ public class SwerveStateGenerator {
     private Twist2d chassisSpeedsToTwist2d(ChassisSpeeds speed) {
         return new Twist2d(speed.vxMetersPerSecond, speed.vyMetersPerSecond, speed.omegaRadiansPerSecond);
     }
-    private static boolean epsilonEquals(double a, double b, double epsilon) {
-        return (a - epsilon <= b) && (a + epsilon >= b);
-    }
-    private static boolean epsilonEquals(double a, double b) {
-        return epsilonEquals(a, b, Constants.EPSILON);
-    }
-
-    private static boolean epsilonEquals(Twist2d a, Twist2d b, double epsilon) {
-        return epsilonEquals(a.dx, b.dx, epsilon) && epsilonEquals(a.dy, b.dy, epsilon) && epsilonEquals(a.dtheta, b.dtheta, epsilon);
-    }
 
     private static Rotation2d flipRotation2d(Rotation2d rotation2d) {
         if (!Double.isNaN(rotation2d.getSin()) && !Double.isNaN(rotation2d.getCos())) {
@@ -151,7 +141,7 @@ public class SwerveStateGenerator {
 
         // Special case: desiredState is a complete stop. In this case, module angle is arbitrary, so just use the previous angle.
         boolean need_to_steer = true;
-        if (epsilonEquals(chassisSpeedsToTwist2d(desiredState), new Twist2d(0, 0, 0), Constants.EPSILON)) {
+        if (Util.epsilonEquals(chassisSpeedsToTwist2d(desiredState), new Twist2d(0, 0, 0), Util.EPSILON)) {
             need_to_steer = false;
             for (int i = 0; i < modules; ++i) {
                 desiredModuleState[i].angle = prevSetpoint.mModuleStates[i].angle;
@@ -188,8 +178,8 @@ public class SwerveStateGenerator {
             }
         }
         if (all_modules_should_flip &&
-                !epsilonEquals(chassisSpeedsToTwist2d(prevSetpoint.mChassisSpeeds), new Twist2d(0, 0, 0), Constants.EPSILON) &&
-                !epsilonEquals(chassisSpeedsToTwist2d(desiredState), new Twist2d(0, 0, 0), Constants.EPSILON)) {
+                !Util.epsilonEquals(chassisSpeedsToTwist2d(prevSetpoint.mChassisSpeeds), new Twist2d(0, 0, 0), Util.EPSILON) &&
+                !Util.epsilonEquals(chassisSpeedsToTwist2d(desiredState), new Twist2d(0, 0, 0), Util.EPSILON)) {
             // It will (likely) be faster to stop the robot, rotate the modules in place to the complement of the desired
             // angle, and accelerate again.
             return generateSetpoint(limits, prevSetpoint, new ChassisSpeeds(), dt);
@@ -217,10 +207,10 @@ public class SwerveStateGenerator {
                 continue;
             }
             overrideSteering.add(Optional.empty());
-            if (epsilonEquals(prevSetpoint.mModuleStates[i].speedMetersPerSecond, 0.0)) {
+            if (Util.epsilonEquals(prevSetpoint.mModuleStates[i].speedMetersPerSecond, 0.0)) {
                 // If module is stopped, we know that we will need to move straight to the final steering angle, so limit based
                 // purely on rotation in place.
-                if (epsilonEquals(desiredModuleState[i].speedMetersPerSecond, 0.0)) {
+                if (Util.epsilonEquals(desiredModuleState[i].speedMetersPerSecond, 0.0)) {
                     // Goal angle doesn't matter. Just leave module at its current angle.
                     overrideSteering.set(i, Optional.of(prevSetpoint.mModuleStates[i].angle));
                     continue;
