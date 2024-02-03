@@ -38,10 +38,10 @@ public class Drivetrain extends SubsystemBase {
     this.gyro.calibrate();
 
     this.swerveKinematics = new SwerveDriveKinematics(
-      new Translation2d(Constants.WHEEL_BASE / 2, Constants.TRACK_WIDTH / 2 - Units.inchesToMeters(1.5)),  // Front Left
-      new Translation2d(Constants.WHEEL_BASE / 2, -Constants.TRACK_WIDTH / 2 - Units.inchesToMeters(1.5)),  // Front Right
-      new Translation2d(-Constants.WHEEL_BASE / 2, Constants.TRACK_WIDTH / 2 - Units.inchesToMeters(1.5)),  // Back Left
-      new Translation2d(-Constants.WHEEL_BASE / 2, -Constants.TRACK_WIDTH / 2 - Units.inchesToMeters(1.5))  // Back Right
+      new Translation2d(Units.inchesToMeters(-11.875), Units.inchesToMeters(8.625)),  // Front Left
+      new Translation2d(Units.inchesToMeters(11.875), Units.inchesToMeters(8.625)),  // Front Right
+      new Translation2d(Units.inchesToMeters(-11.875), Units.inchesToMeters(-11.125)),  // Back Left
+      new Translation2d(Units.inchesToMeters(11.875), Units.inchesToMeters(-11.125))  // Back Right
     );
     this.frontLeft = new SwerveModule(Constants.Ports.FRONT_LEFT_DRIVE, Constants.Ports.FRONT_LEFT_TURN, Constants.Drivetrain.FRONT_LEFT_KENCODER_OFFSET, "front left");
     this.frontRight = new SwerveModule(Constants.Ports.FRONT_RIGHT_DRIVE, Constants.Ports.FRONT_RIGHT_TURN, Constants.Drivetrain.FRONT_RIGHT_KENCODER_OFFSET, "front right");
