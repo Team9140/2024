@@ -41,7 +41,6 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotPeriodic() {
-    this.drive.updateOdometry();
     CommandScheduler.getInstance().run();
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());

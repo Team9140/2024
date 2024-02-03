@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,15 +34,15 @@ public class Drivetrain extends SubsystemBase {
     this.gyro.calibrate();
 
     this.swerveKinematics = new SwerveDriveKinematics(
-      new Translation2d(Constants.wheelBase / 2, Constants.trackWidth / 2 - Units.inchesToMeters(1.5)),  // Front Left
-      new Translation2d(Constants.wheelBase / 2, -Constants.trackWidth / 2 - Units.inchesToMeters(1.5)),  // Front Right
-      new Translation2d(-Constants.wheelBase / 2, Constants.trackWidth / 2 - Units.inchesToMeters(1.5)),  // Back Left
-      new Translation2d(-Constants.wheelBase / 2, -Constants.trackWidth / 2 - Units.inchesToMeters(1.5))  // Back Right
+      new Translation2d(Constants.WHEEL_BASE / 2, Constants.TRACK_WIDTH / 2 - Units.inchesToMeters(1.5)),  // Front Left
+      new Translation2d(Constants.WHEEL_BASE / 2, -Constants.TRACK_WIDTH / 2 - Units.inchesToMeters(1.5)),  // Front Right
+      new Translation2d(-Constants.WHEEL_BASE / 2, Constants.TRACK_WIDTH / 2 - Units.inchesToMeters(1.5)),  // Back Left
+      new Translation2d(-Constants.WHEEL_BASE / 2, -Constants.TRACK_WIDTH / 2 - Units.inchesToMeters(1.5))  // Back Right
     );
-    this.frontLeft = new SwerveModule(Constants.Ports.frontLeftDrivePort, Constants.Ports.frontLeftTurnPort, Constants.Drivetrain.FRONT_LEFT_KENCODER_OFFSET, "front left");
-    this.frontRight = new SwerveModule(Constants.Ports.frontRightDrivePort, Constants.Ports.frontRightTurnPort, Constants.Drivetrain.FRONT_RIGHT_KENCODER_OFFSET, "front right");
-    this.backLeft = new SwerveModule(Constants.Ports.backLeftDrivePort, Constants.Ports.backLeftTurnPort, Constants.Drivetrain.BACK_LEFT_KENCODER_OFFSET, "back left");
-    this.backRight = new SwerveModule(Constants.Ports.backRightDrivePort, Constants.Ports.backRightTurnPort, Constants.Drivetrain.BACK_RIGHT_KENCODER_OFFSET, "back right");
+    this.frontLeft = new SwerveModule(Constants.Ports.FRONT_LEFT_DRIVE, Constants.Ports.FRONT_LEFT_TURN, Constants.Drivetrain.FRONT_LEFT_KENCODER_OFFSET, "front left");
+    this.frontRight = new SwerveModule(Constants.Ports.FRONT_RIGHT_DRIVE, Constants.Ports.FRONT_RIGHT_TURN, Constants.Drivetrain.FRONT_RIGHT_KENCODER_OFFSET, "front right");
+    this.backLeft = new SwerveModule(Constants.Ports.BACK_LEFT_DRIVE, Constants.Ports.BACK_LEFT_TURN, Constants.Drivetrain.BACK_LEFT_KENCODER_OFFSET, "back left");
+    this.backRight = new SwerveModule(Constants.Ports.BACK_RIGHT_DRIVE, Constants.Ports.BACK_RIGHT_TURN, Constants.Drivetrain.BACK_RIGHT_KENCODER_OFFSET, "back right");
     this.swerveOdometry = new SwerveDriveOdometry(
       swerveKinematics,
 //      new Rotation2d(gyro.getAngle()),  // ADIS16470_IMU
@@ -63,7 +62,7 @@ public class Drivetrain extends SubsystemBase {
       this::swerveDrive,
       new HolonomicPathFollowerConfig(
         Constants.Drivetrain.FORWARD_METERS_PER_SECOND,
-        Units.inchesToMeters(Math.hypot(29, 29) / 2),
+        Units.inchesToMeters(Math.hypot(Constants.WIDTH, Constants.LENGTH) / 2),
         new ReplanningConfig()
       ),
       () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
@@ -81,7 +80,7 @@ public class Drivetrain extends SubsystemBase {
 
   private void resetPosition(Pose2d position) {
 //    this.swerveOdometry.resetPosition(new Rotation2d(gyro.getAngle()), new SwerveModulePosition[] {  // ADIS16470_IMU
-    this.swerveOdometry.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {  // PigeonIMU
+    this.swerveOdometry.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {  // Trash Gyro
       new SwerveModulePosition(this.frontLeft.getPositionMeters(), new Rotation2d(this.frontLeft.getTurnAngle())),
       new SwerveModulePosition(this.frontRight.getPositionMeters(), new Rotation2d(this.frontRight.getTurnAngle())),
       new SwerveModulePosition(this.backLeft.getPositionMeters(), new Rotation2d(this.backLeft.getTurnAngle())),
@@ -98,19 +97,18 @@ public class Drivetrain extends SubsystemBase {
     );
   }
 
-  public void updateOdometry() {
-    if (this.swerveOdometry != null) {
-      this.swerveOdometry.update(
-//        new Rotation2d(gyro.getAngle()),  // ADIS16470_IMU
-        gyro.getRotation2d(),  // PigeonIMU
-        new SwerveModulePosition[] {
-          this.frontLeft.getPosition(),
-          this.frontRight.getPosition(),
-          this.backLeft.getPosition(),
-          this.backRight.getPosition()
-        }
-      );
-    }
+  @Override
+  public void periodic() {
+    this.swerveOdometry.update(
+//      new Rotation2d(gyro.getAngle()),  // ADIS16470_IMU
+      gyro.getRotation2d(),  // PigeonIMU
+      new SwerveModulePosition[] {
+        this.frontLeft.getPosition(),
+        this.frontRight.getPosition(),
+        this.backLeft.getPosition(),
+        this.backRight.getPosition()
+      }
+    );
   }
 
   public Command resetGyro() {
