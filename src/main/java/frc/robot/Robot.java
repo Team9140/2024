@@ -32,8 +32,8 @@ public class Robot extends LoggedRobot {
     this.drive.setDefaultCommand(Commands.run(() -> {
       double rightJoystickX = MathUtil.applyDeadband(this.controller.getRightX(), Constants.Drivetrain.TURN_DEADBAND);
       this.drive.swerveDrive(
-        MathUtil.applyDeadband(this.controller.getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.FORWARD_METERS_PER_SECOND * -1,
-        MathUtil.applyDeadband(this.controller.getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND * -1,
+        MathUtil.applyDeadband(this.controller.getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
+        MathUtil.applyDeadband(this.controller.getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
         rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1,
         !this.controller.leftBumper().getAsBoolean());
     }, this.drive));

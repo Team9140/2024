@@ -61,7 +61,7 @@ public class Drivetrain extends SubsystemBase {
       this::getSpeed,
       this::swerveDrive,
       new HolonomicPathFollowerConfig(
-        Constants.Drivetrain.FORWARD_METERS_PER_SECOND,
+        Constants.Drivetrain.METERS_PER_SECOND,
         Units.inchesToMeters(Math.hypot(Constants.WIDTH, Constants.LENGTH) / 2),
         new ReplanningConfig()
       ),
