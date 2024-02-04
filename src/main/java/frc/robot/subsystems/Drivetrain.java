@@ -152,10 +152,10 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("drive omega", omega);
     SmartDashboard.putNumber("drive velocity", Math.hypot(vx, vy));
 
-//    if (fieldRelative) {
-//      this.swerveDrive(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, this.gyro.getRotation2d()));
-//    } else {
+    if (fieldRelative) {
+      this.swerveDrive(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, this.gyro.getRotation2d()));
+    } else {
       this.swerveDrive(new ChassisSpeeds(vx, vy, omega));
-//    }
+    }
   }
 }
