@@ -29,6 +29,15 @@ public class Drivetrain extends SubsystemBase {
   private static SwerveModule backLeft;
   private static SwerveModule backRight;
 
+  private static Translation2d[] modulePositions = {
+          new Translation2d(Units.inchesToMeters(8.625), Units.inchesToMeters(11.875)),  // Front Left
+          new Translation2d(Units.inchesToMeters(8.625), Units.inchesToMeters(-11.875)),  // Front Right
+          new Translation2d(Units.inchesToMeters(-11.125), Units.inchesToMeters(11.875)),  // Back Left
+          new Translation2d(Units.inchesToMeters(-11.125), Units.inchesToMeters(-11.875))  // Back Right
+  };
+
+  private final SwerveKinematicLimits limits = new SwerveKinematicLimits(Constants.Drivetrain.METERS_PER_SECOND, Constants.Drivetrain.ACCELERATION, Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND);
+
   public static SwerveDriveKinematics swerveKinematics;
 
   public static SwerveDriveOdometry swerveOdometry;
@@ -86,7 +95,7 @@ public class Drivetrain extends SubsystemBase {
 
   private void resetPosition(Pose2d position) {
 //    this.swerveOdometry.resetPosition(new Rotation2d(gyro.getAngle()), new SwerveModulePosition[] {  // ADIS16470_IMU
-    this.swerveOdometry.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {  // Trash Gyro
+      this.swerveOdometry.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {  // Trash Gyro
       new SwerveModulePosition(this.frontLeft.getPositionMeters(), new Rotation2d(this.frontLeft.getTurnAngle())),
       new SwerveModulePosition(this.frontRight.getPositionMeters(), new Rotation2d(this.frontRight.getTurnAngle())),
       new SwerveModulePosition(this.backLeft.getPositionMeters(), new Rotation2d(this.backLeft.getTurnAngle())),
@@ -118,7 +127,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command resetGyro() {
-    return Commands.run(() -> this.gyro.reset());
+    return Commands.run(this.gyro::reset);
   }
 
   /**
@@ -127,7 +136,7 @@ public class Drivetrain extends SubsystemBase {
    **/
   private void swerveDrive(ChassisSpeeds movement) {
     SwerveStateGenerator swerveStateGenerator = new SwerveStateGenerator(swerveKinematics);
-    this.prevSetpoint = swerveStateGenerator.generateSetpoint(new SwerveKinematicLimits(Constants.Drivetrain.METERS_PER_SECOND, Constants.Drivetrain.ACCELERATION, Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND), this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
+    this.prevSetpoint = swerveStateGenerator.generateSetpoint(modulePositions, limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
     SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
 //    moduleStates[0] = SwerveModuleState.optimize(moduleStates[0], new Rotation2d(this.frontLeft.getTurnAngle()));
