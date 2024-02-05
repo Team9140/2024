@@ -7,7 +7,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
+import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class PhotonVision extends SubsystemBase {
   private static PhotonVision instance;
@@ -29,30 +31,6 @@ public class PhotonVision extends SubsystemBase {
 
   public PhotonVision() {
     this.camera = new PhotonCamera(Constants.Ports.CAMERA);
-  }
-
-  public Offset getAngleOffBigTarget(){
-    Offset ret = null;
-    Pose3d robotPose = getRobotPose();
-    Transform3d transform;
-    if(robotPose != null) {
-      switch (Constants.alliance.orElse(DriverStation.Alliance.Red)) {
-        case Red:
-          Pose3d tagPoseRed = Constants.Camera.field.getTagPose(4).get();
-          transform = new Transform3d(robotPose, tagPoseRed);
-          ret = new Offset(Math.sqrt(Math.pow(transform.getX(), 2) + Math.pow(transform.getY(), 2)),
-                  transform.getRotation().toRotation2d().getRadians());
-          break;
-
-        case Blue:
-          Pose3d tagPoseBlue = Constants.Camera.field.getTagPose(7).get();
-          transform = new Transform3d(robotPose, tagPoseBlue);
-          ret = new Offset(Math.sqrt(Math.pow(transform.getX(), 2) + Math.pow(transform.getY(), 2)),
-                  transform.getRotation().toRotation2d().getRadians());
-          break;
-      }
-    }
-    return ret;
   }
 
   @Override
@@ -94,6 +72,43 @@ public class PhotonVision extends SubsystemBase {
     return ret;
   }
 
+  /*
+  returns a transform2d of how the robot has to move in order to line up with target.
+  returns null if none of the scoring tags (3, 4, 7, 8) are in view.
+   */
+  public Transform2d lineUpWithTarget(){
+    Transform2d trans;
+    PhotonTrackedTarget result = latestResult.getBestTarget();
+    switch(result.getFiducialId()){
+      case 3:
+        trans = offCenter(result, 3, 4);
+        break;
+      case 8:
+        trans = offCenter(result, 8, 7);
+        break;
+      case 4, 7:
+        trans = onCenter(result);
+        break;
+      default:
+        return null;
+    }
+    return trans;
+  }
+
+  //composes the transform of camera to tag, to the tag at the center of the goal, in theory producing the transform
+  //from the camera to the center of the goal.
+  public Transform2d offCenter(PhotonTrackedTarget result, int tagID1, int tagID2){
+    Transform2d ret = new Transform2d(result.getBestCameraToTarget().getX(),
+            result.getBestCameraToTarget().getY(), Rotation2d.fromRadians(result.getYaw()));
+    return ret.plus(new Transform2d(Constants.Camera.field.getTagPose(tagID1).get().toPose2d(),
+            Constants.Camera.field.getTagPose(tagID2).get().toPose2d()));
+  }
+
+  //just produces the transform from the camera to the center of the goal.
+  public Transform2d onCenter(PhotonTrackedTarget result){
+    return new Transform2d(result.getBestCameraToTarget().getX(),
+            result.getBestCameraToTarget().getY(), Rotation2d.fromRadians(result.getYaw()));
+  }
 
   public class Offset {
     private double distance;
