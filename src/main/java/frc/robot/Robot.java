@@ -35,7 +35,7 @@ public class Robot extends LoggedRobot {
         MathUtil.applyDeadband(this.controller.getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.FORWARD_METERS_PER_SECOND * -1,
         MathUtil.applyDeadband(this.controller.getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.HORIZONTAL_METERS_PER_SECOND * -1,
         rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1,
-        !this.controller.leftBumper().getAsBoolean());  // Removed ! from beginning to disable field-centric driving without the button press (TEMPORARY)
+        this.controller.leftBumper().getAsBoolean());  // Removed ! from beginning to disable field-centric driving without the button press (TEMPORARY)
     }, this.drive));
   }
 
