@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import lib.swerve.SwerveKinematicLimits;
 import lib.swerve.SwerveSetpoint;
-import lib.swerve.SwerveStateGenerator;
+import lib.swerve.SwerveSetpointGenerator;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
@@ -29,7 +29,7 @@ public class Drivetrain extends SubsystemBase {
   private static SwerveModule backLeft;
   private static SwerveModule backRight;
 
-  private static Translation2d[] modulePositions = {
+  private final static Translation2d[] modulePositions = {
           new Translation2d(Units.inchesToMeters(8.625), Units.inchesToMeters(11.875)),  // Front Left
           new Translation2d(Units.inchesToMeters(8.625), Units.inchesToMeters(-11.875)),  // Front Right
           new Translation2d(Units.inchesToMeters(-11.125), Units.inchesToMeters(11.875)),  // Back Left
@@ -135,8 +135,8 @@ public class Drivetrain extends SubsystemBase {
     * @param movement The requested ChassisSpeeds
    **/
   private void swerveDrive(ChassisSpeeds movement) {
-    SwerveStateGenerator swerveStateGenerator = new SwerveStateGenerator(swerveKinematics);
-    this.prevSetpoint = swerveStateGenerator.generateSetpoint(modulePositions, limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
+    SwerveSetpointGenerator swerveStateGenerator = new SwerveSetpointGenerator(swerveKinematics);
+    this.prevSetpoint = swerveStateGenerator.generateSetpoint(limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
     SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
 //    moduleStates[0] = SwerveModuleState.optimize(moduleStates[0], new Rotation2d(this.frontLeft.getTurnAngle()));
