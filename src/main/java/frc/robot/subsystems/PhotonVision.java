@@ -49,29 +49,6 @@ public class PhotonVision extends SubsystemBase {
     }
   }
 
-  //Method to get to a scoring position if close
-  //Returns Offset containing the distance between current position and position we decide is our scoring position
-  //and the rotation needed to line up properly(I think)
-  public Offset getToScore() {
-    Offset ret = null;
-    Transform3d transform;
-    Pose3d robotPose = getRobotPose();
-    int[] scoringtags = {3,4,7,8};
-    //Whatever pose we need to be in to score
-    Pose3d scoringPose;
-    //If speaker we are scoring on is in view, get the current pose and then moves to the position suited to score
-    for (int i: scoringtags) {
-        if(Constants.Camera.field.getTagPose(latestResult.getBestTarget().getFiducialId()).get()
-                .equals(Constants.Camera.field.getTagPose(scoringtags[i]).get())) {
-          transform = new Transform3d(robotPose, scoringPose);
-          ret = new Offset(Math.sqrt(Math.pow(transform.getX(), 2) + Math.pow(transform.getY(), 2)),
-                  transform.getRotation().toRotation2d().getRadians());
-          break;
-      }
-    }
-    return ret;
-  }
-
   /*
   returns a transform2d of how the robot has to move in order to line up with target.
   returns null if none of the scoring tags (3, 4, 7, 8) are in view.
