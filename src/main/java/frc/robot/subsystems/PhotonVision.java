@@ -86,25 +86,6 @@ public class PhotonVision extends SubsystemBase {
     return new Transform2d(result.getBestCameraToTarget().getX(),
             result.getBestCameraToTarget().getY(), Rotation2d.fromRadians(result.getYaw()));
   }
-
-  public class Offset {
-    private double distance;
-    private double rotation;
-
-    public Offset(double distance, double rotation){
-      this.distance = distance;
-      this.rotation = rotation;
-    }
-
-    public double getDistance() {
-      return distance;
-    }
-
-    public double getRotation() {
-      return rotation;
-    }
-  }
-
   /*
   Just writing down stuff to think about
   Objectives
