@@ -20,6 +20,8 @@ public final class Constants {
   public static final double wheelBase = Units.inchesToMeters(0);
   public static final double trackWidth = Units.inchesToMeters(0);
 
+  public static final double scoringRange = 120.0;
+
   //  public static final double fieldx = Units.inchesToMeters(501);
   //  public static final double fieldy = Units.inchesToMeters(323.28);
   public static final int kencoderCountsPerRev = 1;

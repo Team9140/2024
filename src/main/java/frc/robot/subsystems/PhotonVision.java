@@ -67,6 +67,28 @@ public class PhotonVision extends SubsystemBase {
       case Blue -> pose.getRotation().toRotation2d();
     };
   }
+
+  //Returns a Pose3d
+  public Pose2d getClosestScoringPoint() {
+     double yPoint = Constants.scoringRange * Math.sin(angleFromGoal(getRobotPose().get().estimatedPose).getDegrees());
+     double xPoint = Constants.scoringRange * Math.cos(angleFromGoal(getRobotPose().get().estimatedPose).getDegrees());
+     return new Pose2d(xPoint, yPoint, getRobotPose().get().estimatedPose.getRotation().toRotation2d());
+  }
+
+
+  //Returns a Transform2d with the distance needed to move(if at all) and the rotation needed to face the goal
+  //Can be adjusted to be in certain scoring spots rather than
+  public Transform2d getToScoringPosition() {
+    //if in scoring range assuming that the range has a radius
+    if(distanceFromGoal(getRobotPose().get().estimatedPose) <= Constants.scoringRange) {
+      //return Transform2d staying in same place and just rotating to line up with goal
+      return new Transform2d(new Translation2d(), angleFromGoal(getRobotPose().get().estimatedPose));
+    } else {
+      //hopefully returns a Transform2d that tells robot where to go and how much to rotate by
+      return new Transform2d(new Translation2d(Math.abs(getClosestScoringPoint().getX() - getRobotPose().get().estimatedPose.getX()),
+              Math.abs(getClosestScoringPoint().getY() - getRobotPose().get().estimatedPose.getY())), angleFromGoal(getRobotPose().get().estimatedPose));
+    }
+  }
   /*
   Just writing down stuff to think about
   Objectives
