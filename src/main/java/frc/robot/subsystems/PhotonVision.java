@@ -1,27 +1,27 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonUtils;
 import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import java.util.List;
+import java.util.Optional;
+
 public class PhotonVision extends SubsystemBase {
   private static PhotonVision instance;
   private PhotonCamera camera;
   private PhotonPipelineResult latestResult = null;
-  private double lastTimestamp = 0.0;
-  private Pose2d lastPose = null;
-
-  private int lastTagNum = -1;
-
-  // gets last result from camera.
-//  PhotonPipelineResult result = camera.getLatestResult();
+  PhotonPoseEstimator photonPose;
 
   public static PhotonVision getInstance() {
     return PhotonVision.instance == null
@@ -31,60 +31,34 @@ public class PhotonVision extends SubsystemBase {
 
   public PhotonVision() {
     this.camera = new PhotonCamera(Constants.Ports.CAMERA);
+    photonPose = new PhotonPoseEstimator(Constants.Camera.field,
+            PhotonPoseEstimator.PoseStrategy.AVERAGE_BEST_TARGETS, camera, Constants.Camera.cameraToRobot);
+
   }
 
   @Override
   public void periodic() {
-    latestResult = camera.getLatestResult();
-    SmartDashboard.putString("Camera Results", String.valueOf(this.camera.getLatestResult().hasTargets()));
+
   }
 
-  //Gets current pose on field using AprilTag
-  public Pose3d getRobotPose(){
-    if(latestResult.hasTargets()) {
-      return PhotonUtils.estimateFieldToRobotAprilTag(latestResult.getBestTarget().getBestCameraToTarget(),
-              Constants.Camera.field.getTagPose(latestResult.getBestTarget().getFiducialId()).get(), Constants.Camera.cameraToRobot);
-    }else{
-      return null;
-    }
+  //Gets current pose and timestamp on field using PhotonPoseEstimator
+  public Optional<EstimatedRobotPose> getRobotPose(){
+    return photonPose.update();
   }
 
-  /*
-  returns a transform2d of how the robot has to move in order to line up with target.
-  returns null if none of the scoring tags (3, 4, 7, 8) are in view.
-   */
-  public Transform2d lineUpWithTarget(){
-    Transform2d trans;
-    PhotonTrackedTarget result = latestResult.getBestTarget();
-    switch(result.getFiducialId()){
-      case 3:
-        trans = offCenter(result, 3, 4);
-        break;
-      case 8:
-        trans = offCenter(result, 8, 7);
-        break;
-      case 4, 7:
-        trans = onCenter(result);
-        break;
-      default:
-        return null;
-    }
-    return trans;
-  }
 
-  //composes the transform of camera to tag, to the tag at the center of the goal, in theory producing the transform
-  //from the camera to the center of the goal.
-  public Transform2d offCenter(PhotonTrackedTarget result, int tagID1, int tagID2){
-    Transform2d ret = new Transform2d(result.getBestCameraToTarget().getX(),
-            result.getBestCameraToTarget().getY(), Rotation2d.fromRadians(result.getYaw()));
-    return ret.plus(new Transform2d(Constants.Camera.field.getTagPose(tagID1).get().toPose2d(),
-            Constants.Camera.field.getTagPose(tagID2).get().toPose2d()));
-  }
-
-  //just produces the transform from the camera to the center of the goal.
-  public Transform2d onCenter(PhotonTrackedTarget result){
-    return new Transform2d(result.getBestCameraToTarget().getX(),
-            result.getBestCameraToTarget().getY(), Rotation2d.fromRadians(result.getYaw()));
+  //takes a pose3d and returns the distance from the goal.
+  public double distanceFromGoal(Pose3d pose){
+      return switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
+          case Red -> {
+              Transform3d transRed = new Transform3d(Constants.Camera.field.getTagPose(7).get(), pose);
+              yield Math.sqrt(Math.pow(transRed.getX(), 2) + Math.pow(transRed.getY(), 2));
+          }
+          case Blue -> {
+              Transform3d transBlue = new Transform3d(Constants.Camera.field.getTagPose(4).get(), pose);
+              yield Math.sqrt(Math.pow(transBlue.getX(), 2) + Math.pow(transBlue.getY(), 2));
+          }
+      };
   }
   /*
   Just writing down stuff to think about
