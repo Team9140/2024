@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,8 +21,8 @@ import lib.swerve.SwerveSetpointGenerator;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
-//  private final ADIS16470_IMU gyro = new ADIS16470_IMU();
-  private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+  private final ADIS16470_IMU gyro = new ADIS16470_IMU();
+//  private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
   private static SwerveModule frontLeft;
   private static SwerveModule frontRight;
@@ -58,8 +58,8 @@ public class Drivetrain extends SubsystemBase {
     this.backRight = new SwerveModule(Constants.Ports.BACK_RIGHT_DRIVE, Constants.Ports.BACK_RIGHT_TURN, Constants.Drivetrain.BACK_RIGHT_KENCODER_OFFSET, "back right");
     this.swerveOdometry = new SwerveDriveOdometry(
       swerveKinematics,
-//      new Rotation2d(gyro.getAngle()),  // ADIS16470_IMU
-      gyro.getRotation2d(),
+      Rotation2d.fromDegrees(gyro.getAngle()),  // ADIS16470_IMU
+//      gyro.getRotation2d(),
       new SwerveModulePosition[] {
         this.frontLeft.getPosition(),
         this.frontRight.getPosition(),
@@ -94,8 +94,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   private void resetPosition(Pose2d position) {
-//    this.swerveOdometry.resetPosition(new Rotation2d(gyro.getAngle()), new SwerveModulePosition[] {  // ADIS16470_IMU
-      this.swerveOdometry.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {  // Trash Gyro
+    this.swerveOdometry.resetPosition(Rotation2d.fromDegrees(gyro.getAngle()), new SwerveModulePosition[] {  // ADIS16470_IMU
+//      this.swerveOdometry.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {  // Trash Gyro
       new SwerveModulePosition(this.frontLeft.getPositionMeters(), new Rotation2d(this.frontLeft.getTurnAngle())),
       new SwerveModulePosition(this.frontRight.getPositionMeters(), new Rotation2d(this.frontRight.getTurnAngle())),
       new SwerveModulePosition(this.backLeft.getPositionMeters(), new Rotation2d(this.backLeft.getTurnAngle())),
@@ -115,8 +115,8 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     this.swerveOdometry.update(
-//      new Rotation2d(gyro.getAngle()),  // ADIS16470_IMU
-      gyro.getRotation2d(),  // PigeonIMU
+      Rotation2d.fromDegrees(gyro.getAngle()),  // ADIS16470_IMU
+//      gyro.getRotation2d(),  // PigeonIMU
       new SwerveModulePosition[] {
         this.frontLeft.getPosition(),
         this.frontRight.getPosition(),
@@ -135,6 +135,9 @@ public class Drivetrain extends SubsystemBase {
     * @param movement The requested ChassisSpeeds
    **/
   private void swerveDrive(ChassisSpeeds movement) {
+    SmartDashboard.putNumber("vx", movement.vxMetersPerSecond);
+    SmartDashboard.putNumber("vy", movement.vyMetersPerSecond);
+    SmartDashboard.putNumber("omega", movement.omegaRadiansPerSecond);
     SwerveSetpointGenerator swerveStateGenerator = new SwerveSetpointGenerator(swerveKinematics);
     this.prevSetpoint = swerveStateGenerator.generateSetpoint(limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
@@ -160,9 +163,10 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("drive vy", vy);
     SmartDashboard.putNumber("drive omega", omega);
     SmartDashboard.putNumber("drive velocity", Math.hypot(vx, vy));
+    SmartDashboard.putNumber("heading", this.gyro.getAngle());
 
     if (fieldRelative) {
-      this.swerveDrive(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, this.gyro.getRotation2d()));
+      this.swerveDrive(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(this.gyro.getAngle())));
     } else {
       this.swerveDrive(new ChassisSpeeds(vx, vy, omega));
     }

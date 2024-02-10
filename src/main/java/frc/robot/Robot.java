@@ -27,21 +27,22 @@ public class Robot extends LoggedRobot {
     Constants.UpdateSettings();
     this.drive = Drivetrain.getInstance();
 
-    this.controller.start().onTrue(this.drive.resetGyro());  // Temporary
+//    this.controller.a().onTrue(this.drive.resetGyro());  // Temporary
 
     this.drive.setDefaultCommand(Commands.run(() -> {
-      double rightJoystickX = MathUtil.applyDeadband(this.controller.getRightX(), Constants.Drivetrain.TURN_DEADBAND);
+      double rightJoystickX = MathUtil.applyDeadband(this.controller.getHID().getRightX(), Constants.Drivetrain.TURN_DEADBAND);
       this.drive.swerveDrive(
-        MathUtil.applyDeadband(this.controller.getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
-        MathUtil.applyDeadband(this.controller.getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
+        MathUtil.applyDeadband(this.controller.getHID().getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
+        MathUtil.applyDeadband(this.controller.getHID().getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
         rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1,
-        this.controller.leftBumper().getAsBoolean());  // Removed ! from beginning to disable field-centric driving without the button press (TEMPORARY)
+        controller.getHID().getLeftBumper());  // Removed ! from beginning to disable field-centric driving without the button press (TEMPORARY)
     }, this.drive));
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    if (controller.getHID().getAButtonPressed()) this.drive.resetGyro();
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
   }

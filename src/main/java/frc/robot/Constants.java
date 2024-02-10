@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Optional;
 
 public final class Constants {
-  public static final double LOOP_INTERVAL = 0.010;
+  public static final double LOOP_INTERVAL = 0.020;
   public static final double TRACK_WIDTH = Units.inchesToMeters(23.75);
   public static final double WHEEL_BASE = Units.inchesToMeters(20.75);
   public static final int WIDTH = 29;  // Inches
