@@ -135,10 +135,11 @@ public class Drivetrain extends SubsystemBase {
     * @param movement The requested ChassisSpeeds
    **/
   private void swerveDrive(ChassisSpeeds movement) {
+    SwerveSetpointGenerator swerveStateGenerator = new SwerveSetpointGenerator(swerveKinematics);
+    movement = ChassisSpeeds.discretize(movement, Constants.LOOP_INTERVAL);
     SmartDashboard.putNumber("vx", movement.vxMetersPerSecond);
     SmartDashboard.putNumber("vy", movement.vyMetersPerSecond);
     SmartDashboard.putNumber("omega", movement.omegaRadiansPerSecond);
-    SwerveSetpointGenerator swerveStateGenerator = new SwerveSetpointGenerator(swerveKinematics);
     this.prevSetpoint = swerveStateGenerator.generateSetpoint(limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
     SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
