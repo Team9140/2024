@@ -60,6 +60,13 @@ public class PhotonVision extends SubsystemBase {
           }
       };
   }
+
+  public Rotation2d angleFromGoal(Pose3d pose){
+    return switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
+      case Red -> pose.getRotation().toRotation2d().minus(new Rotation2d(180));
+      case Blue -> pose.getRotation().toRotation2d();
+    };
+  }
   /*
   Just writing down stuff to think about
   Objectives
