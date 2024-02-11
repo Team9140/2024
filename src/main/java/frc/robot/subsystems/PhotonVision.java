@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -9,12 +8,8 @@ import frc.robot.Constants;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonUtils;
-import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
-import java.util.List;
 import java.util.Optional;
 
 public class PhotonVision extends SubsystemBase {
@@ -71,8 +66,8 @@ public class PhotonVision extends SubsystemBase {
 
   //Returns a Pose3d
   public Pose2d getClosestScoringPoint() {
-    double xPoint;
-    double yPoint;
+    double xPoint = 0;
+    double yPoint = 0;
     switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
       //math will change when angleRelativeToGoal is finished
       case Blue:
@@ -87,16 +82,14 @@ public class PhotonVision extends SubsystemBase {
 
   //Returns angle relative to the goal regardless of what way the robot is facing
   public double angleRelativeToGoal() {
-    switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
-      case Red:
-        return Math.asin((getRobotPose().get().estimatedPose.getY() - 218.42) /
-                Math.sqrt(Math.pow(getRobotPose().get().estimatedPose.getY() - 218.42, 2) +
-                        Math.pow(getRobotPose().get().estimatedPose.getX() - 652.73, 2)));
-      case Blue:
-        return Math.asin((getRobotPose().get().estimatedPose.getY() - 218.42) /
-                Math.sqrt(Math.pow(getRobotPose().get().estimatedPose.getY() - 218.42, 2) +
-                        Math.pow(getRobotPose().get().estimatedPose.getX() + 1.5, 2)));
-    }
+      return switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
+          case Red -> Math.asin((getRobotPose().get().estimatedPose.getY() - 218.42) /
+                  Math.sqrt(Math.pow(getRobotPose().get().estimatedPose.getY() - 218.42, 2) +
+                          Math.pow(getRobotPose().get().estimatedPose.getX() - 652.73, 2)));
+          case Blue -> Math.asin((getRobotPose().get().estimatedPose.getY() - 218.42) /
+                  Math.sqrt(Math.pow(getRobotPose().get().estimatedPose.getY() - 218.42, 2) +
+                          Math.pow(getRobotPose().get().estimatedPose.getX() + 1.5, 2)));
+      };
   }
 
   //Returns a Transform2d with the distance needed to move(if at all) and the rotation needed to face the goal
