@@ -2,8 +2,7 @@ package frc.robot.subsystems;
 
 // importing phoenix6 stuff for talonfx controllers built into the calamari motors
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 // importing rev stuff for the little red motors
@@ -19,7 +18,8 @@ import frc.robot.Constants;
 public class Launcher extends SubsystemBase {
 
     private static Launcher instance; // single instance of Launcher class
-    private double targetAngle;
+    private double targetAngle; // position in radians for launcher to turn to
+    private double targetRollerVelocity; // velocity in UNITS? for rollers to spin at
 
     // motors (technically the motor controllers) 
     private TalonFX armMotor; // kraken for turning arm of launcher 
@@ -28,8 +28,7 @@ public class Launcher extends SubsystemBase {
     private CANSparkMax feederMotor; // little red motor
 
     // a request to motionmagic to move the arm to a position smoothly ???
-    private MotionMagicVoltage armMotionMagicVoltage;
-    private MotionMagicVelocityVoltage rollerMotionMagicVelocityVoltage;
+    private MotionMagicExpoTorqueCurrentFOC armMotionMagic;
 
     // constructor
     private Launcher(){
@@ -41,6 +40,8 @@ public class Launcher extends SubsystemBase {
         this.feederMotor = new CANSparkMax(11, CANSparkLowLevel.MotorType.kBrushed);
 
         // configure talonfxs
+
+        // TODO armMotor needs conversion factor 
         TalonFXConfiguration armMotorConfig = new TalonFXConfiguration(); // initialize a configuration for armMotor
         // set .kP, .kI, .kD, .kV  for slot0 of armMotorConfig. This is for PID i think
         // armMotorConfig.Slot0.kP = ;
@@ -57,11 +58,14 @@ public class Launcher extends SubsystemBase {
         // rollerMotorConfig.Slot0.kV = ;
         this.topRollerMotor.getConfigurator().apply(rollerMotorConfig);
         this.bottomRollerMotor.getConfigurator().apply(rollerMotorConfig);
+        
+        //invert bottomRollerMotor (could be either)
+        this.bottomRollerMotor.setInverted(true);
 
-        // constructor: MotionMagicVoltage(double Position, boolean EnableFOC <- p2w, double FeedForward, int Slot, boolean boolean OverrideBrakeDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
-        this.armMotionMagicVoltage = new MotionMagicVoltage(0, false, 0, 0, false, false, false);
-        // constructor: MotionMagicVelocityVoltage(double Velocity, double Acceleration, boolean EnableFOC, double FeedForward, int Slot, boolean OverrideBrakeDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
-        this.rollerMotionMagicVelocityVoltage = new MotionMagicVelocityVoltage(0.0, 0.0, false, 0.0, 0, false, false, false);
+        // other constructor: MotionMagicExpoTorqueCurrentFOC​(double Position, double FeedForward, int Slot, boolean OverrideCoastDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
+        this.armMotionMagic = new MotionMagicExpoTorqueCurrentFOC(0);
+        this.armMotionMagic.UpdateFreqHz = 1000.0;
+
     }
 
     public static Launcher getInstance(){
@@ -70,7 +74,9 @@ public class Launcher extends SubsystemBase {
 
     @Override
     public void periodic(){
-        this.armMotor.setControl(this.armMotionMagicVoltage.withPosition(this.targetAngle).withSlot(0));
+        this.armMotor.setControl(this.armMotionMagic.withPosition(this.targetAngle).withSlot(0));
+        this.topRollerMotor.setControl();
+        this.bottomRollerMotor.setControl();
     }
 
     // move arm to a position in radians
@@ -78,12 +84,12 @@ public class Launcher extends SubsystemBase {
         return this.runOnce(() -> this.targetAngle = rad);
     }
 
-    public Command rollersGrab(){
-
+    public Command rollersGrabNote(){
+        return this.runOnce(() -> this.targetRollerVelocity = Constants.Launcher.Velocities.GRAB);
     }
 
-    public Command rollersShoot(){
-        
+    public Command rollersShootNote(){
+        return this.runOnce(() -> this.targetRollerVelocity = Constants.Launcher.Velocities.SHOOT);
     }
 
     // eg: move arm to a position in radians called bruh ("bruh" doesnt actually exist tho)
