@@ -91,6 +91,8 @@ public final class Constants {
     public static final int BACK_LEFT_TURN = 7;
     public static final int BACK_RIGHT_DRIVE = 2;
     public static final int BACK_RIGHT_TURN = 1;
+
+    public static final String LAUNCHER_CANBUS = "Jama";
   }
 
   // Command to move to specified position on field
@@ -132,6 +134,14 @@ public final class Constants {
   }
 
   // Side of the field per-match
+  public static class Launcher {
+    public static class Positions {}
+    public static class Velocities {
+      public static final double GRAB = 0.0;  // FIXME: unknown units
+      public static final double SHOOT = 0.0;  // FIXME: unknown units
+    }
+  }
+
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
   public static OptionalInt alliance_position = OptionalInt.empty();
 
