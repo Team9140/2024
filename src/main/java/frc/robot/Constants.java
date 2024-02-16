@@ -7,6 +7,7 @@ package frc.robot;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+
 import java.util.Optional;
 
 public final class Constants {
@@ -21,10 +22,9 @@ public final class Constants {
     public static final double DRIVE_DEADBAND = 0.10;  // Input deadband value for left joystick
     public static final double TURN_DEADBAND = 0.15;  // Input deadband value for right joystick
 
-
     // Max linear and rotational speeds
-    public static final double FORWARD_METERS_PER_SECOND = Units.feetToMeters(16);
-    public static final double HORIZONTAL_METERS_PER_SECOND = Units.feetToMeters(16);
+    public static final double METERS_PER_SECOND = Units.feetToMeters(16);
+    public static final double ACCELERATION = Units.feetToMeters(48);
     public static final double ROTATION_RADIANS_PER_SECOND = (2 * Math.PI) * 2;  // 2 complete rotations per second (720 deg/s)
 
 

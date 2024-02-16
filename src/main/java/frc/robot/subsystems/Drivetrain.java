@@ -15,6 +15,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import lib.swerve.SwerveKinematicLimits;
+import lib.swerve.SwerveSetpoint;
+import lib.swerve.SwerveStateGenerator;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
@@ -29,6 +32,7 @@ public class Drivetrain extends SubsystemBase {
   public static SwerveDriveKinematics swerveKinematics;
 
   public static SwerveDriveOdometry swerveOdometry;
+  private SwerveSetpoint prevSetpoint;
 
   private Drivetrain() {
     this.gyro.calibrate();
@@ -46,8 +50,7 @@ public class Drivetrain extends SubsystemBase {
     this.backRight = new SwerveModule(Constants.Ports.BACK_RIGHT_DRIVE, Constants.Ports.BACK_RIGHT_TURN, Constants.Drivetrain.BACK_RIGHT_KENCODER_OFFSET, "back right");
     this.swerveOdometry = new SwerveDriveOdometry(
       swerveKinematics,
-//      new Rotation2d(gyro.getAngle()),  // ADIS16470_IMU
-      gyro.getRotation2d(),
+      Rotation2d.fromDegrees(gyro.getAngle()),
       new SwerveModulePosition[] {
         this.frontLeft.getPosition(),
         this.frontRight.getPosition(),
@@ -56,13 +59,15 @@ public class Drivetrain extends SubsystemBase {
       }
     );
 
+    this.prevSetpoint = new SwerveSetpoint(this.getSpeed(), swerveKinematics.toSwerveModuleStates(this.getSpeed()));
+
     AutoBuilder.configureHolonomic(
       this::getPosition,
       this::resetPosition,
       this::getSpeed,
       this::swerveDrive,
       new HolonomicPathFollowerConfig(
-        Constants.Drivetrain.FORWARD_METERS_PER_SECOND,
+        Constants.Drivetrain.METERS_PER_SECOND,
         Units.inchesToMeters(Math.hypot(Constants.WIDTH, Constants.LENGTH) / 2),
         new ReplanningConfig()
       ),
@@ -80,8 +85,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   private void resetPosition(Pose2d position) {
-//    this.swerveOdometry.resetPosition(new Rotation2d(gyro.getAngle()), new SwerveModulePosition[] {  // ADIS16470_IMU
-    this.swerveOdometry.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {  // Trash Gyro
+    this.swerveOdometry.resetPosition(Rotation2d.fromDegrees(gyro.getAngle()), new SwerveModulePosition[] {
       new SwerveModulePosition(this.frontLeft.getPositionMeters(), new Rotation2d(this.frontLeft.getTurnAngle())),
       new SwerveModulePosition(this.frontRight.getPositionMeters(), new Rotation2d(this.frontRight.getTurnAngle())),
       new SwerveModulePosition(this.backLeft.getPositionMeters(), new Rotation2d(this.backLeft.getTurnAngle())),
@@ -101,8 +105,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     this.swerveOdometry.update(
-//      new Rotation2d(gyro.getAngle()),  // ADIS16470_IMU
-      gyro.getRotation2d(),  // PigeonIMU
+      Rotation2d.fromDegrees(gyro.getAngle()),
       new SwerveModulePosition[] {
         this.frontLeft.getPosition(),
         this.frontRight.getPosition(),
@@ -113,7 +116,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command resetGyro() {
-    return Commands.run(() -> this.gyro.reset());
+    return Commands.run(this.gyro::reset);
   }
 
   /**
@@ -121,12 +124,10 @@ public class Drivetrain extends SubsystemBase {
     * @param movement The requested ChassisSpeeds
    **/
   private void swerveDrive(ChassisSpeeds movement) {
-    SwerveModuleState[] moduleStates = swerveKinematics.toSwerveModuleStates(movement);//, new Translation2d(Units.inchesToMeters(1.5), 0));
-    moduleStates[0] = SwerveModuleState.optimize(moduleStates[0], new Rotation2d(this.frontLeft.getTurnAngle()));
-    moduleStates[1] = SwerveModuleState.optimize(moduleStates[1], new Rotation2d(this.frontRight.getTurnAngle()));
-    moduleStates[2] = SwerveModuleState.optimize(moduleStates[2], new Rotation2d(this.backLeft.getTurnAngle()));
-    moduleStates[3] = SwerveModuleState.optimize(moduleStates[3], new Rotation2d(this.backRight.getTurnAngle()));
+    SwerveStateGenerator swerveStateGenerator = new SwerveStateGenerator(swerveKinematics);
+    this.prevSetpoint = swerveStateGenerator.generateSetpoint(new SwerveKinematicLimits(Constants.Drivetrain.METERS_PER_SECOND, Constants.Drivetrain.ACCELERATION, Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND), this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
+    SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
     this.frontLeft.setTarget(moduleStates[0]);
     this.frontRight.setTarget(moduleStates[1]);
     this.backLeft.setTarget(moduleStates[2]);
