@@ -11,10 +11,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Drivetrain;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
+  private PhotonVision camera;
+
   private Drivetrain drive;
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 
@@ -25,9 +28,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotInit() {
     Constants.UpdateSettings();
+    this.camera = PhotonVision.getInstance();
     this.drive = Drivetrain.getInstance();
-
-//    this.controller.a().onTrue(this.drive.resetGyro());  // Temporary
 
     this.drive.setDefaultCommand(Commands.run(() -> {
       double rightJoystickX = MathUtil.applyDeadband(this.controller.getHID().getRightX(), Constants.Drivetrain.TURN_DEADBAND);
@@ -35,7 +37,7 @@ public class Robot extends LoggedRobot {
         MathUtil.applyDeadband(this.controller.getHID().getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
         MathUtil.applyDeadband(this.controller.getHID().getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
         rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1,
-        controller.getHID().getLeftBumper());  // Removed ! from beginning to disable field-centric driving without the button press (TEMPORARY)
+        !controller.getHID().getLeftBumper());
     }, this.drive));
   }
 

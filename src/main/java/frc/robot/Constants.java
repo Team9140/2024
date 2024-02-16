@@ -5,9 +5,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-
+import java.io.IOException;
 import java.util.Optional;
 
 public final class Constants {
@@ -17,6 +21,9 @@ public final class Constants {
   public static final int WIDTH = 29;  // Inches
   public static final int LENGTH = 29;  // Inches
 
+  //  public static final double fieldx = Units.inchesToMeters(501);
+  //  public static final double fieldy = Units.inchesToMeters(323.28);
+  public static final int kencoderCountsPerRev = 1;
   public static final class Drivetrain {
     public static final double WHEEL_DIAMETER = 4;  // Diameter of each wheel
     public static final double DRIVE_DEADBAND = 0.10;  // Input deadband value for left joystick
@@ -65,6 +72,7 @@ public final class Constants {
 
   public static class Ports {
     public static final int INPUT_CONTROLLER = 0;  // Xbox Controller
+    public static final String CAMERA = "ProblemCamera";
 
     // Ports for CANSparkMax motor controllers
     public static final int FRONT_LEFT_DRIVE = 10;
@@ -75,6 +83,23 @@ public final class Constants {
     public static final int BACK_LEFT_TURN = 7;
     public static final int BACK_RIGHT_DRIVE = 2;
     public static final int BACK_RIGHT_TURN = 1;
+  }
+
+
+  public static final class Camera {
+    public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
+    public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
+    public static final AprilTagFieldLayout field;
+
+    static {
+      try {
+        field = new AprilTagFieldLayout("2024-crescendo.json");
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public static final Transform2d cameraToRobot = new Transform2d(12, 12, new Rotation2d(0));
   }
 
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();

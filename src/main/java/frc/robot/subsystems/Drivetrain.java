@@ -52,14 +52,14 @@ public class Drivetrain extends SubsystemBase {
       new Translation2d(Units.inchesToMeters(-11.125), Units.inchesToMeters(11.875)),  // Back Left
       new Translation2d(Units.inchesToMeters(-11.125), Units.inchesToMeters(-11.875))  // Back Right
     );
+
     this.frontLeft = new SwerveModule(Constants.Ports.FRONT_LEFT_DRIVE, Constants.Ports.FRONT_LEFT_TURN, Constants.Drivetrain.FRONT_LEFT_KENCODER_OFFSET, "front left");
     this.frontRight = new SwerveModule(Constants.Ports.FRONT_RIGHT_DRIVE, Constants.Ports.FRONT_RIGHT_TURN, Constants.Drivetrain.FRONT_RIGHT_KENCODER_OFFSET, "front right");
     this.backLeft = new SwerveModule(Constants.Ports.BACK_LEFT_DRIVE, Constants.Ports.BACK_LEFT_TURN, Constants.Drivetrain.BACK_LEFT_KENCODER_OFFSET, "back left");
     this.backRight = new SwerveModule(Constants.Ports.BACK_RIGHT_DRIVE, Constants.Ports.BACK_RIGHT_TURN, Constants.Drivetrain.BACK_RIGHT_KENCODER_OFFSET, "back right");
     this.swerveOdometry = new SwerveDriveOdometry(
       swerveKinematics,
-      Rotation2d.fromDegrees(gyro.getAngle()),  // ADIS16470_IMU
-//      gyro.getRotation2d(),
+      Rotation2d.fromDegrees(gyro.getAngle()),
       new SwerveModulePosition[] {
         this.frontLeft.getPosition(),
         this.frontRight.getPosition(),
@@ -94,8 +94,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   private void resetPosition(Pose2d position) {
-    this.swerveOdometry.resetPosition(Rotation2d.fromDegrees(gyro.getAngle()), new SwerveModulePosition[] {  // ADIS16470_IMU
-//      this.swerveOdometry.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {  // Trash Gyro
+    this.swerveOdometry.resetPosition(Rotation2d.fromDegrees(gyro.getAngle()), new SwerveModulePosition[] {
       new SwerveModulePosition(this.frontLeft.getPositionMeters(), new Rotation2d(this.frontLeft.getTurnAngle())),
       new SwerveModulePosition(this.frontRight.getPositionMeters(), new Rotation2d(this.frontRight.getTurnAngle())),
       new SwerveModulePosition(this.backLeft.getPositionMeters(), new Rotation2d(this.backLeft.getTurnAngle())),
@@ -115,8 +114,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     this.swerveOdometry.update(
-      Rotation2d.fromDegrees(gyro.getAngle()),  // ADIS16470_IMU
-//      gyro.getRotation2d(),  // PigeonIMU
+      Rotation2d.fromDegrees(gyro.getAngle()),
       new SwerveModulePosition[] {
         this.frontLeft.getPosition(),
         this.frontRight.getPosition(),
@@ -143,10 +141,6 @@ public class Drivetrain extends SubsystemBase {
     this.prevSetpoint = swerveStateGenerator.generateSetpoint(limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
     SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
-//    moduleStates[0] = SwerveModuleState.optimize(moduleStates[0], new Rotation2d(this.frontLeft.getTurnAngle()));
-//    moduleStates[1] = SwerveModuleState.optimize(moduleStates[1], new Rotation2d(this.frontRight.getTurnAngle()));
-//    moduleStates[2] = SwerveModuleState.optimize(moduleStates[2], new Rotation2d(this.backLeft.getTurnAngle()));
-//    moduleStates[3] = SwerveModuleState.optimize(moduleStates[3], new Rotation2d(this.backRight.getTurnAngle()));
     this.frontLeft.setTarget(moduleStates[0]);
     this.frontRight.setTarget(moduleStates[1]);
     this.backLeft.setTarget(moduleStates[2]);
