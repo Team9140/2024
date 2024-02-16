@@ -210,12 +210,21 @@ public class Drivetrain extends SubsystemBase {
 
   /**
     * Move the robot to a specified field-relative position.
-    * @param target The target position on the field.
+    * @param target The target field-centric position on the field.
    **/
   public void swerveDrive(Pose2d target) {
     CommandScheduler.getInstance().schedule(new MoveCommand(target, Constants.MoveCommand.ERROR));
   }
 
+  /**
+    *
+    * swerveDrive but with Bezier curves and such
+    * the better way to do things, but more complicated
+    * work on this later
+    *
+    * @param target The target field-centric position on the field.
+    *
+   **/
 //  public void swerveDrive(Pose2d target) {
 //    Command path = AutoBuilder.pathfindThenFollowPath(
 //      target,

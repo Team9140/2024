@@ -93,6 +93,13 @@ public final class Constants {
     public static final int BACK_RIGHT_TURN = 1;
 
     public static final String LAUNCHER_CANBUS = "Jama";
+    public static final int ARM_MOTOR = 5;
+    public static final int BOTTOM_SHOOTER = 6;
+    public static final int TOP_SHOOTER = 7;
+    public static final int ARM_FEEDER = 11;
+
+    public static final int FRONT_INTAKE = 0;
+    public static final int BACK_INTAKE = 0;
   }
 
   // Command to move to specified position on field
@@ -133,15 +140,25 @@ public final class Constants {
 //    }
   }
 
-  // Side of the field per-match
   public static class Launcher {
+    public static final double ARM_CONVERSION_FACTOR = 0.0;  // FIXME: unknown value
+
+    // Electric current limits for intake motors
+    public static final int INTAKE_CURRENT_LIMIT = 0;  // FIXME: unknown value
+    public static final double INTAKE_NOTE_VELOCITY = 0.0;  // FIXME: unknown value
+    public static final double INTAKE_RELEASE_VELOCITY = 0.0;
+    public static final double INTAKE_S = 0.0;
+    public static final double INTAKE_V = 0.0;
+    public static final double INTAKE_A = 0.0;
+
     public static class Positions {}
     public static class Velocities {
-      public static final double GRAB = 0.0;  // FIXME: unknown units
-      public static final double SHOOT = 0.0;  // FIXME: unknown units
+      public static final double GRAB = 0.0;  // FIXME: unknown units & values
+      public static final double SHOOT = 0.0;  // FIXME: unknown units & values
     }
   }
 
+  // Side of the field per-match
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
   public static OptionalInt alliance_position = OptionalInt.empty();
 

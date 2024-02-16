@@ -18,12 +18,6 @@ public class PhotonVision extends SubsystemBase {
   private PhotonPoseEstimator photonPose;
 
 
-  public static PhotonVision getInstance() {
-    return PhotonVision.instance == null
-      ? PhotonVision.instance = new PhotonVision()
-      : PhotonVision.instance;
-  }
-
   public PhotonVision() {
     this.camera = new PhotonCamera(Constants.Ports.CAMERA);
     photonPose = new PhotonPoseEstimator(
@@ -32,6 +26,16 @@ public class PhotonVision extends SubsystemBase {
       camera,
       Constants.Camera.cameraToRobot
     );
+  }
+
+  /**
+   * Ensures there is only ever one PhotonVision object
+   * @return itself
+   **/
+  public static PhotonVision getInstance() {
+    return PhotonVision.instance == null
+      ? PhotonVision.instance = new PhotonVision()
+      : PhotonVision.instance;
   }
 
   /**

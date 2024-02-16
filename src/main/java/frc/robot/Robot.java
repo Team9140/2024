@@ -42,7 +42,7 @@ public class Robot extends LoggedRobot {
     this.camera = PhotonVision.getInstance();
     this.drive = Drivetrain.getInstance();
 
-    // Make the robot drive in eleoperated mode by default
+    // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
       // Remove low, fluctuating values from rotation input joystick
       double rightJoystickX = MathUtil.applyDeadband(this.controller.getHID().getRightX(), Constants.Drivetrain.TURN_DEADBAND);

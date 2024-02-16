@@ -85,8 +85,8 @@ public class SwerveModule extends SubsystemBase {
   @Override
   public void periodic() {
     // Set the target angle and velocity for module movement
-    this.turnMotor.getPIDController().setReference(targetAngle, CANSparkBase.ControlType.kPosition);
-    this.driveMotorLeader.setControl(driveMotorRequest.withOutput(feedforward.calculate(targetVelocity)));
+    this.turnMotor.getPIDController().setReference(this.targetAngle, CANSparkBase.ControlType.kPosition);
+    this.driveMotorLeader.setControl(this.driveMotorRequest.withOutput(feedforward.calculate(this.targetVelocity)));
 
     // Output current values to SmartDashboard for debugging
     SmartDashboard.putNumber(this.niceName + " turn angle", this.getTurnAngle());
