@@ -11,10 +11,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Drivetrain;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
+  private PhotonVision camera;
+
   private Drivetrain drive;
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 
@@ -25,6 +28,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotInit() {
     Constants.UpdateSettings();
+    this.camera = PhotonVision.getInstance();
     this.drive = Drivetrain.getInstance();
 
     this.controller.start().onTrue(this.drive.resetGyro());  // Temporary
