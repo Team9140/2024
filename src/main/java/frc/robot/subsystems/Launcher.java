@@ -59,10 +59,15 @@ public class Launcher extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  public void periodic(){
     this.armMotor.setControl(this.armMotionMagic.withPosition(this.targetAngle).withSlot(0));
 //    this.topShooterMotor.setControl();  // FIXME: fix it
 //    this.bottomShooterMotor.setControl();
+
+    // if the shooters are at shooting speed and the angle is reasonable, turn on feeder motor to give note to the launcher
+    if (areShootersReadyToShoot() && isArmReadyToShoot()) {
+      this.feederMotor.setVoltage(0.0);
+    }
   }
 
   // move arm to a position in radians
@@ -78,7 +83,33 @@ public class Launcher extends SubsystemBase {
     return this.runOnce(() -> this.targetShooterVelocity = Constants.Launcher.Velocities.SHOOT);
   }
 
-//  public Command feedNoteToShooter() {
-//    return this.runOnce(() -> /* idk */);
-//  }
+  // get the velocity in radians per second of the topShooterMotor TODO: configure things to work in radians instead of rotations
+  private double getTopShooterVelocity() {
+    return this.topShooterMotor.getVelocity().getValue();
+  }
+
+  // get the velocity in radians per second of the bottomShooterMotor
+  private double getBottomShooterVelocity() {
+    return this.bottomShooterMotor.getVelocity().getValue();
+  }
+
+  // could use renaming; calls velocity getters for shooters and checks if theyre >= the constant for suitable shooting velocity
+  private boolean areShootersReadyToShoot() {
+    return this.getTopShooterVelocity() >= Constants.Launcher.Velocities.TOP_READY_TO_SHOOT && this.getBottomShooterVelocity() >= Constants.Launcher.Velocities.BOTTOM_READY_TO_SHOOT;
+  }
+
+  // true if launcher arm is not in intake/grab position
+  private boolean isArmReadyToShoot() {
+    return this.targetAngle != Constants.Launcher.Positions.INTAKE;
+  }
+
+  // true if launcher arm is in intake/grab position
+  private boolean isArmReadyToGrabNote() {
+    return this.targetAngle == Constants.Launcher.Positions.INTAKE;
+  }
+
+  // go to intake position
+  public Command setIntake() {
+    return setPosition(Constants.Launcher.Positions.INTAKE);
+  }
 }
