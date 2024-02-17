@@ -338,3 +338,7 @@ bin/
 
 # Build Constants
 src/main/java/frc/robot/BuildConstants.java
+
+# Sysid Intellij
+sysid-proj/.idea/*
+sysid-proj/.idea/
