@@ -86,6 +86,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     Constants.UpdateSettings();
+
+    this.drive.resetPosition(Constants.STARTING_POSITIONS[Constants.alliance_position.getAsInt()]);
+
     CommandScheduler.getInstance().cancelAll();
     CommandScheduler.getInstance().schedule(new PathPlannerAuto("New Auto"));
   }
