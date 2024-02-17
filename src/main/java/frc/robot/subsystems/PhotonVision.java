@@ -9,10 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
-import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
-
-import java.util.Optional;
 
 public class PhotonVision extends SubsystemBase {
   private static PhotonVision instance;
@@ -22,9 +19,6 @@ public class PhotonVision extends SubsystemBase {
   private double lastAmbiguity = 0.0;
 
   private int lastTagNum = -1;
-
-  // gets last result from camera.
-//  PhotonPipelineResult result = camera.getLatestResult();
 
   public static PhotonVision getInstance() {
     return PhotonVision.instance == null
@@ -58,53 +52,55 @@ public class PhotonVision extends SubsystemBase {
 
   public VisionData getPosition2d(){
     PhotonPipelineResult result = this.camera.getLatestResult();
-    //temp
-    double gyro = 0.0;
-    if(result.hasTargets()){
-      lastTagNum = result.getBestTarget().getFiducialId();
-      Pose3d pose3d = Constants.Camera.field.getTagPose(lastTagNum).get();
-      lastTimestamp = result.getTimestampSeconds();
-      lastPose = PhotonUtils.estimateFieldToRobot(Constants.Camera.CAMERA_HEIGHT_METERS, pose3d.getZ(), Constants.Camera.CAMERA_PITCH_RADS,
-              0.0, pose3d.getRotation().toRotation2d(), new Rotation2d(gyro), pose3d.toPose2d(),
-              Constants.Camera.cameraToRobot);
-      lastAmbiguity = result.getBestTarget().getPoseAmbiguity();
+    double gyro = 0.0;  // Temporary
 
-      return new VisionData(lastTimestamp, lastPose, lastAmbiguity, lastTagNum);
+    if (result.hasTargets()) {
+      this.lastTagNum = result.getBestTarget().getFiducialId();
+      Pose3d pose3d = Constants.Camera.field.getTagPose(this.lastTagNum).get();
+      this.lastTimestamp = result.getTimestampSeconds();
 
-    }else{
-      return new VisionData(lastTimestamp, lastPose, lastAmbiguity, lastTagNum);
+      this.lastPose = PhotonUtils.estimateFieldToRobot(Constants.Camera.CAMERA_HEIGHT_METERS, pose3d.getZ(), Constants.Camera.CAMERA_PITCH_RADS,
+        0.0, pose3d.getRotation().toRotation2d(), new Rotation2d(gyro), pose3d.toPose2d(),
+        Constants.Camera.cameraToRobot
+      );
+
+      this.lastAmbiguity = result.getBestTarget().getPoseAmbiguity();
     }
+
+    return new VisionData(this.lastTimestamp, this.lastPose, this.lastAmbiguity, this.lastTagNum);
   }
 
-  //Contains the 2d location of the robot, when that information is from, and how 'good' of a view the robot had
-  // of the april tag which could help to inform on the accuracy.
+  /**
+    * Contains the 2d location of the robot, when that information is from, and how 'good' of a view the robot had
+    * of the april tag which could help to inform on the accuracy.
+   **/
   private class VisionData {
-    private double timestamp;
-    private Pose2d pose;
-    private double ambiguity;
+    private final double timestamp;
+    private final Pose2d pose;
+    private final double ambiguity;
 
-    private int tagNum;
+    private final int tagNum;
 
-    public VisionData(double time, Pose2d pose, double ambiguity, int tagNum){
+    public VisionData(double time, Pose2d pose, double ambiguity, int tagNum) {
       this.timestamp = time;
       this.pose = pose;
       this.ambiguity = ambiguity;
       this.tagNum = tagNum;
     }
 
-    public double getTimestamp(){
+    public double getTimestamp() {
       return this.timestamp;
     }
 
-    public Pose2d getPose(){
+    public Pose2d getPose() {
       return this.pose;
     }
 
-    public double getAmbiguity(){
+    public double getAmbiguity() {
       return this.ambiguity;
     }
 
-    public double getTagNum(){
+    public double getTagNum() {
       return this.tagNum;
     }
   }
