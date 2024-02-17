@@ -45,13 +45,16 @@ public class Drivetrain extends SubsystemBase {
   private final SwerveKinematicLimits limits = new SwerveKinematicLimits(Constants.Drivetrain.METERS_PER_SECOND, Constants.Drivetrain.ACCELERATION, Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND);
 
   public static SwerveDriveKinematics swerveKinematics;
-
   private final SwerveDrivePoseEstimator positionEstimator;
   private SwerveSetpoint prevSetpoint;
 
+  /**
+    * The drivetrain subsystem for robot movement
+   **/
   private Drivetrain() {
     this.gyro.calibrate();
 
+    // Create the SwerveDriveKinematics object
     this.swerveKinematics = new SwerveDriveKinematics(
       new Translation2d(Units.inchesToMeters(8.625), Units.inchesToMeters(11.875)),  // Front Left
       new Translation2d(Units.inchesToMeters(8.625), Units.inchesToMeters(-11.875)),  // Front Right
@@ -59,11 +62,13 @@ public class Drivetrain extends SubsystemBase {
       new Translation2d(Units.inchesToMeters(-11.125), Units.inchesToMeters(-11.875))  // Back Right
     );
 
+    // Initialize swerve modules
     this.frontLeft = new SwerveModule(Constants.Ports.FRONT_LEFT_DRIVE, Constants.Ports.FRONT_LEFT_TURN, Constants.Drivetrain.FRONT_LEFT_KENCODER_OFFSET, "front left");
     this.frontRight = new SwerveModule(Constants.Ports.FRONT_RIGHT_DRIVE, Constants.Ports.FRONT_RIGHT_TURN, Constants.Drivetrain.FRONT_RIGHT_KENCODER_OFFSET, "front right");
     this.backLeft = new SwerveModule(Constants.Ports.BACK_LEFT_DRIVE, Constants.Ports.BACK_LEFT_TURN, Constants.Drivetrain.BACK_LEFT_KENCODER_OFFSET, "back left");
     this.backRight = new SwerveModule(Constants.Ports.BACK_RIGHT_DRIVE, Constants.Ports.BACK_RIGHT_TURN, Constants.Drivetrain.BACK_RIGHT_KENCODER_OFFSET, "back right");
 
+    // Set up position estimator (like SwerveDriveOdometry but with the ability to add data from PhotonVision)
     this.positionEstimator = new SwerveDrivePoseEstimator(
       this.swerveKinematics,
       Rotation2d.fromDegrees(this.gyro.getAngle()),
@@ -71,8 +76,10 @@ public class Drivetrain extends SubsystemBase {
       new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)) // Starting Position
     );
 
+    // FIXME: unclear
     this.prevSetpoint = new SwerveSetpoint(this.getSpeed(), swerveKinematics.toSwerveModuleStates(this.getSpeed()));
 
+    // Configure autonomous routines
     AutoBuilder.configureHolonomic(
       this::getPosition,
       this::resetPosition,
@@ -218,6 +225,4 @@ public class Drivetrain extends SubsystemBase {
 //      Constants.Drivetrain.ROTATION_DELAY_METERS
 //    );
 //  }
-
-
 }
