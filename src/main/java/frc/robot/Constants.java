@@ -118,6 +118,8 @@ public final class Constants {
     public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
     public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
     public static final AprilTagFieldLayout field;
+
+    // Position of camera relative to the robot
     public static final Transform3d cameraToRobot = new Transform3d();
 
     static {
@@ -127,9 +129,6 @@ public final class Constants {
         throw new RuntimeException(e);
       }
     }
-
-    // Position of camera relative to the robot
-    public static final Transform2d cameraToRobot = new Transform2d(12, 12, new Rotation2d(0));
   }
 
   // Side of the field per-match

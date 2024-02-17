@@ -8,7 +8,6 @@ import frc.robot.Constants;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import java.util.Optional;
@@ -17,12 +16,8 @@ public class PhotonVision extends SubsystemBase {
   private static PhotonVision instance;
   private PhotonCamera camera;
   private PhotonPipelineResult latestResult = null;
-  PhotonPoseEstimator photonPose;
-  private double lastTimestamp = 0.0;
-  private Pose2d lastPose = null;
-  private double lastAmbiguity = 0.0;
+  private PhotonPoseEstimator photonPose;
 
-  private int lastTagNum = -1;
 
   public static PhotonVision getInstance() {
     return PhotonVision.instance == null
@@ -40,12 +35,17 @@ public class PhotonVision extends SubsystemBase {
     );
   }
 
+  /**
+   * Routinely sends debugging information to SmartDashboard
+   */
   @Override
   public void periodic() {
     SmartDashboard.putString("Camera Results", "X: " + getRobotPose().get().estimatedPose.getX() + " Y: " + getRobotPose().get().estimatedPose.getY());
   }
 
-  // Gets current pose and timestamp on field using PhotonPoseEstimator
+  /**
+    * Gets current pose and timestamp on field using PhotonPoseEstimator
+   **/
   public Optional<EstimatedRobotPose> getRobotPose(){
     return photonPose.update();
   }
@@ -99,26 +99,6 @@ public class PhotonVision extends SubsystemBase {
     return new Pose2d(xPoint, yPoint, getRobotPose().get().estimatedPose.getRotation().toRotation2d());
   }
 
-  public VisionData getPosition2d() {
-    PhotonPipelineResult result = this.camera.getLatestResult();
-    double gyro = 0.0;  // Temporary
-
-    if (result.hasTargets()) {
-      this.lastTagNum = result.getBestTarget().getFiducialId();
-      Pose3d pose3d = Constants.Camera.field.getTagPose(this.lastTagNum).get();
-      this.lastTimestamp = result.getTimestampSeconds();
-
-      this.lastPose = PhotonUtils.estimateFieldToRobot(Constants.Camera.CAMERA_HEIGHT_METERS, pose3d.getZ(), Constants.Camera.CAMERA_PITCH_RADS,
-        0.0, pose3d.getRotation().toRotation2d(), new Rotation2d(gyro), pose3d.toPose2d(),
-        Constants.Camera.cameraToRobot  // FIXME: error. wants Transform2d, given Transform3d
-      );
-
-      this.lastAmbiguity = result.getBestTarget().getPoseAmbiguity();
-    }
-
-    return new VisionData(this.lastTimestamp, this.lastPose, this.lastAmbiguity, this.lastTagNum);
-  }
-
   /**
     * Returns angle relative to the goal regardless of what way the robot is facing
     * @return The angle relative to the goal.
@@ -151,42 +131,6 @@ public class PhotonVision extends SubsystemBase {
         Math.abs(getClosestScoringPoint().getY() - getRobotPose().get().estimatedPose.getY())),
         Rotation2d.fromRadians(getRobotPose().get().estimatedPose.getRotation().getZ())
       );
-    }
-  }
-
-
-  /**
-    * Contains the 2d location of the robot, when that information is from, and how 'good' of a view the robot had
-    * of the april tag which could help to inform on the accuracy.
-   **/
-  private class VisionData {
-    private final double timestamp;
-    private final Pose2d pose;
-    private final double ambiguity;
-
-    private final int tagNum;
-
-    public VisionData(double time, Pose2d pose, double ambiguity, int tagNum) {
-      this.timestamp = time;
-      this.pose = pose;
-      this.ambiguity = ambiguity;
-      this.tagNum = tagNum;
-    }
-
-    public double getTimestamp() {
-      return this.timestamp;
-    }
-
-    public Pose2d getPose() {
-      return this.pose;
-    }
-
-    public double getAmbiguity() {
-      return this.ambiguity;
-    }
-
-    public double getTagNum() {
-      return this.tagNum;
     }
   }
 }

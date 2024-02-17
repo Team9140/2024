@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkBase;
@@ -16,10 +17,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class SwerveModule extends SubsystemBase {
-  // Various motors [clarification needed]
+  // Various motors FIXME: clarification needed
   private TalonFX driveMotorLeader;
 
-  // Allows full use of 15% power [clarification needed]
+  // Allows full use of 15% power FIXME: clarification needed
   private VoltageOut driveMotorRequest;
 
   // Controller for the rotation motor
@@ -49,7 +50,7 @@ public class SwerveModule extends SubsystemBase {
     this.driveMotorLeader = new TalonFX(drivePort, "moe");
     this.driveMotorLeader.setInverted(true);
 
-    // Enables FOC (15% extra power) [clarification needed]
+    // Enables FOC (15% extra power) FIXME: clarification needed
     this.driveMotorRequest = new VoltageOut(0).withEnableFOC(true);
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Drivetrain.DRIVE_CURRENT_LIMIT).withStatorCurrentLimitEnable(true);
     TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits);
@@ -103,7 +104,6 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(this.niceName + " target angle", this.targetAngle);
     SmartDashboard.putNumber(this.niceName + " target velocity", this.targetVelocity);
     SmartDashboard.putNumber(this.niceName + " turn current", this.turnMotor.getOutputCurrent());
-    // I think this gets the current at the motor level [clarification needed]
     SmartDashboard.putNumber(this.niceName + " drive current", this.driveMotorLeader.getStatorCurrent().getValueAsDouble());
   }
 
