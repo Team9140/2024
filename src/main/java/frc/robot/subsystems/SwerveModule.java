@@ -61,7 +61,8 @@ public class SwerveModule extends SubsystemBase {
     this.turnMotor.restoreFactoryDefaults();
     this.turnMotor.setInverted(true);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
-    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
+    this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
+    this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI);
     this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
 
     // Tool to convert requested velocity into voltage
@@ -69,7 +70,7 @@ public class SwerveModule extends SubsystemBase {
 
     // Configure PID values & configuration for rotation motor
     SparkPIDController turnPID = this.turnMotor.getPIDController();
-    turnPID.setFeedbackDevice(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle));
+    turnPID.setFeedbackDevice(this.turnMotor.getEncoder());
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(Constants.Drivetrain.PID_MIN_INPUT);
     turnPID.setPositionPIDWrappingMaxInput(Constants.Drivetrain.PID_MAX_INPUT);
@@ -98,6 +99,15 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(this.niceName + " target velocity", this.targetVelocity);
     SmartDashboard.putNumber(this.niceName + " turn current", this.turnMotor.getOutputCurrent());
     SmartDashboard.putNumber(this.niceName + " drive current", this.driveMotorLeader.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber(this.niceName + " turn encoder position", this.turnMotor.getEncoder().getPosition());
+  }
+
+  //  Gets best way to turn to an angle without doing an extra rotation
+  public static double bestTurn(double targetAngle, double currentPosition) {
+    double minimumTarget = Math.floor(currentPosition / (2 * Math.PI)) * 2 * Math.PI + targetAngle; // number of rotations converted to radians + target turn
+    double greatestTarget = minimumTarget + 2 * Math.PI; // subtract one rotation
+    // Return smallest difference one
+    return Math.abs(minimumTarget - currentPosition) < Math.abs(greatestTarget - currentPosition) ? minimumTarget : greatestTarget;
   }
 
   /**
@@ -105,7 +115,7 @@ public class SwerveModule extends SubsystemBase {
     * @param state A SwerveModuleState object containing the requested values
    **/
   public void setTarget(SwerveModuleState state) {
-    this.targetAngle = state.angle.getRadians();
+    this.targetAngle = bestTurn(state.angle.getRadians(), this.turnMotor.getEncoder().getPosition());
     this.targetVelocity = state.speedMetersPerSecond;
   }
 
@@ -130,7 +140,7 @@ public class SwerveModule extends SubsystemBase {
     * @return The swerve module rotation
    **/
   public double getTurnAngle() {
-    return this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition();
+    return this.turnMotor.getEncoder().getPosition();
   }
 
   /**
