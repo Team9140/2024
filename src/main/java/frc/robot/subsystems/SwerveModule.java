@@ -43,7 +43,7 @@ public class SwerveModule extends SubsystemBase {
     * @param kencoderOffset The initial offset value of the absolute encoder
     * @param niceName Pretty name for easier debugging
    **/
-  public SwerveModule(int drivePort, int turnPort, double kencoderOffset, String niceName) {
+  private SwerveModule(int drivePort, int turnPort, double kencoderOffset, String niceName) {
     this.niceName = niceName;
 
     // TalonFX doesn't use RIO canbus, it uses its own

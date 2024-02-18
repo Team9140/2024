@@ -14,15 +14,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.PhotonVision;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
-  // The camera subsystem instance
-  private PhotonVision camera;
-
-  // The drivetrain subsystem instance
   private Drivetrain drive;
+  private PhotonVision camera;
+  private Intake intake;
 
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
@@ -38,31 +37,25 @@ public class Robot extends LoggedRobot {
   public void robotInit() {
     Constants.UpdateSettings();
 
-    // Create/get subsystem instances
     this.camera = PhotonVision.getInstance();
     this.drive = Drivetrain.getInstance();
+    this.intake = Intake.getInstance();
 
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
       // Remove low, fluctuating values from rotation input joystick
       double rightJoystickX = MathUtil.applyDeadband(this.controller.getHID().getRightX(), Constants.Drivetrain.TURN_DEADBAND);
 
-      // Remove low, fluctuating values and drive at the percentage of max velocity
+      // Remove low, fluctuating values and drive at the input joystick as percentage of max velocity
       this.drive.swerveDrive(
-        // Forward (front-to-back) movement
-        MathUtil.applyDeadband(this.controller.getHID().getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
-
-        // Horizontal (side-to-side) movement
-        MathUtil.applyDeadband(this.controller.getHID().getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,
-
-        // Rotation (squared to make larger values more sensitive)
-        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1,
-
-        // Enable field-relative driving by default
-        !this.controller.getHID().getLeftBumper()
+        MathUtil.applyDeadband(this.controller.getHID().getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
+        MathUtil.applyDeadband(this.controller.getHID().getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
+        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1,  // Rotation (squared to make larger values more sensitive)
+        !this.controller.getHID().getLeftBumper()  // Enable field-relative driving by default
       );
     }, this.drive));
 
+    this.controller.rightTrigger().onTrue(this.intake.intakeNote()).onFalse(this.intake.off());
   }
 
   /**

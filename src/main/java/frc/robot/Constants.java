@@ -144,14 +144,16 @@ public final class Constants {
     public static final double ARM_CONVERSION_FACTOR = 0.0;  // FIXME: unknown value
 
     // Electric current limits for intake motors
-    public static final int INTAKE_CURRENT_LIMIT = 0;  // FIXME: unknown value
-    public static final double INTAKE_NOTE_VELOCITY = 0.0;  // FIXME: unknown value
-    public static final double INTAKE_RELEASE_VELOCITY = 0.0;
-    public static final double INTAKE_S = 0.0;
-    public static final double INTAKE_V = 0.0;
-    public static final double INTAKE_A = 0.0;
+    public static final int INTAKE_CURRENT_LIMIT = 25;
+    public static final double INTAKE_NOTE_VOLTS = 8.0;
 
-    public static class Positions {}
+    public static final double POSITION_ERROR = 0.2;
+    public static final double VELOCITY_ERROR = 0.2;
+
+    public static class Positions {
+      public static final double INTAKE = 0.0;
+//      public static final double
+    }
     public static class Velocities {
       public static final double GRAB = 0.0;  // FIXME: unknown units & values
       public static final double SHOOT = 0.0;  // FIXME: unknown units & values

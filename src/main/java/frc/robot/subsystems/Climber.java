@@ -1,47 +1,41 @@
 package frc.robot.subsystems;
 
 // import stuff
-import edu.wpi.first.wpilibj2.command.Command; // CommandBase code is merged into Command as of 2024
+
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Climber extends SubsystemBase{
+public class Climber extends SubsystemBase {
+  private static Climber instance;
 
-    // single instance
-    public static instance;
+  // TODO: implement TrapezoidProfile or MotionMagic
 
-    // idk if were using trapezoid profile from last year or MotionMagic
+  private Climber() {}
 
-    // motor
+  /**
+    * Returns an initialized class of Climber if one exists, or create a new one if it doesn't (and return it).
+    * @return The climber
+   **/
+  public Climber getInstance() {
+    return Climber.instance == null ? Climber.instance = new Climber() : Climber.instance;
+  }
 
+  // hes getting bigger!!!
+  public Command extendClimber() {
+    return runOnce(() -> {
+      // tell motor to go uppy
+    });
+  }
 
-    // constructor
-    private Climber(){
-        // set up motors have fun
-    }
+  // short
+  public Command retractClimber() {
+    return runOnce(() -> {
+      // tell motor to go down
+    });
+  }
 
-    // called by robot.java; this makes sure theres only ever 1 instance of Intake
-    public Climber getInstance(){
-        return frc.robot.subsystems.Climber.instance == null ? frc.robot.subsystems.Climber.instance = new Climber() : frc.robot.subsystems.Climber.instance;
-    }
-
-    // hes getting bigger!!!
-    public Command extendClimber(){
-        return runOnce(() -> {
-            // tell motor to go uppy
-        })
-    }
-
-    // short
-    public Command retractClimber(){
-        return runOnce(() -> {
-            // tell motor to go down
-        })
-    }
-
-    // true if up, false if down
-    public boolean isUp(){
-        return ; // check if motor sensor is past/at a certain position in radians 
-    }
-
-
+  // true if up, false if down
+  public boolean isUp() {
+    return false; // check if motor sensor is past/at a certain position in radians
+  }
 }
