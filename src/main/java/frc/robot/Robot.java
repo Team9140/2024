@@ -55,7 +55,9 @@ public class Robot extends LoggedRobot {
       );
     }, this.drive));
 
-    this.controller.rightTrigger().onTrue(this.intake.intakeNote()).onFalse(this.intake.off());
+    controller.rightBumper().onTrue(this.intake.intakeNote());
+    controller.rightBumper().onFalse(this.intake.off());
+    controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
   }
 
   /**
@@ -64,10 +66,10 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    if (controller.getHID().getAButton()) this.drive.resetGyro();
 
     // TODO: Replace this with a button that will auto-align against a target and then shoot the note
-    if (controller.getHID().getBButton()) Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(180))));
+//    if (controller.getHID().getBButton()) Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(180))));
+
 
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());

@@ -30,13 +30,6 @@ public class Launcher extends SubsystemBase {
     this.topShooterMotor = new TalonFX(Constants.Ports.TOP_SHOOTER, Constants.Ports.LAUNCHER_CANBUS);
     this.feederMotor = new CANSparkMax(Constants.Ports.ARM_FEEDER, CANSparkLowLevel.MotorType.kBrushed);
 
-    // TODO: armMotor needs conversion factor
-    TalonFXConfiguration armMotorConfig = new TalonFXConfiguration();
-    // armMotorConfig.Slot0.kP = ;
-    // armMotorConfig.Slot0.kI = ;
-    // armMotorConfig.Slot0.kD = ;
-    // armMotorConfig.Slot0.kV = ;
-
     TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
     this.topShooterMotor.getConfigurator().apply(shooterMotorConfig);
     this.bottomShooterMotor.getConfigurator().apply(shooterMotorConfig);
@@ -44,11 +37,16 @@ public class Launcher extends SubsystemBase {
 
     FeedbackConfigs armFeedbackConfigs = new FeedbackConfigs();
     armFeedbackConfigs.withSensorToMechanismRatio(Constants.Launcher.ARM_CONVERSION_FACTOR);
-//    armMotorConfig.apply(armFeedbackConfigs);  // FIXME: broken
+    // TODO: armMotor needs conversion factor
+    TalonFXConfiguration armMotorConfig = new TalonFXConfiguration().withFeedback(armFeedbackConfigs);
+    // armMotorConfig.Slot0.kP = ;
+    // armMotorConfig.Slot0.kI = ;
+    // armMotorConfig.Slot0.kD = ;
+    // armMotorConfig.Slot0.kV = ;
     this.armMotor.getConfigurator().apply(armMotorConfig);
 
     // Add MotionMagic to smoothly move the arm rotation
-    // other constructor: MotionMagicExpoTorqueCurrentFOC​(double Position, double FeedForward, int Slot, boolean OverrideCoastDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
+//     other constructor: MotionMagicExpoTorqueCurrentFOC​(double Position, double FeedForward, int Slot, boolean OverrideCoastDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
     this.armMotionMagic = new MotionMagicExpoTorqueCurrentFOC(0);
     this.armMotionMagic.UpdateFreqHz = 1000.0;
   }

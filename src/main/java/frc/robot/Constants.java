@@ -83,23 +83,23 @@ public final class Constants {
     public static final String CAMERA = "ProblemCamera";  // PhotonVision camera ID
 
     // Ports for CANSparkMax motor controllers
-    public static final int FRONT_LEFT_DRIVE = 10;
-    public static final int FRONT_LEFT_TURN = 5;
-    public static final int FRONT_RIGHT_DRIVE = 3;
-    public static final int FRONT_RIGHT_TURN = 4;
-    public static final int BACK_LEFT_DRIVE = 6;
-    public static final int BACK_LEFT_TURN = 7;
+    public static final int FRONT_LEFT_DRIVE = 1;
+    public static final int FRONT_LEFT_TURN = 4;
+    public static final int FRONT_RIGHT_DRIVE = 0;
+    public static final int FRONT_RIGHT_TURN = 9;
+    public static final int BACK_LEFT_DRIVE = 3;
+    public static final int BACK_LEFT_TURN = 1;
     public static final int BACK_RIGHT_DRIVE = 2;
-    public static final int BACK_RIGHT_TURN = 1;
+    public static final int BACK_RIGHT_TURN = 7;
 
     public static final String LAUNCHER_CANBUS = "Jama";
-    public static final int ARM_MOTOR = 5;
-    public static final int BOTTOM_SHOOTER = 6;
-    public static final int TOP_SHOOTER = 7;
-    public static final int ARM_FEEDER = 11;
+    public static final int ARM_MOTOR = 19;
+    public static final int BOTTOM_SHOOTER = 20;
+    public static final int TOP_SHOOTER = 21;
+    public static final int ARM_FEEDER = 22;
 
-    public static final int FRONT_INTAKE = 0;
-    public static final int BACK_INTAKE = 0;
+    public static final int FRONT_INTAKE = 10;
+    public static final int BACK_INTAKE = 6;
   }
 
   // Command to move to specified position on field
