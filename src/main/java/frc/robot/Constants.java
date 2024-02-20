@@ -36,8 +36,8 @@ public final class Constants {
 
     // Max linear and rotational speeds
     public static final double METERS_PER_SECOND = Units.feetToMeters(16);  // ft/s max velocity
-    public static final double ACCELERATION = Units.feetToMeters(48);  // ft/s^2 max acceleration
-    public static final double ROTATION_RADIANS_PER_SECOND = (2 * Math.PI) * 2;  // 2 complete rotations per second (720 deg/s)
+    public static final double ACCELERATION = Units.feetToMeters(80);  // ft/s^2 max acceleration
+    public static final double ROTATION_RADIANS_PER_SECOND = (2 * Math.PI) * 4;  // 2 complete rotations per second (720 deg/s)
 
 
     // Drive motor feedforward values
@@ -54,9 +54,9 @@ public final class Constants {
 
 
     // PID values for the turn motor
-    public static final double TURN_P = 0.4;
+    public static final double TURN_P = 1.97;
     public static final double TURN_I = 0.0;
-    public static final double TURN_D = 0.0;
+    public static final double TURN_D = 0.115;
 
 
     // PID values for the drive motor
@@ -66,8 +66,8 @@ public final class Constants {
 
 
     // Electric current limits for the swerve modules
-    public static final int DRIVE_CURRENT_LIMIT = 25;
-    public static final int TURN_CURRENT_LIMIT = 25;
+    public static final int DRIVE_CURRENT_LIMIT = 60;
+    public static final int TURN_CURRENT_LIMIT = 30;
 
 
     // PID wrapping values for the turn motor
@@ -92,7 +92,7 @@ public final class Constants {
     public static final int BACK_RIGHT_DRIVE = 2;
     public static final int BACK_RIGHT_TURN = 7;
 
-    public static final String LAUNCHER_CANBUS = "Jama";
+    public static final String CTRE_CANBUS = "jama";
     public static final int ARM_MOTOR = 19;
     public static final int BOTTOM_SHOOTER = 20;
     public static final int TOP_SHOOTER = 21;
@@ -178,8 +178,8 @@ public final class Constants {
     Constants.alliance = DriverStation.getAlliance();
     Constants.alliance_position = DriverStation.getLocation();
 
-    SmartDashboard.putString("Alliance", Constants.alliance.get().toString());
-    SmartDashboard.putNumber("Position", Constants.alliance_position.getAsInt());
+//    SmartDashboard.putString("Alliance", Constants.alliance.get().toString());
+//    SmartDashboard.putNumber("Position", Constants.alliance_position.getAsInt());
   }
 
 }

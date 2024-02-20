@@ -37,17 +37,17 @@ public class SwerveModule extends SubsystemBase {
   private volatile double targetVelocity;
 
   /**
-    * Initializes one module for a swerve drive robot
-    * @param drivePort The port ID of the drive motor's controller
-    * @param turnPort The port ID of the rotation motor's controller
-    * @param kencoderOffset The initial offset value of the absolute encoder
-    * @param niceName Pretty name for easier debugging
+   * Initializes one module for a swerve drive robot
+   * @param drivePort The port ID of the drive motor's controller
+   * @param turnPort The port ID of the rotation motor's controller
+   * @param kencoderOffset The initial offset value of the absolute encoder
+   * @param niceName Pretty name for easier debugging
    **/
   public SwerveModule(int drivePort, int turnPort, double kencoderOffset, String niceName) {
     this.niceName = niceName;
 
     // TalonFX doesn't use RIO canbus, it uses its own
-    this.driveMotorLeader = new TalonFX(drivePort, "moe");
+    this.driveMotorLeader = new TalonFX(drivePort, Constants.Ports.CTRE_CANBUS);
     this.driveMotorLeader.setInverted(true);
 
     // Enables FOC (15% extra power) FIXME: clarification needed
@@ -62,14 +62,18 @@ public class SwerveModule extends SubsystemBase {
     this.turnMotor.setInverted(true);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
+    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
     this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
+    this.turnMotor.getEncoder().setPositionConversionFactor(7.0 / 150.0 * 2 * Math.PI);
+    this.turnMotor.getEncoder().setVelocityConversionFactor(7.0 / 150.0 * 2 * Math.PI / 60.0);
+    this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
 
     // Tool to convert requested velocity into voltage
     this.feedforward = new SimpleMotorFeedforward(Constants.Drivetrain.MODULE_S, Constants.Drivetrain.MODULE_V, Constants.Drivetrain.MODULE_A);
 
     // Configure PID values & configuration for rotation motor
     SparkPIDController turnPID = this.turnMotor.getPIDController();
-    turnPID.setFeedbackDevice(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle));
+    turnPID.setFeedbackDevice(this.turnMotor.getEncoder());
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(Constants.Drivetrain.PID_MIN_INPUT);
     turnPID.setPositionPIDWrappingMaxInput(Constants.Drivetrain.PID_MAX_INPUT);
@@ -77,16 +81,23 @@ public class SwerveModule extends SubsystemBase {
     turnPID.setI(Constants.Drivetrain.TURN_I);
     turnPID.setD(Constants.Drivetrain.TURN_D);
     this.turnMotor.burnFlash();
+
+    // Potentially removable, PID settings for drive motor
+//    SparkPIDController drivePID = this.driveMotor.getPIDController();
+//    drivePID.setFeedbackDevice(this.driveMotor.getEncoder());
+//    turnPID.setP(Constants.Drivetrain.DRIVE_P);
+//    turnPID.setI(Constants.Drivetrain.DRIVE_I);
+//    turnPID.setD(Constants.Drivetrain.DRIVE_D);
   }
 
   /**
-    * Routinely updates the target velocity & angle and sends debugging information to SmartDashboard
+   * Routinely updates the target velocity & angle and sends debugging information to SmartDashboard
    **/
   @Override
   public void periodic() {
     // Set the target angle and velocity for module movement
-    this.turnMotor.getPIDController().setReference(this.targetAngle, CANSparkBase.ControlType.kPosition);
-    this.driveMotorLeader.setControl(this.driveMotorRequest.withOutput(feedforward.calculate(this.targetVelocity)));
+    this.turnMotor.getPIDController().setReference(targetAngle, CANSparkBase.ControlType.kPosition);
+    this.driveMotorLeader.setControl(driveMotorRequest.withOutput(feedforward.calculate(targetVelocity)));
 
     // Output current values to SmartDashboard for debugging
     SmartDashboard.putNumber(this.niceName + " turn angle", this.getTurnAngle());
@@ -98,11 +109,20 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(this.niceName + " target velocity", this.targetVelocity);
     SmartDashboard.putNumber(this.niceName + " turn current", this.turnMotor.getOutputCurrent());
     SmartDashboard.putNumber(this.niceName + " drive current", this.driveMotorLeader.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber(this.niceName + " turn encoder position", this.turnMotor.getEncoder().getPosition());
+  }
+
+  //  Gets best way to turn to an angle without doing an extra rotation
+  public static double bestTurn(double targetAngle, double currentPosition) {
+    double minimumTarget = Math.floor(currentPosition / (2 * Math.PI)) * 2 * Math.PI + targetAngle; // number of rotations converted to radians + target turn
+    double greatestTarget = minimumTarget + 2 * Math.PI; // subtract one rotation
+    // Return smallest difference one
+    return Math.abs(minimumTarget - currentPosition) < Math.abs(greatestTarget - currentPosition) ? minimumTarget : greatestTarget;
   }
 
   /**
-    * Set the target module angle and velocity.
-    * @param state A SwerveModuleState object containing the requested values
+   * Set the target module angle and velocity.
+   * @param state A SwerveModuleState object containing the requested values
    **/
   public void setTarget(SwerveModuleState state) {
     this.targetAngle = state.angle.getRadians();
@@ -118,24 +138,24 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-    * Gets the approximate 1-directional distance travelled.
-    * @return The distance in meters
+   * Gets the approximate 1-directional distance travelled.
+   * @return The distance in meters
    **/
   public double getPositionMeters() {
     return this.driveMotorLeader.getPosition().getValueAsDouble() * Constants.Drivetrain.WHEEL_DIAMETER * Math.PI;
   }
 
   /**
-    * Gets the swerve module rotation in radians.
-    * @return The swerve module rotation
+   * Gets the swerve module rotation in radians.
+   * @return The swerve module rotation
    **/
   public double getTurnAngle() {
-    return this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition();
+    return this.turnMotor.getEncoder().getPosition();
   }
 
   /**
-    * Gets information about the swerve module's current velocity and rotation.
-    * @return A SwerveModuleState object containing the velocity and rotational values
+   * Gets information about the swerve module's current velocity and rotation.
+   * @return A SwerveModuleState object containing the velocity and rotational values
    **/
   public SwerveModuleState getState() {
     return new SwerveModuleState(this.driveMotorLeader.getVelocity().getValueAsDouble(), new Rotation2d(getTurnAngle()));

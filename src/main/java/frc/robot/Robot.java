@@ -20,7 +20,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
   private Drivetrain drive;
-  private PhotonVision camera;
+//  private PhotonVision camera;
   private Intake intake;
 
   // The input Xbox controller
@@ -37,7 +37,7 @@ public class Robot extends LoggedRobot {
   public void robotInit() {
     Constants.UpdateSettings();
 
-    this.camera = PhotonVision.getInstance();
+//    this.camera = PhotonVision.getInstance();
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
 
