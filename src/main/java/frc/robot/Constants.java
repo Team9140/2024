@@ -141,7 +141,7 @@ public final class Constants {
   }
 
   public static class Launcher {
-    public static final double ARM_CONVERSION_FACTOR = 0.0;  // FIXME: unknown value
+    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 8.0;
 
     // Electric current limits for intake motors
     public static final int INTAKE_CURRENT_LIMIT = 25;
@@ -151,8 +151,8 @@ public final class Constants {
     public static final double VELOCITY_ERROR = 0.2;
 
     public static class Positions {
-      public static final double INTAKE = 0.0;
-//      public static final double
+      // wont actually be 0.0, origin will be when the arm is straight down
+      public static final double INTAKE = 0.0; // FIXME: unknown units & values
     }
     public static class Velocities {
       public static final double GRAB = 0.0;  // FIXME: unknown units & values
