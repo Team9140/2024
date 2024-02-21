@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -110,7 +109,7 @@ public final class Constants {
     public static final Pose2d ERROR = new Pose2d(0.4, 0.4, Rotation2d.fromDegrees(20));
 
 
-    // FORWARD_* and HORIZONTAL* will probably be merged into DRIVE_*
+    // FORWARD_* and HORIZONTAL* will probably be merged into a single set of DRIVE_* values
     public static final double FORWARD_P = 0.0;
     public static final double FORWARD_I = 0.0;
     public static final double FORWARD_D = 0.0;
@@ -135,7 +134,7 @@ public final class Constants {
 
 //    static {
 //      try {
-//        field = new AprilTagFieldLayout("2024-crescendo.json");
+//        field = new AprilTagFieldLayout("2024-crescendo.json");  // FIXME: Add JSON to deploy
 //      } catch (IOException e) {
 //        throw new RuntimeException(e);
 //      }
@@ -153,9 +152,10 @@ public final class Constants {
     public static final double VELOCITY_ERROR = 0.2;
 
     public static class Positions {
-      // wont actually be 0.0, origin will be when the arm is straight down
+      // Won't actually be 0.0, origin will be when the arm is straight down
       public static final double INTAKE = 0.0; // FIXME: unknown units & values
     }
+    
     public static class Velocities {
       public static final double GRAB = 0.0;  // FIXME: unknown units & values
       public static final double SHOOT = 0.0;  // FIXME: unknown units & values
