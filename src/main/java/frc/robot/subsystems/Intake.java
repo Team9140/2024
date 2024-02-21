@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
   public Command intakeNote() {
     return this.run(() -> {
       this.frontMotor.setVoltage(Constants.Launcher.INTAKE_NOTE_VOLTS);
-      this.frontMotor.setVoltage(Constants.Launcher.INTAKE_NOTE_VOLTS);
+      this.backMotor.setVoltage(Constants.Launcher.INTAKE_NOTE_VOLTS);
     });
   }
 

@@ -30,12 +30,14 @@ public final class Constants {
   //  public static final double fieldx = Units.inchesToMeters(501);
   //  public static final double fieldy = Units.inchesToMeters(323.28);
   public static final class Drivetrain {
-    public static final double WHEEL_DIAMETER = 4;  // Diameter of each wheel
+    public static final double TURN_GEAR_RATIO = 150.0 / 7.0;
+    public static final double DRIVE_GEAR_RATIO = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
+    public static final double WHEEL_DIAMETER = 4;  // Diameter of each wheel in inches
     public static final double DRIVE_DEADBAND = 0.10;  // Input deadband value for left joystick
     public static final double TURN_DEADBAND = 0.15;  // Input deadband value for right joystick
 
     // Max linear and rotational speeds
-    public static final double METERS_PER_SECOND = Units.feetToMeters(16);  // ft/s max velocity
+    public static final double METERS_PER_SECOND = Units.feetToMeters(19);  // ft/s max velocity
     public static final double ACCELERATION = Units.feetToMeters(80);  // ft/s^2 max acceleration
     public static final double ROTATION_RADIANS_PER_SECOND = (2 * Math.PI) * 4;  // 2 complete rotations per second (720 deg/s)
 
@@ -145,7 +147,7 @@ public final class Constants {
 
     // Electric current limits for intake motors
     public static final int INTAKE_CURRENT_LIMIT = 25;
-    public static final double INTAKE_NOTE_VOLTS = 8.0;
+    public static final double INTAKE_NOTE_VOLTS = 12.0;
 
     public static final double POSITION_ERROR = 0.2;
     public static final double VELOCITY_ERROR = 0.2;

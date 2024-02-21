@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder;
@@ -12,6 +13,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -48,13 +50,14 @@ public class SwerveModule extends SubsystemBase {
 
     // TalonFX doesn't use RIO canbus, it uses its own
     this.driveMotorLeader = new TalonFX(drivePort, Constants.Ports.CTRE_CANBUS);
-    this.driveMotorLeader.setInverted(true);
 
     // Enables FOC (15% extra power) FIXME: clarification needed
     this.driveMotorRequest = new VoltageOut(0).withEnableFOC(true);
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Drivetrain.DRIVE_CURRENT_LIMIT).withStatorCurrentLimitEnable(true);
     TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits);
     this.driveMotorLeader.getConfigurator().apply(driveMotorConfiguration);
+    this.driveMotorLeader.setInverted(true);
+    this.driveMotorLeader.setNeutralMode(NeutralModeValue.Brake);
 
     // Boilerplate configuration for the turn motor to prevent issues from arriving due to cached values
     this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
@@ -64,8 +67,8 @@ public class SwerveModule extends SubsystemBase {
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
     this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
-    this.turnMotor.getEncoder().setPositionConversionFactor(7.0 / 150.0 * 2 * Math.PI);
-    this.turnMotor.getEncoder().setVelocityConversionFactor(7.0 / 150.0 * 2 * Math.PI / 60.0);
+    this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
+    this.turnMotor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 60.0 / Constants.Drivetrain.TURN_GEAR_RATIO);
     this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
 
     // Tool to convert requested velocity into voltage
@@ -110,6 +113,8 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(this.niceName + " turn current", this.turnMotor.getOutputCurrent());
     SmartDashboard.putNumber(this.niceName + " drive current", this.driveMotorLeader.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putNumber(this.niceName + " turn encoder position", this.turnMotor.getEncoder().getPosition());
+    SmartDashboard.putNumber(this.niceName + " turn encoder position % 2pi", this.turnMotor.getEncoder().getPosition() % (2 * Math.PI));
+    SmartDashboard.putNumber(this.niceName + " drive meters per second", Units.inchesToMeters(this.driveMotorLeader.getVelocity().getValueAsDouble() / Constants.Drivetrain.DRIVE_GEAR_RATIO * Math.PI * Constants.Drivetrain.WHEEL_DIAMETER));
   }
 
   //  Gets best way to turn to an angle without doing an extra rotation
@@ -142,7 +147,7 @@ public class SwerveModule extends SubsystemBase {
    * @return The distance in meters
    **/
   public double getPositionMeters() {
-    return this.driveMotorLeader.getPosition().getValueAsDouble() * Constants.Drivetrain.WHEEL_DIAMETER * Math.PI;
+    return this.driveMotorLeader.getPosition().getValueAsDouble() / Constants.Drivetrain.DRIVE_GEAR_RATIO * Constants.Drivetrain.WHEEL_DIAMETER * Math.PI;
   }
 
   /**
