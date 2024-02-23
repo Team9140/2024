@@ -23,7 +23,6 @@ public class Intake extends SubsystemBase {
 
     this.backMotor = new WPI_TalonSRX(Constants.Ports.BACK_INTAKE);
     this.backMotor.configContinuousCurrentLimit(Constants.BACK_INTAKE_CURRENT_LIMIT);
-    this.backMotor.setInverted(true);
   }
 
   /**
