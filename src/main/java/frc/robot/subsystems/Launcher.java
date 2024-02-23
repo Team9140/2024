@@ -23,6 +23,7 @@ public class Launcher extends SubsystemBase {
   private final CANSparkMax feederMotor;  // Red motor
 
   private final MotionMagicExpoTorqueCurrentFOC armMotionMagic;
+  // private final Motion TODO: which motion magic to use for shooters
 
   private Launcher() {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
@@ -37,7 +38,6 @@ public class Launcher extends SubsystemBase {
 
     FeedbackConfigs armFeedbackConfigs = new FeedbackConfigs();
     armFeedbackConfigs.withSensorToMechanismRatio(Constants.Launcher.ARM_CONVERSION_FACTOR);
-    // TODO: armMotor needs conversion factor
     TalonFXConfiguration armMotorConfig = new TalonFXConfiguration().withFeedback(armFeedbackConfigs);
     // armMotorConfig.Slot0.kP = ;
     // armMotorConfig.Slot0.kI = ;

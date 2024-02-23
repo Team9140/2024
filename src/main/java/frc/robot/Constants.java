@@ -142,7 +142,7 @@ public final class Constants {
   }
 
   public static class Launcher {
-    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 8.0;
+    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
 
     // Electric current limits for intake motors
     public static final int INTAKE_CURRENT_LIMIT = 25;
@@ -154,6 +154,14 @@ public final class Constants {
     public static class Positions {
       // Won't actually be 0.0, origin will be when the arm is straight down
       public static final double INTAKE = 0.0; // FIXME: unknown units & values
+      public static final double AMP = 0.0; // FIXME: unknown units & values
+      /* 
+       * UNDERHAND_SHOOT and OVERHAND_SHOOT are just for testing arm movement and shooting
+       * wont actually be used in the final robot because set shooting positions will be replaced by photonvision aimbot
+       */
+      public static final double UNDERHAND_SHOOT = 0.0; // FIXME: unknown units & values
+      public static final double OVERHAND_SHOOT = 0.0; // FIXME: unknown units & values
+
     }
     
     public static class Velocities {
