@@ -119,9 +119,10 @@ public class SwerveModule extends SubsystemBase {
 
   //  Gets best way to turn to an angle without doing an extra rotation
   public static double bestTurn(double targetAngle, double currentPosition) {
-    double minimumTarget = Math.floor(currentPosition / (2 * Math.PI)) * 2 * Math.PI + targetAngle; // number of rotations converted to radians + target turn
-    double greatestTarget = minimumTarget + 2 * Math.PI; // subtract one rotation
-    // Return smallest difference one
+    double minimumTarget = Math.floor(currentPosition / (2 * Math.PI)) * 2 * Math.PI + targetAngle;  // Number of rotations converted to radians + target turn
+    double greatestTarget = minimumTarget + 2 * Math.PI;  // Subtract one rotation
+
+    // Return smallest difference angle
     return Math.abs(minimumTarget - currentPosition) < Math.abs(greatestTarget - currentPosition) ? minimumTarget : greatestTarget;
   }
 
@@ -130,7 +131,7 @@ public class SwerveModule extends SubsystemBase {
    * @param state A SwerveModuleState object containing the requested values
    **/
   public void setTarget(SwerveModuleState state) {
-    this.targetAngle = state.angle.getRadians();
+    this.targetAngle = bestTurn(state.angle.getRadians(), this.turnMotor.getEncoder().getPosition());
     this.targetVelocity = state.speedMetersPerSecond;
   }
 
