@@ -38,7 +38,7 @@ public final class Constants {
     // Max linear and rotational speeds
     public static final double METERS_PER_SECOND = Units.feetToMeters(19);  // ft/s max velocity
     public static final double ACCELERATION = Units.feetToMeters(80);  // ft/s^2 max acceleration
-    public static final double ROTATION_RADIANS_PER_SECOND = (2 * Math.PI) * 4;  // 2 complete rotations per second (720 deg/s)
+    public static final double ROTATION_RADIANS_PER_SECOND = (2 * Math.PI) * 2;  // 2 complete rotations per second (720 deg/s)
 
 
     // Drive motor feedforward values
@@ -75,6 +75,9 @@ public final class Constants {
     public static final double PID_MIN_INPUT = 0.0;
     public static final double PID_MAX_INPUT = 2 * Math.PI;
 
+    public static final double TURN_REGULAR_NOBOOST = 70.0 / 100.0;  // Percent requested rotation without boost enabled
+    public static final double DRIVE_REGULAR_NOBOOST = 70.0 / 100.0;  // Percent requested drive without boost enabled
+
     // Distance to travel before rotation is attempted
 //    public static final double ROTATION_DELAY_METERS = 1.0;
   }
@@ -99,8 +102,9 @@ public final class Constants {
     public static final int TOP_SHOOTER = 21;
     public static final int ARM_FEEDER = 22;
 
-    public static final int FRONT_INTAKE = 10;
-    public static final int BACK_INTAKE = 6;
+    public static final int FRONT_LEFT_INTAKE = 32;
+    public static final int FRONT_RIGHT_INTAKE = 31;
+    public static final int BACK_INTAKE = 30;
   }
 
   // Command to move to specified position on field
@@ -110,13 +114,9 @@ public final class Constants {
 
 
     // FORWARD_* and HORIZONTAL* will probably be merged into a single set of DRIVE_* values
-    public static final double FORWARD_P = 0.0;
-    public static final double FORWARD_I = 0.0;
-    public static final double FORWARD_D = 0.0;
-
-    public static final double HORIZONTAL_P = 0.0;
-    public static final double HORIZONTAL_I = 0.0;
-    public static final double HORIZONTAL_D = 0.0;
+    public static final double DRIVE_P = 0.0;
+    public static final double DRIVE_I = 0.0;
+    public static final double DRIVE_D = 0.0;
 
     public static final double ROTATION_P = 0.0;
     public static final double ROTATION_I = 0.0;
@@ -141,12 +141,14 @@ public final class Constants {
 //    }
   }
 
+  // Electric current limits for intake motors
+  public static final int FRONT_INTAKE_CURRENT_LIMIT = 15;
+  public static final int BACK_INTAKE_CURRENT_LIMIT = 25;
+  public static final double FRONT_INTAKE_NOTE_VOLTS = 6.0;
+  public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
+
   public static class Launcher {
     public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
-
-    // Electric current limits for intake motors
-    public static final int INTAKE_CURRENT_LIMIT = 25;
-    public static final double INTAKE_NOTE_VOLTS = 12.0;
 
     public static final double POSITION_ERROR = 0.2;
     public static final double VELOCITY_ERROR = 0.2;
@@ -163,7 +165,7 @@ public final class Constants {
       public static final double OVERHAND_SHOOT = 0.0; // FIXME: unknown units & values
 
     }
-    
+
     public static class Velocities {
       public static final double GRAB = 0.0;  // FIXME: unknown units & values
       public static final double SHOOT = 0.0;  // FIXME: unknown units & values

@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.PhotonVision;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
@@ -48,6 +47,12 @@ public class Robot extends LoggedRobot {
       double leftJoystickY = MathUtil.applyDeadband(this.controller.getHID().getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND);
       double leftJoystickX = MathUtil.applyDeadband(this.controller.getHID().getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND);
 
+      // Apply movement booster
+      rightJoystickX = Constants.Drivetrain.TURN_REGULAR_NOBOOST * rightJoystickX + (1 - Constants.Drivetrain.TURN_REGULAR_NOBOOST) * rightJoystickX * this.controller.getHID().getLeftTriggerAxis();
+      leftJoystickY = Constants.Drivetrain.DRIVE_REGULAR_NOBOOST * leftJoystickY + (1 - Constants.Drivetrain.DRIVE_REGULAR_NOBOOST) * leftJoystickY * this.controller.getHID().getLeftTriggerAxis();
+      leftJoystickX = Constants.Drivetrain.DRIVE_REGULAR_NOBOOST * leftJoystickX + (1 - Constants.Drivetrain.DRIVE_REGULAR_NOBOOST) * leftJoystickX * this.controller.getHID().getLeftTriggerAxis();
+
+
       // Remove low, fluctuating values and drive at the input joystick as percentage of max velocity
       this.drive.swerveDrive(
         leftJoystickY * Math.abs(leftJoystickY) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
@@ -57,9 +62,10 @@ public class Robot extends LoggedRobot {
       );
     }, this.drive));
 
-    controller.rightBumper().onTrue(this.intake.intakeNote());
-    controller.rightBumper().onFalse(this.intake.off());
-    controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
+    this.controller.rightBumper().onTrue(this.intake.intakeNote());
+    this.controller.rightBumper().onFalse(this.intake.off());
+    this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
+    this.controller.b().onTrue(Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0)))));
   }
 
   /**

@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -9,15 +8,21 @@ import frc.robot.Constants;
 public class Intake extends SubsystemBase {
   private static Intake instance;
 
-  private final CANSparkMax frontMotor;  // Big Bad Wolf
-  private final CANSparkMax backMotor;  // Three Little Piggies
+  private final WPI_TalonSRX frontLeftMotor;  // Big Bad Wolf
+  private final WPI_TalonSRX frontRightMotor;  // Big Bad Wolf
+  private final WPI_TalonSRX backMotor;  // Three Little Piggies
 
   private Intake() {
-    this.frontMotor = new CANSparkMax(Constants.Ports.FRONT_INTAKE, CANSparkLowLevel.MotorType.kBrushed);
-    this.frontMotor.setSmartCurrentLimit(Constants.Launcher.INTAKE_CURRENT_LIMIT);
+    this.frontLeftMotor = new WPI_TalonSRX(Constants.Ports.FRONT_LEFT_INTAKE);
+    this.frontLeftMotor.configContinuousCurrentLimit(Constants.FRONT_INTAKE_CURRENT_LIMIT);
 
-    this.backMotor = new CANSparkMax(Constants.Ports.BACK_INTAKE, CANSparkLowLevel.MotorType.kBrushed);
-    this.backMotor.setSmartCurrentLimit(Constants.Launcher.INTAKE_CURRENT_LIMIT);
+    this.frontRightMotor = new WPI_TalonSRX(Constants.Ports.FRONT_RIGHT_INTAKE);
+    this.frontRightMotor.configContinuousCurrentLimit(Constants.FRONT_INTAKE_CURRENT_LIMIT);
+    this.frontRightMotor.setInverted(true);
+    this.frontRightMotor.follow(this.frontLeftMotor);
+
+    this.backMotor = new WPI_TalonSRX(Constants.Ports.BACK_INTAKE);
+    this.backMotor.configContinuousCurrentLimit(Constants.BACK_INTAKE_CURRENT_LIMIT);
     this.backMotor.setInverted(true);
   }
 
@@ -37,8 +42,8 @@ public class Intake extends SubsystemBase {
    **/
   public Command intakeNote() {
     return this.run(() -> {
-      this.frontMotor.setVoltage(Constants.Launcher.INTAKE_NOTE_VOLTS);
-      this.backMotor.setVoltage(Constants.Launcher.INTAKE_NOTE_VOLTS);
+      this.frontLeftMotor.setVoltage(Constants.FRONT_INTAKE_NOTE_VOLTS);
+      this.backMotor.setVoltage(Constants.BACK_INTAKE_NOTE_VOLTS);
     });
   }
 
@@ -48,8 +53,8 @@ public class Intake extends SubsystemBase {
    **/
   public Command releaseNote() {
     return this.runOnce(() -> {
-      this.frontMotor.setVoltage(-Constants.Launcher.INTAKE_NOTE_VOLTS);
-      this.backMotor.setVoltage(-Constants.Launcher.INTAKE_NOTE_VOLTS);
+      this.frontLeftMotor.setVoltage(-Constants.FRONT_INTAKE_NOTE_VOLTS);
+      this.backMotor.setVoltage(-Constants.BACK_INTAKE_NOTE_VOLTS);
     });
   }
 
@@ -58,7 +63,7 @@ public class Intake extends SubsystemBase {
    **/
   public Command off() {
     return this.run(() -> {
-      this.frontMotor.setVoltage(0.0);
+      this.frontLeftMotor.setVoltage(0.0);
       this.backMotor.setVoltage(0.0);
     });
   }
