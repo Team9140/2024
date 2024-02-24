@@ -5,13 +5,14 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
@@ -66,6 +67,8 @@ public class Robot extends LoggedRobot {
     this.controller.rightBumper().onFalse(this.intake.off());
     this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
     this.controller.b().onTrue(Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0)))));
+
+    this.addAutoModes();
   }
 
   /**
@@ -90,10 +93,19 @@ public class Robot extends LoggedRobot {
   public void autonomousInit() {
     Constants.UpdateSettings();
 
-    this.drive.resetPosition(Constants.STARTING_POSITIONS[Constants.alliance_position.getAsInt()]);
-
     CommandScheduler.getInstance().cancelAll();
-    CommandScheduler.getInstance().schedule(new PathPlannerAuto("New Auto"));
+    (switch (0) {
+      case 0:
+        yield new SequentialCommandGroup(
+          this.drive.swerveDrive(new Pose2d(2.0, 0.0, Rotation2d.fromDegrees(0))),
+          this.intake.intakeNote().raceWith(new WaitCommand(1.0)),
+          this.drive.swerveDrive(new Pose2d(2.1, 0.0, Rotation2d.fromDegrees(0))),
+          this.intake.off(),
+          this.drive.swerveDrive(new Pose2d(1.0, 0.0, Rotation2d.fromDegrees(90)))
+        );
+      default:
+        yield new SequentialCommandGroup();
+    }).schedule();
   }
 
   /**
@@ -102,6 +114,20 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     Constants.UpdateSettings();
+  }
+
+  private void addAutoModes() {
+    Object[] autoModes = Constants.STARTING_POSITIONS.keySet().toArray();
+
+    for (int i = 0; i < autoModes.length; i++) {
+      if (Constants.STARTING_POSITION.equals(autoModes[i])) {
+        Constants.positionChooser.setDefaultOption("[Auto - " + autoModes[i].toString() + "] (Default)", i);
+      } else {
+        Constants.positionChooser.addOption("[Auto - " + autoModes[i].toString() + "]", i);
+      }
+    }
+
+    SmartDashboard.putData(Constants.positionChooser);
   }
 
 //  @Override

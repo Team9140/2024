@@ -68,6 +68,7 @@ public class MoveCommand extends Command {
   public boolean isFinished() {
     // Subtract the target from the current position
     Transform2d diff = this.drive.getPosition().minus(new Pose2d(this.targetX, this.targetY, Rotation2d.fromRadians(this.targetTheta)));
+
     // Compare the difference to see if it is in an acceptable range (the error values)
     return Math.abs(diff.getX()) <= this.errorX
       && Math.abs(diff.getY()) <= this.errorY

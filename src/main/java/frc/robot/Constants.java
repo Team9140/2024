@@ -11,9 +11,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public final class Constants {
   public static final double LOOP_INTERVAL = 0.010;  // Periodic interval delay time FIXME: unknown units
@@ -61,9 +64,9 @@ public final class Constants {
 
 
     // PID values for the drive motor
-//    public static final double DRIVE_P = 0.1;
-//    public static final double DRIVE_I = 0.0;
-//    public static final double DRIVE_D = 0.0;
+    public static final double DRIVE_P = 0.1;
+    public static final double DRIVE_I = 0.0;
+    public static final double DRIVE_D = 0.0;
 
 
     // Electric current limits for the swerve modules
@@ -157,7 +160,7 @@ public final class Constants {
       // Won't actually be 0.0, origin will be when the arm is straight down
       public static final double INTAKE = 0.0; // FIXME: unknown units & values
       public static final double AMP = 0.0; // FIXME: unknown units & values
-      /* 
+      /*
        * UNDERHAND_SHOOT and OVERHAND_SHOOT are just for testing arm movement and shooting
        * wont actually be used in the final robot because set shooting positions will be replaced by photonvision aimbot
        */
@@ -174,24 +177,46 @@ public final class Constants {
 
   // Side of the field per-match
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
-  public static OptionalInt alliance_position = OptionalInt.empty();
 
-  public static final Pose2d[] STARTING_POSITIONS = {
-    new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)),  // Unknown
-    new Pose2d(613.1875, 47.3541, Rotation2d.fromDegrees(180)),  // Red1
-    new Pose2d(613.1875, 142.0625, Rotation2d.fromDegrees(180)),  // Red2
-    new Pose2d(613.1875, 236.7708, Rotation2d.fromDegrees(180)),  // Red3
-    new Pose2d(38.0625, 47.3541, Rotation2d.fromDegrees(0)),  // Blue1
-    new Pose2d(38.0625, 142.0625, Rotation2d.fromDegrees(0)),  // Blue2
-    new Pose2d(38.0625, 236.7708, Rotation2d.fromDegrees(0))  // Blue3
-  };
+  private static Pose2d start(double x, double y, double theta) {
+    return new Pose2d(x, y, Rotation2d.fromDegrees(theta));
+  }
+
+  public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
+  public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
+    // Blue Alliance
+    Map.entry("Amp Corner",                 start(1.4997,  7.401295403, 0)),
+    Map.entry("Amp-Side Speaker Corner",    start(1.2813,  6.445974092, 0)),
+    Map.entry("Speaker Center",             start(1.2813,  5.556972314, 0)),
+    Map.entry("Inward-Side Speaker Corner", start(1.2813,  4.667970536, 0)),
+    Map.entry("Field Center",               start(1.4997,  4.11480823,  0)),
+    Map.entry("Speaker-Side Bar Line",      start(1.4997,  3.309042418, 0)),
+    Map.entry("Opponent-Side Bar Line",     start(1.4997,  2.572440945, 0))
+  ));
+
+  public static Pose2d STARTING_POSITION = new Pose2d(0.0, 0.0, new Rotation2d(0.0));
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
-    Constants.alliance_position = DriverStation.getLocation();
 
-//    SmartDashboard.putString("Alliance", Constants.alliance.get().toString());
-//    SmartDashboard.putNumber("Position", Constants.alliance_position.getAsInt());
+    String positionString = Constants.STARTING_POSITIONS.keySet().toArray()[Constants.positionChooser.getSelected()].toString();
+    if (!Constants.STARTING_POSITIONS.containsKey(positionString)) {
+      Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(positionString);
+    } else {
+      System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");
+    }
+
+    if (Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red) {
+      Constants.STARTING_POSITION = start(
+        16.54 - Constants.STARTING_POSITION.getX(),
+        Constants.STARTING_POSITION.getY(),
+        Constants.STARTING_POSITION.getRotation().getDegrees() + 180
+      );
+    }
+
+    SmartDashboard.putString("Auto Starting Position", positionString);
+    SmartDashboard.putString("Alliance", Constants.alliance.get().toString());
+    SmartDashboard.putString("Auto Starting Coords", Constants.STARTING_POSITION.toString());
   }
 
 }

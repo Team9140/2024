@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -212,8 +211,8 @@ public class Drivetrain extends SubsystemBase {
     * Move the robot to a specified field-relative position.
     * @param target The target field-centric position on the field.
    **/
-  public void swerveDrive(Pose2d target) {
-    CommandScheduler.getInstance().schedule(new MoveCommand(target, Constants.MoveCommand.ERROR));
+  public Command swerveDrive(Pose2d target) {
+    return new MoveCommand(target, Constants.MoveCommand.ERROR);
   }
 
   /**
