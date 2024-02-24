@@ -147,11 +147,27 @@ public final class Constants {
   public static final double FRONT_INTAKE_NOTE_VOLTS = 6.0;
   public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
 
+
+
   public static class Launcher {
     public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
 
     public static final double POSITION_ERROR = 0.2;
     public static final double VELOCITY_ERROR = 0.2;
+    public static final double SHOOTER_RADIUS = 1.063;
+    public static final double TERMINAL_VELOCITY_ACCOUNTING = 0.1; //accounts for terminal velocity, probably no real need TODO: fine tune through testing
+
+    // Heights for aimbot
+    // TODO: fine tune speaker height for maximum variability resistance
+    public static final double SPEAKER_HEIGHT = 6.8;
+    public static final double JOINT_HEIGHT = 1.72283;
+
+    // The desired upward velocity of the note when it enters the speaker
+    // Higher values mean earlier entry and more upward, lower values mean more horizontal.
+    // Values close to 0 are likely to hit the front instead of going in.
+    public static final double ENTERING_SPEAKER_VELOCITY = 1.0;  // TODO: fine tune velocity through testing
+    public static final double ACCELERATION_GRAVITY = -32.17405;  // Acceleration of gravity ft/s^2
+
 
     public static class Positions {
       // Won't actually be 0.0, origin will be when the arm is straight down
