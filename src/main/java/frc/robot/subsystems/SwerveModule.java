@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder;
@@ -12,6 +13,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -37,24 +39,25 @@ public class SwerveModule extends SubsystemBase {
   private volatile double targetVelocity;
 
   /**
-    * Initializes one module for a swerve drive robot
-    * @param drivePort The port ID of the drive motor's controller
-    * @param turnPort The port ID of the rotation motor's controller
-    * @param kencoderOffset The initial offset value of the absolute encoder
-    * @param niceName Pretty name for easier debugging
+   * Initializes one module for a swerve drive robot
+   * @param drivePort The port ID of the drive motor's controller
+   * @param turnPort The port ID of the rotation motor's controller
+   * @param kencoderOffset The initial offset value of the absolute encoder
+   * @param niceName Pretty name for easier debugging
    **/
   public SwerveModule(int drivePort, int turnPort, double kencoderOffset, String niceName) {
     this.niceName = niceName;
 
     // TalonFX doesn't use RIO canbus, it uses its own
-    this.driveMotorLeader = new TalonFX(drivePort, "moe");
-    this.driveMotorLeader.setInverted(true);
+    this.driveMotorLeader = new TalonFX(drivePort, Constants.Ports.CTRE_CANBUS);
 
     // Enables FOC (15% extra power) FIXME: clarification needed
     this.driveMotorRequest = new VoltageOut(0).withEnableFOC(true);
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Drivetrain.DRIVE_CURRENT_LIMIT).withStatorCurrentLimitEnable(true);
     TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits);
     this.driveMotorLeader.getConfigurator().apply(driveMotorConfiguration);
+    this.driveMotorLeader.setInverted(true);
+    this.driveMotorLeader.setNeutralMode(NeutralModeValue.Brake);
 
     // Boilerplate configuration for the turn motor to prevent issues from arriving due to cached values
     this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
@@ -62,14 +65,18 @@ public class SwerveModule extends SubsystemBase {
     this.turnMotor.setInverted(true);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
     this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
+    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
     this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
+    this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
+    this.turnMotor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 60.0 / Constants.Drivetrain.TURN_GEAR_RATIO);
+    this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
 
     // Tool to convert requested velocity into voltage
     this.feedforward = new SimpleMotorFeedforward(Constants.Drivetrain.MODULE_S, Constants.Drivetrain.MODULE_V, Constants.Drivetrain.MODULE_A);
 
     // Configure PID values & configuration for rotation motor
     SparkPIDController turnPID = this.turnMotor.getPIDController();
-    turnPID.setFeedbackDevice(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle));
+    turnPID.setFeedbackDevice(this.turnMotor.getEncoder());
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(Constants.Drivetrain.PID_MIN_INPUT);
     turnPID.setPositionPIDWrappingMaxInput(Constants.Drivetrain.PID_MAX_INPUT);
@@ -87,7 +94,7 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-    * Routinely updates the target velocity & angle and sends debugging information to SmartDashboard
+   * Routinely updates the target velocity & angle and sends debugging information to SmartDashboard
    **/
   @Override
   public void periodic() {
@@ -105,14 +112,26 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(this.niceName + " target velocity", this.targetVelocity);
     SmartDashboard.putNumber(this.niceName + " turn current", this.turnMotor.getOutputCurrent());
     SmartDashboard.putNumber(this.niceName + " drive current", this.driveMotorLeader.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber(this.niceName + " turn encoder position", this.turnMotor.getEncoder().getPosition());
+    SmartDashboard.putNumber(this.niceName + " turn encoder position % 2pi", this.turnMotor.getEncoder().getPosition() % (2 * Math.PI));
+    SmartDashboard.putNumber(this.niceName + " drive meters per second", Units.inchesToMeters(this.driveMotorLeader.getVelocity().getValueAsDouble() / Constants.Drivetrain.DRIVE_GEAR_RATIO * Math.PI * Constants.Drivetrain.WHEEL_DIAMETER));
+  }
+
+  //  Gets best way to turn to an angle without doing an extra rotation
+  public static double bestTurn(double targetAngle, double currentPosition) {
+    double minimumTarget = Math.floor(currentPosition / (2 * Math.PI)) * 2 * Math.PI + targetAngle;  // Number of rotations converted to radians + target turn
+    double greatestTarget = minimumTarget + 2 * Math.PI;  // Subtract one rotation
+
+    // Return smallest difference angle
+    return Math.abs(minimumTarget - currentPosition) < Math.abs(greatestTarget - currentPosition) ? minimumTarget : greatestTarget;
   }
 
   /**
-    * Set the target module angle and velocity.
-    * @param state A SwerveModuleState object containing the requested values
+   * Set the target module angle and velocity.
+   * @param state A SwerveModuleState object containing the requested values
    **/
   public void setTarget(SwerveModuleState state) {
-    this.targetAngle = state.angle.getRadians();
+    this.targetAngle = bestTurn(state.angle.getRadians(), this.turnMotor.getEncoder().getPosition());
     this.targetVelocity = state.speedMetersPerSecond;
   }
 
@@ -125,24 +144,24 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-    * Gets the approximate 1-directional distance travelled.
-    * @return The distance in meters
+   * Gets the approximate 1-directional distance travelled.
+   * @return The distance in meters
    **/
   public double getPositionMeters() {
-    return this.driveMotorLeader.getPosition().getValueAsDouble() * Constants.Drivetrain.WHEEL_DIAMETER * Math.PI;
+    return this.driveMotorLeader.getPosition().getValueAsDouble() / Constants.Drivetrain.DRIVE_GEAR_RATIO * Constants.Drivetrain.WHEEL_DIAMETER * Math.PI;
   }
 
   /**
-    * Gets the swerve module rotation in radians.
-    * @return The swerve module rotation
+   * Gets the swerve module rotation in radians.
+   * @return The swerve module rotation
    **/
   public double getTurnAngle() {
-    return this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition();
+    return this.turnMotor.getEncoder().getPosition();
   }
 
   /**
-    * Gets information about the swerve module's current velocity and rotation.
-    * @return A SwerveModuleState object containing the velocity and rotational values
+   * Gets information about the swerve module's current velocity and rotation.
+   * @return A SwerveModuleState object containing the velocity and rotational values
    **/
   public SwerveModuleState getState() {
     return new SwerveModuleState(this.driveMotorLeader.getVelocity().getValueAsDouble(), new Rotation2d(getTurnAngle()));

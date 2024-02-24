@@ -72,7 +72,7 @@ public class Drivetrain extends SubsystemBase {
       this.swerveKinematics,
       Rotation2d.fromDegrees(this.gyro.getAngle()),
       this.getPositionArray(),
-      new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)) // Starting Position
+      new Pose2d(Constants.WIDTH / 2, Constants.LENGTH / 2, Rotation2d.fromDegrees(0)) // Starting Position
     );
 
     // FIXME: unclear
@@ -103,24 +103,23 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
+    * Reset the robot's field-relative position
+    * @param position The new offset/position of the robot
+   **/
+  public void resetPosition(Pose2d position) {
+    this.positionEstimator.resetPosition(
+      Rotation2d.fromDegrees(gyro.getAngle()),
+      this.getPositionArray(),
+      new Pose2d(position.getX() + Constants.WIDTH / 2, position.getY() + Constants.LENGTH / 2, position.getRotation())
+    );
+  }
+
+  /**
     * Returns the approximate field-relative position of the robot.
     * @return A Pose2d containing the robot's position state
    **/
   public Pose2d getPosition() {
     return this.positionEstimator.getEstimatedPosition();
-  }
-
-  /**
-    * Reset the robot's field-relative position
-    * @param position The new offset/position of the robot
-   **/
-  private void resetPosition(Pose2d position) {
-    this.positionEstimator.resetPosition(Rotation2d.fromDegrees(gyro.getAngle()), new SwerveModulePosition[] {
-      new SwerveModulePosition(this.frontLeft.getPositionMeters(), new Rotation2d(this.frontLeft.getTurnAngle())),
-      new SwerveModulePosition(this.frontRight.getPositionMeters(), new Rotation2d(this.frontRight.getTurnAngle())),
-      new SwerveModulePosition(this.backLeft.getPositionMeters(), new Rotation2d(this.backLeft.getTurnAngle())),
-      new SwerveModulePosition(this.backRight.getPositionMeters(), new Rotation2d(this.backRight.getTurnAngle())),
-    }, position);
   }
 
   /**
@@ -211,11 +210,10 @@ public class Drivetrain extends SubsystemBase {
 
   /**
     * Move the robot to a specified field-relative position.
-    * @param target The target position on the field.
+    * @param target The target field-centric position on the field.
    **/
   public void swerveDrive(Pose2d target) {
     CommandScheduler.getInstance().schedule(new MoveCommand(target, Constants.MoveCommand.ERROR));
-
   }
 
   private void updateVisionMeasurement(){
@@ -229,6 +227,15 @@ public class Drivetrain extends SubsystemBase {
   }
 
 
+  /**
+    *
+    * swerveDrive but with Bezier curves and such
+    * the better way to do things, but more complicated
+    * work on this later
+    *
+    * @param target The target field-centric position on the field.
+    *
+   **/
 //  public void swerveDrive(Pose2d target) {
 //    Command path = AutoBuilder.pathfindThenFollowPath(
 //      target,

@@ -32,8 +32,8 @@ public class MoveCommand extends Command {
     * @param error A Pose2d containing the acceptable error values
    **/
   public MoveCommand(Pose2d target, Pose2d error) {
-    this.forwardPID = new PIDController(Constants.MoveCommand.FORWARD_P, Constants.MoveCommand.FORWARD_I, Constants.MoveCommand.FORWARD_D);
-    this.horizontalPID = new PIDController(Constants.MoveCommand.HORIZONTAL_P, Constants.MoveCommand.HORIZONTAL_I, Constants.MoveCommand.HORIZONTAL_D);
+    this.forwardPID = new PIDController(Constants.MoveCommand.DRIVE_P, Constants.MoveCommand.DRIVE_I, Constants.MoveCommand.DRIVE_D);
+    this.horizontalPID = new PIDController(Constants.MoveCommand.DRIVE_P, Constants.MoveCommand.DRIVE_I, Constants.MoveCommand.DRIVE_D);
     this.rotationPID = new PIDController(Constants.MoveCommand.ROTATION_P, Constants.MoveCommand.ROTATION_I, Constants.MoveCommand.ROTATION_D);
     this.drive = Drivetrain.getInstance();
 
