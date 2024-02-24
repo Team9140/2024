@@ -86,6 +86,8 @@ public final class Constants {
     public static final int INPUT_CONTROLLER = 0;  // Xbox Controller
     public static final String CAMERA = "ProblemCamera";  // PhotonVision camera ID
 
+    public static final int CANDLEID = 5;
+
     // Ports for CANSparkMax motor controllers
     public static final int FRONT_LEFT_DRIVE = 1;
     public static final int FRONT_LEFT_TURN = 4;
@@ -157,7 +159,7 @@ public final class Constants {
       // Won't actually be 0.0, origin will be when the arm is straight down
       public static final double INTAKE = 0.0; // FIXME: unknown units & values
       public static final double AMP = 0.0; // FIXME: unknown units & values
-      /* 
+      /*
        * UNDERHAND_SHOOT and OVERHAND_SHOOT are just for testing arm movement and shooting
        * wont actually be used in the final robot because set shooting positions will be replaced by photonvision aimbot
        */
