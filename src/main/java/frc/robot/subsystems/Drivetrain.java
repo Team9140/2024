@@ -4,9 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -24,6 +22,7 @@ import frc.robot.commands.MoveCommand;
 import lib.swerve.SwerveKinematicLimits;
 import lib.swerve.SwerveSetpoint;
 import lib.swerve.SwerveSetpointGenerator;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
@@ -142,6 +141,7 @@ public class Drivetrain extends SubsystemBase {
    **/
   @Override
   public void periodic() {
+    this.updateVisionMeasurement();
     this.positionEstimator.update(
       Rotation2d.fromDegrees(gyro.getAngle()),
       this.getPositionArray()
@@ -217,6 +217,17 @@ public class Drivetrain extends SubsystemBase {
     CommandScheduler.getInstance().schedule(new MoveCommand(target, Constants.MoveCommand.ERROR));
 
   }
+
+  private void updateVisionMeasurement(){
+    PhotonPipelineResult result = PhotonVision.getInstance().getLatestResult();
+    if(result.hasTargets()){
+      double imageCaptureTime = result.getTimestampSeconds();
+      Transform3d cameraToTargetTransform = result.getBestTarget().getBestCameraToTarget();
+      Pose3d cameraPose = Constants.Camera.field.getTagPose(result.getBestTarget().getFiducialId()).get().transformBy(cameraToTargetTransform.inverse());
+      positionEstimator.addVisionMeasurement(cameraPose.transformBy(Constants.Camera.cameraToRobot).toPose2d(), imageCaptureTime);
+    }
+  }
+
 
 //  public void swerveDrive(Pose2d target) {
 //    Command path = AutoBuilder.pathfindThenFollowPath(
