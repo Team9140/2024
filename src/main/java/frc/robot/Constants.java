@@ -86,6 +86,8 @@ public final class Constants {
     public static final int INPUT_CONTROLLER = 0;  // Xbox Controller
     public static final String CAMERA = "ProblemCamera";  // PhotonVision camera ID
 
+    public static final int CANDLEID = 5;
+
     // Ports for CANSparkMax motor controllers
     public static final int FRONT_LEFT_DRIVE = 1;
     public static final int FRONT_LEFT_TURN = 4;

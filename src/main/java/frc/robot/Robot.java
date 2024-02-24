@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.Candle;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -22,6 +24,8 @@ public class Robot extends LoggedRobot {
   private Drivetrain drive;
 //  private PhotonVision camera;
   private Intake intake;
+
+  private Candle candleSystem = new Candle();
 
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
@@ -66,19 +70,33 @@ public class Robot extends LoggedRobot {
       );
     }, this.drive));
 
-    this.controller.rightBumper().onTrue(this.intake.intakeNote());
-    this.controller.rightBumper().onFalse(this.intake.off());
+    //Examples where animations are used when the intake is happening. Color defaults to red right now
+    InstantCommand intakeCommand = new InstantCommand(() -> {
+      // Start the intake process
+      this.intake.intakeNote();
+      // Change the animation to Rainbow
+      candleSystem.changeAnimation(Candle.AnimationTypes.Rainbow);
+    });
+
+    InstantCommand intakeOffCommand = new InstantCommand(() -> {
+      // Turn off the intake
+      this.intake.off();
+      // Set the animation to null once intake is done
+      candleSystem.changeAnimation(Candle.AnimationTypes.Empty);
+    });
+
+    this.controller.rightBumper().onTrue(intakeCommand);
+    this.controller.rightBumper().onFalse(intakeOffCommand);
     this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
     this.controller.b().onTrue(Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0)))));
   }
-
   /**
     * Routinely execute the currently scheduled command.
    **/
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-
+    candleSystem.periodic();
     // TODO: Replace this with a button that will auto-align against a target and then shoot the note
 //    if (controller.getHID().getBButton()) Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(180))));
 
