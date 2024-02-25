@@ -40,11 +40,11 @@ public class SwerveModule extends SubsystemBase {
   private volatile double targetVelocity;
 
   /**
-   * Initializes one module for a swerve drive robot
-   * @param drivePort The port ID of the drive motor's controller
-   * @param turnPort The port ID of the rotation motor's controller
-   * @param kencoderOffset The initial offset value of the absolute encoder
-   * @param niceName Pretty name for easier debugging
+    * Initializes one module for a swerve drive robot
+    * @param drivePort The port ID of the drive motor's controller
+    * @param turnPort The port ID of the rotation motor's controller
+    * @param kencoderOffset The initial offset value of the absolute encoder
+    * @param niceName Pretty name for easier debugging
    **/
   public SwerveModule(int drivePort, int turnPort, double kencoderOffset, String niceName) {
     this.niceName = niceName;
@@ -97,7 +97,7 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-   * Routinely updates the target velocity & angle and sends debugging information to SmartDashboard
+    * Routinely updates the target velocity & angle and sends debugging information to SmartDashboard
    **/
   @Override
   public void periodic() {
@@ -130,8 +130,8 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-   * Set the target module angle and velocity.
-   * @param state A SwerveModuleState object containing the requested values
+    * Set the target module angle and velocity.
+    * @param state A SwerveModuleState object containing the requested values
    **/
   public void setTarget(SwerveModuleState state) {
     this.targetAngle = bestTurn(state.angle.getRadians(), this.turnMotor.getEncoder().getPosition());
@@ -139,32 +139,32 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-   * Gets the full position and rotation of the swerve module.
-   * @return A SwerveModulePosition object containing the position and rotation values.
+    * Gets the full position and rotation of the swerve module.
+    * @return A SwerveModulePosition object containing the position and rotation values.
    **/
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(this.driveMotorLeader.getPosition().getValueAsDouble(), new Rotation2d(getTurnAngle()));
   }
 
   /**
-   * Gets the approximate 1-directional distance travelled.
-   * @return The distance in meters
+    * Gets the approximate 1-directional distance travelled.
+    * @return The distance in meters
    **/
   public double getPositionMeters() {
     return this.driveMotorLeader.getPosition().getValueAsDouble() / Constants.Drivetrain.DRIVE_GEAR_RATIO * Constants.Drivetrain.WHEEL_DIAMETER * Math.PI;
   }
 
   /**
-   * Gets the swerve module rotation in radians.
-   * @return The swerve module rotation
+    * Gets the swerve module rotation in radians.
+    * @return The swerve module rotation
    **/
   public double getTurnAngle() {
     return this.turnMotor.getEncoder().getPosition();
   }
 
   /**
-   * Gets information about the swerve module's current velocity and rotation.
-   * @return A SwerveModuleState object containing the velocity and rotational values
+    * Gets information about the swerve module's current velocity and rotation.
+    * @return A SwerveModuleState object containing the velocity and rotational values
    **/
   public SwerveModuleState getState() {
     return new SwerveModuleState(this.driveMotorLeader.getVelocity().getValueAsDouble(), new Rotation2d(getTurnAngle()));

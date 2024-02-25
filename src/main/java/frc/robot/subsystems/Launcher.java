@@ -73,46 +73,49 @@ public class Launcher extends SubsystemBase {
 
   /**
     * Sets the target angle of the launcher.
-    * @param angle the requested angle of the launcher, RADIANS.
+    * @param angle The requested angle in radians.
    **/
   public void setTargetAngle(double angle) {
     this.targetAngle = angle;
   }
 
+  /**
+    * Sets the target velocity of the launcher motors.
+    * @param velocity The requested velocity in radians per second.
+   **/
   public void setTargetShooterVelocity(double velocity) {
     this.targetShooterVelocity = velocity;
   }
 
   /**
-    * get the velocity in radians per second of the topShooterMotor
-    * @return the velocity of the TOP shooter motor.
+    * Get the rotational velocity of the top launcher motor.
+    * @return The velocity of the motor in radians per second.
    **/
   private double getTopShooterVelocity() {
     return this.topShooterMotor.getVelocity().getValue() * 2 * Math.PI;
   }
 
   /**
-   * get the velocity in radians per second of the bottomShooterMotor
-   * @return the velocity of the BOTTOM shooter motor.
+    * Get the rotational velocity of the bottom launcher motor.
+    * @return The velocity of the motor in radians per second.
    **/
   private double getBottomShooterVelocity() {
     return this.bottomShooterMotor.getVelocity().getValue() * 2 * Math.PI;
   }
 
   /**
-    * could use renaming
-    * calls velocity getters for shooters
-    * Ensures the shooter velocities are >= suitable shooting velocity
-    * @return if the shooters are ready
-   */
+    * Check if the velocity of the launcher motors are greater than or equal to the target velocity.
+    * @return if the shooters are ready.
+   **/
   private boolean shootersReady() {
     return (this.getTopShooterVelocity() - this.targetShooterVelocity) <= Constants.Launcher.VELOCITY_ERROR
       && (this.getBottomShooterVelocity() - this.targetShooterVelocity) <= Constants.Launcher.VELOCITY_ERROR;
   }
 
   /**
-    * @return whether the arm is ready to do the requested action, in terms of arm rotation
-   */
+    * Check if the arm has reached its target angle.
+    * @return A boolean representing if the arm is ready.
+   **/
   private boolean armReady() {
     return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Launcher.POSITION_ERROR;
   }
