@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -50,11 +51,13 @@ public class SwerveModule extends SubsystemBase {
 
     // TalonFX doesn't use RIO canbus, it uses its own
     this.driveMotorLeader = new TalonFX(drivePort, Constants.Ports.CTRE_CANBUS);
-
     // Enables FOC (15% extra power) FIXME: clarification needed
     this.driveMotorRequest = new VoltageOut(0).withEnableFOC(true);
+    this.driveMotorLeader.setPosition(0.0);
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Drivetrain.DRIVE_CURRENT_LIMIT).withStatorCurrentLimitEnable(true);
-    TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits);
+    // 1 / ((1 / GR) * Math.PI * Diameter) Solved on whiteboard photo in drive
+    FeedbackConfigs feedbackConfigs = new FeedbackConfigs().withSensorToMechanismRatio(Constants.Drivetrain.DRIVE_GEAR_RATIO / Units.inchesToMeters(Math.PI * Constants.Drivetrain.WHEEL_DIAMETER));
+    TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits).withFeedback(feedbackConfigs);
     this.driveMotorLeader.getConfigurator().apply(driveMotorConfiguration);
     this.driveMotorLeader.setInverted(true);
     this.driveMotorLeader.setNeutralMode(NeutralModeValue.Brake);
@@ -114,7 +117,7 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(this.niceName + " drive current", this.driveMotorLeader.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putNumber(this.niceName + " turn encoder position", this.turnMotor.getEncoder().getPosition());
     SmartDashboard.putNumber(this.niceName + " turn encoder position % 2pi", this.turnMotor.getEncoder().getPosition() % (2 * Math.PI));
-    SmartDashboard.putNumber(this.niceName + " drive meters per second", Units.inchesToMeters(this.driveMotorLeader.getVelocity().getValueAsDouble() / Constants.Drivetrain.DRIVE_GEAR_RATIO * Math.PI * Constants.Drivetrain.WHEEL_DIAMETER));
+    SmartDashboard.putNumber(this.niceName + " drive meters per second", this.driveMotorLeader.getVelocity().getValueAsDouble());
   }
 
   //  Gets best way to turn to an angle without doing an extra rotation
@@ -140,7 +143,7 @@ public class SwerveModule extends SubsystemBase {
    * @return A SwerveModulePosition object containing the position and rotation values.
    **/
   public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(this.getPositionMeters(), new Rotation2d(getTurnAngle()));
+    return new SwerveModulePosition(this.driveMotorLeader.getPosition().getValueAsDouble(), new Rotation2d(getTurnAngle()));
   }
 
   /**
