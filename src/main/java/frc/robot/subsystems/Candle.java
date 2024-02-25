@@ -36,6 +36,7 @@ public class Candle extends SubsystemBase {
   public void setPatternDuration(int r, int g, int b) {
     candle.setLEDs(r, g, b);
   }
+  
   public void turnOff(){
     candle.setLEDs(0, 0, 0);
   }
