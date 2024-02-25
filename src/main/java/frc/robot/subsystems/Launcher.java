@@ -120,7 +120,5 @@ public class Launcher extends SubsystemBase {
     return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Launcher.POSITION_ERROR;
   }
 
-  /*
-   *  TODO: methods for each shot position
-   */
+  // TODO: methods for each shot position
 }
