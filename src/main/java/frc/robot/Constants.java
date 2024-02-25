@@ -64,9 +64,9 @@ public final class Constants {
 
 
     // PID values for the drive motor
-    public static final double DRIVE_P = 0.1;
+    public static final double DRIVE_P = 6.6544;
     public static final double DRIVE_I = 0.0;
-    public static final double DRIVE_D = 0.0;
+    public static final double DRIVE_D = 4.833;
 
 
     // Electric current limits for the swerve modules
