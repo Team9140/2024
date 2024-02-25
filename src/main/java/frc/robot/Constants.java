@@ -143,6 +143,9 @@ public final class Constants {
 //    }
   }
 
+  public static final int CANDLE_LEDS_PER_ANIMATION = 30;  // FIXME: Placeholder value
+  public static final double CANDLE_BRIGHTNESS = 1.0;
+
   // Electric current limits for intake motors
   public static final int FRONT_INTAKE_CURRENT_LIMIT = 15;
   public static final int BACK_INTAKE_CURRENT_LIMIT = 25;
