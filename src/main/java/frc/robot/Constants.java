@@ -157,20 +157,18 @@ public final class Constants {
 
     public static class Positions {
       // Won't actually be 0.0, origin will be when the arm is straight down
-      public static final double INTAKE = 0.0; // FIXME: unknown units & values
-      public static final double AMP = 0.0; // FIXME: unknown units & values
-      /*
-       * UNDERHAND_SHOOT and OVERHAND_SHOOT are just for testing arm movement and shooting
-       * wont actually be used in the final robot because set shooting positions will be replaced by photonvision aimbot
-       */
-      public static final double UNDERHAND_SHOOT = 0.0; // FIXME: unknown units & values
-      public static final double OVERHAND_SHOOT = 0.0; // FIXME: unknown units & values
+      public static final double INTAKE = 0.0;  // FIXME: unknown units & value
+      public static final double AMP = 0.0;  // FIXME: unknown units & value
 
+
+      // Values for testing arm movement. Set positions will be replaced with photonvision aimbot.
+      public static final double UNDERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
+      public static final double OVERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
     }
 
     public static class Velocities {
-      public static final double GRAB = 0.0;  // FIXME: unknown units & values
-      public static final double SHOOT = 0.0;  // FIXME: unknown units & values
+      public static final double GRAB = 0.0;  // FIXME: unknown units & value
+      public static final double SHOOT = 0.0;  // FIXME: unknown units & value
     }
   }
 
