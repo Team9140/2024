@@ -23,6 +23,7 @@ public class Launcher extends SubsystemBase {
   private final CANSparkMax feederMotor;  // Red motor
 
   private final MotionMagicExpoTorqueCurrentFOC armMotionMagic;
+  private final MotionMagicVelocityVoltage shooterMotionMagic;
   // private final Motion TODO: which motion magic to use for shooters
 
   private Launcher() {
@@ -49,6 +50,8 @@ public class Launcher extends SubsystemBase {
 //     other constructor: MotionMagicExpoTorqueCurrentFOC​(double Position, double FeedForward, int Slot, boolean OverrideCoastDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
     this.armMotionMagic = new MotionMagicExpoTorqueCurrentFOC(0);
     this.armMotionMagic.UpdateFreqHz = 1000.0;
+    this.shooterMotionMagic = new MotionMagicVelocityVoltage(0) //parameter is velocity
+    this.shooterMotionMagic.UpdateFreqHz = 1000.0;
   }
 
   /**
@@ -62,8 +65,9 @@ public class Launcher extends SubsystemBase {
   @Override
   public void periodic(){
     this.armMotor.setControl(this.armMotionMagic.withPosition(this.targetAngle).withSlot(0));
-//    this.topShooterMotor.setVoltage(voltage);
-//    this.bottomShooterMotor.setVoltage(voltage);
+
+    // FIXME: feedforward is constant or changes?
+    this.topShooterMotor.setControl(this.shooterMotionMagic.withVelocity(this.targetShooterVelocity).withFeedForward(URMUM).withSlot(0));
 
     // if the shooters are at shooting speed and the angle is reasonable, turn on feeder motor to give note to the launcher
 //    if (shootersReady() && armReady()) {
@@ -120,5 +124,17 @@ public class Launcher extends SubsystemBase {
     return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Launcher.POSITION_ERROR;
   }
 
-  // TODO: methods for each shot position
+  // methods for each shot position for cleaner code in robot.java
+  public void setIntake(){
+    this.setTargetAngle(Constants.Launcher.Positions.INTAKE);
+  }
+  public void setOverhandShoot(){
+    this.setTargetAngle(Constants.Launcher.Positions.OVERHAND_SHOOT);
+  }
+  public void setUnderhandShoot(){
+    this.setTargetAngle(Constants.Launcher.Positions.UNDERHAND_SHOOT);
+  }
+  public void setAmp(){
+    this.setTargetAngle(Constants.Launcher.Positions.AMP);
+  }
 }
