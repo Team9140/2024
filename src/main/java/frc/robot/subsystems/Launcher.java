@@ -24,7 +24,6 @@ public class Launcher extends SubsystemBase {
 
   private final MotionMagicExpoTorqueCurrentFOC armMotionMagic;
   private final MotionMagicVelocityVoltage shooterMotionMagic;
-  // private final Motion TODO: which motion magic to use for shooters
 
   private Launcher() {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
