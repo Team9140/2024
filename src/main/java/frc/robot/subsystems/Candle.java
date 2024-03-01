@@ -10,6 +10,8 @@ public class Candle extends SubsystemBase {
 
   private Animation toAnimate = null;
 
+  private boolean isLedNotAnimated = false; // variable that checks if a LED action that is not an animation is occurring
+
   // Different types of animations
   public static enum AnimationTypes {
     ColorFlow,
@@ -33,15 +35,18 @@ public class Candle extends SubsystemBase {
     this.candle.configAllSettings(config);
   }
 
-  public void setPatternDuration(int r, int g, int b) {
+  public void setColor(int r, int g, int b) {
+    isLedNotAnimated = true;
     candle.setLEDs(r, g, b);
   }
   
   public void turnOff(){
+    isLedNotAnimated = true;
     candle.setLEDs(0, 0, 0);
   }
 
   public void changeAnimation(AnimationTypes animation) {
+    isLedNotAnimated = false;
     switch (animation) {
       default:
       case Empty:
@@ -82,6 +87,9 @@ public class Candle extends SubsystemBase {
     if (this.toAnimate != null) {
       // Play set animation
       this.candle.animate(this.toAnimate);
+
+    } else if (isLedNotAnimated){
+      // do nothing the LED color is set to a color or turned off
     } else if (Constants.alliance.isPresent() && Constants.alliance.get().equals(DriverStation.Alliance.Red)) {
       // Red alliance color
       this.candle.setLEDs(255,0,0);
