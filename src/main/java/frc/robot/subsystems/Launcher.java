@@ -1,11 +1,14 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -20,7 +23,7 @@ public class Launcher extends SubsystemBase {
   private final TalonFX armMotor;  // Kraken for moving arm position
   private final TalonFX bottomShooterMotor;  // Kraken for bottom roller
   private final TalonFX topShooterMotor;  // Kraken for top roller
-  private final CANSparkMax feederMotor;  // Red motor
+  private final TalonSRX feederMotor;  // Red motor
 
   private final MotionMagicExpoTorqueCurrentFOC armMotionMagic;
   private final MotionMagicVelocityVoltage shooterMotionMagic;
@@ -29,7 +32,7 @@ public class Launcher extends SubsystemBase {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
     this.bottomShooterMotor = new TalonFX(Constants.Ports.BOTTOM_SHOOTER, Constants.Ports.CTRE_CANBUS);
     this.topShooterMotor = new TalonFX(Constants.Ports.TOP_SHOOTER, Constants.Ports.CTRE_CANBUS);
-    this.feederMotor = new CANSparkMax(Constants.Ports.ARM_FEEDER, CANSparkLowLevel.MotorType.kBrushed);
+    this.feederMotor = new TalonSRX(Constants.Ports.FEEDER_PORT);
 
     TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
     this.topShooterMotor.getConfigurator().apply(shooterMotorConfig);
@@ -49,7 +52,7 @@ public class Launcher extends SubsystemBase {
 //     other constructor: MotionMagicExpoTorqueCurrentFOC​(double Position, double FeedForward, int Slot, boolean OverrideCoastDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
     this.armMotionMagic = new MotionMagicExpoTorqueCurrentFOC(0);
     this.armMotionMagic.UpdateFreqHz = 1000.0;
-    this.shooterMotionMagic = new MotionMagicVelocityVoltage(0) //parameter is velocity
+    this.shooterMotionMagic = new MotionMagicVelocityVoltage(0); //parameter is velocity
     this.shooterMotionMagic.UpdateFreqHz = 1000.0;
   }
 
@@ -66,7 +69,7 @@ public class Launcher extends SubsystemBase {
     this.armMotor.setControl(this.armMotionMagic.withPosition(this.targetAngle).withSlot(0));
 
     // FIXME: feedforward is constant or changes?
-    this.topShooterMotor.setControl(this.shooterMotionMagic.withVelocity(this.targetShooterVelocity).withFeedForward(URMUM).withSlot(0));
+    this.topShooterMotor.setControl(this.shooterMotionMagic.withVelocity(this.targetShooterVelocity).withFeedForward(0).withSlot(0));
 
     // if the shooters are at shooting speed and the angle is reasonable, turn on feeder motor to give note to the launcher
 //    if (shootersReady() && armReady()) {
@@ -121,6 +124,16 @@ public class Launcher extends SubsystemBase {
    **/
   private boolean armReady() {
     return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Launcher.POSITION_ERROR;
+  }
+
+  //FIXME: rename me
+  public Command checkStartFeederMotorIfReady() {
+    return this.run(() -> {
+      if (shootersReady() && armReady()) {
+        // TODO: figure out how to use talonSRX
+        // TODO: turns on kicker motor?
+      }
+    });
   }
 
   // methods for each shot position for cleaner code in robot.java
