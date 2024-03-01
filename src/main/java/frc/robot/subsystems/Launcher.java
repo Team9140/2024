@@ -119,4 +119,21 @@ public class Launcher extends SubsystemBase {
   private boolean armReady() {
     return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Launcher.POSITION_ERROR;
   }
+
+  /**
+    * Aim the launcher at the speaker and shoot a note
+    * @param distance The distance of the speaker from the robot
+   **/
+  private void speakerAimBot(double distance) {
+    double relativeHeight = Constants.Launcher.SPEAKER_HEIGHT - Constants.Launcher.JOINT_HEIGHT;
+
+    double vVertical = Math.sqrt(Constants.Launcher.ENTERING_SPEAKER_VELOCITY * Constants.Launcher.ENTERING_SPEAKER_VELOCITY
+                                + 2 * Constants.Launcher.ACCELERATION_GRAVITY * relativeHeight);
+    double vHorizontal = (distance * Constants.Launcher.ACCELERATION_GRAVITY) / (vVertical - Constants.Launcher.ENTERING_SPEAKER_VELOCITY);
+
+    double vTotal = Math.sqrt(vVertical*vVertical + vHorizontal*vHorizontal) + Constants.Launcher.TERMINAL_VELOCITY_ACCOUNTING;
+
+    this.targetShooterVelocity = vTotal / (Constants.Launcher.SHOOTER_RADIUS * 2 * Math.PI);
+    this.targetAngle = Math.atan2(vVertical, vHorizontal);
+  }
 }
