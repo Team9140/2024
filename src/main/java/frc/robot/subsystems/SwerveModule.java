@@ -22,20 +22,20 @@ import frc.robot.Constants;
 
 public class SwerveModule extends SubsystemBase {
   // Various motors FIXME: clarification needed
-  private TalonFX driveMotor;
+  private final TalonFX driveMotor;
   private PIDController driveMotorPID;
 
   // Allows full use of 15% power FIXME: clarification needed
-  private VoltageOut driveMotorRequest;
+  private final VoltageOut driveMotorRequest;
 
   // Controller for the rotation motor
-  private CANSparkMax turnMotor;
+  private final CANSparkMax turnMotor;
 
   // For making SmartDashboard values easily discernible
-  private String niceName;
+  private final String niceName;
 
   // Used to calculate velocity to voltage
-  private SimpleMotorFeedforward feedforward;
+  private final SimpleMotorFeedforward feedforward;
 
   // The requested target angle and velocity of the swerve module
   private volatile double targetAngle;
