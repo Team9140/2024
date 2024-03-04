@@ -167,7 +167,6 @@ public final class Constants {
       // Values for testing arm movement. Set positions will be replaced with photonvision aimbot.
       public static final double UNDERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
       public static final double OVERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
-
     }
 
     public static class Velocities {
