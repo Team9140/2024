@@ -8,7 +8,7 @@ import frc.robot.Constants;
 public class Candle extends SubsystemBase {
   private final CANdle candle = new CANdle(Constants.Ports.CANDLEID, Constants.Ports.CTRE_CANBUS);
 
-  private Animation toAnimate = null;
+  private Animation toAnimate;
 
   private boolean isLedNotAnimated = false; // variable that checks if a LED action that is not an animation is occurring
 
@@ -87,8 +87,7 @@ public class Candle extends SubsystemBase {
     if (this.toAnimate != null) {
       // Play set animation
       this.candle.animate(this.toAnimate);
-
-    } else if (isLedNotAnimated){
+    } else if (isLedNotAnimated) {
       // do nothing the LED color is set to a color or turned off
     } else if (Constants.alliance.isPresent() && Constants.alliance.get().equals(DriverStation.Alliance.Red)) {
       // Red alliance color
