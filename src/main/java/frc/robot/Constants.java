@@ -24,6 +24,9 @@ public final class Constants {
   public static final double WHEEL_BASE = Units.inchesToMeters(20.75);  // Front-to-back distance between wheels
   public static final double scoringRange = 120.0;  // FIXME: Unknown
 
+  // Full field length
+  public static final double FIELD_LENGTH = 16.54;  // The length of the field in meters
+
   // Full-body dimensions
   public static final int WIDTH = 29;  // Inches, side-to-side width
   public static final int LENGTH = 29;  // Inches, front-to-back length
@@ -192,20 +195,26 @@ public final class Constants {
   // Side of the field per-match
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
 
-  private static Pose2d start(double x, double y, double theta) {
+  private static Pose2d pose(double x, double y, double theta) {
     return new Pose2d(x, y, Rotation2d.fromDegrees(theta));
+  }
+
+  public static Pose2d allianceBasedPosition(Pose2d position) {
+    return (Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red)
+      ? pose(FIELD_LENGTH - position.getX(), position.getY(), position.getRotation().getDegrees() + 180)
+      : position;
   }
 
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
   public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
     // Blue Alliance
-    Map.entry("Amp Corner",                 start(1.4997,  7.401295403, 0)),
-    Map.entry("Amp-Side Speaker Corner",    start(1.2813,  6.445974092, 0)),
-    Map.entry("Speaker Center",             start(1.2813,  5.556972314, 0)),
-    Map.entry("Inward-Side Speaker Corner", start(1.2813,  4.667970536, 0)),
-    Map.entry("Field Center",               start(1.4997,  4.11480823,  0)),
-    Map.entry("Speaker-Side Bar Line",      start(1.4997,  3.309042418, 0)),
-    Map.entry("Opponent-Side Bar Line",     start(1.4997,  2.572440945, 0))
+    Map.entry("Amp Corner",                 pose(1.4997,  7.401295403, 0)),
+    Map.entry("Amp-Side Speaker Corner",    pose(1.2813,  6.445974092, 0)),
+    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
+    Map.entry("Inward-Side Speaker Corner", pose(1.2813,  4.667970536, 0)),
+    Map.entry("Field Center",               pose(1.4997,  4.11480823,  0)),
+    Map.entry("Speaker-Side Bar Line",      pose(1.4997,  3.309042418, 0)),
+    Map.entry("Opponent-Side Bar Line",     pose(1.4997,  2.572440945, 0))
   ));
 
   public static Pose2d STARTING_POSITION = new Pose2d(0.0, 0.0, new Rotation2d(0.0));
@@ -213,23 +222,19 @@ public final class Constants {
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
 
-    String positionString = Constants.STARTING_POSITIONS.keySet().toArray()[Constants.positionChooser.getSelected()].toString();
-    if (!Constants.STARTING_POSITIONS.containsKey(positionString)) {
-      Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(positionString);
-    } else {
-      System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");
+    Integer position = Constants.positionChooser.getSelected();
+    if (position != null) {
+      String positionString = Constants.STARTING_POSITIONS.keySet().toArray()[position].toString();
+      if (!Constants.STARTING_POSITIONS.containsKey(positionString)) {
+        Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(positionString);
+      } else {
+        System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");
+      }
+      SmartDashboard.putString("Auto Starting Position", positionString);
     }
 
-    if (Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red) {
-      Constants.STARTING_POSITION = start(
-        16.54 - Constants.STARTING_POSITION.getX(),
-        Constants.STARTING_POSITION.getY(),
-        Constants.STARTING_POSITION.getRotation().getDegrees() + 180
-      );
-    }
 
-    SmartDashboard.putString("Auto Starting Position", positionString);
-    SmartDashboard.putString("Alliance", Constants.alliance.get().toString());
+    SmartDashboard.putString("Alliance", Constants.alliance.isPresent() ? Constants.alliance.get().toString() : "None");
     SmartDashboard.putString("Auto Starting Coords", Constants.STARTING_POSITION.toString());
   }
 

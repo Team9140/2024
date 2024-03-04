@@ -8,6 +8,7 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -101,11 +102,11 @@ public class Robot extends LoggedRobot {
     (switch (0) {
       case 0:
         yield new SequentialCommandGroup(
-          this.drive.swerveDrive(new Pose2d(2.0, 0.0, Rotation2d.fromDegrees(0))),
+          this.drive.swerveDrive(new Transform2d(2.0, 0.0, Rotation2d.fromDegrees(0))),
           this.intake.intakeNote().raceWith(new WaitCommand(1.0)),
-          this.drive.swerveDrive(new Pose2d(2.1, 0.0, Rotation2d.fromDegrees(0))),
+          this.drive.swerveDrive(new Transform2d(2.1, 0.0, Rotation2d.fromDegrees(0))),
           this.intake.off(),
-          this.drive.swerveDrive(new Pose2d(1.0, 0.0, Rotation2d.fromDegrees(90)))
+          this.drive.swerveDrive(new Transform2d(1.0, 0.0, Rotation2d.fromDegrees(90)))
         );
       default:
         yield new SequentialCommandGroup();
@@ -121,17 +122,18 @@ public class Robot extends LoggedRobot {
   }
 
   private void addAutoModes() {
-    Object[] autoModes = Constants.STARTING_POSITIONS.keySet().toArray();
+    Object[] startingPositions = Constants.STARTING_POSITIONS.keySet().toArray();
 
-    for (int i = 0; i < autoModes.length; i++) {
-      if (Constants.STARTING_POSITION.equals(autoModes[i])) {
-        Constants.positionChooser.setDefaultOption("[Auto - " + autoModes[i].toString() + "] (Default)", i);
+    for (int i = 0; i < startingPositions.length; i++) {
+      if (Constants.STARTING_POSITION.equals(startingPositions[i])) {
+        Constants.positionChooser.setDefaultOption("[Auto - " + startingPositions[i].toString() + "] (Default)", i);
       } else {
-        Constants.positionChooser.addOption("[Auto - " + autoModes[i].toString() + "]", i);
+        Constants.positionChooser.addOption("[Auto - " + startingPositions[i].toString() + "]", i);
       }
     }
 
     SmartDashboard.putData(Constants.positionChooser);
+  }
 
   @Override
   public void simulationInit() {
@@ -143,8 +145,8 @@ public class Robot extends LoggedRobot {
     this.teleopPeriodic();
   }
 
-//  @Override
-//  public void testInit() {
-//    CommandScheduler.getInstance().cancelAll();
-//  }
+  @Override
+  public void testInit() {
+    CommandScheduler.getInstance().cancelAll();
+  }
 }

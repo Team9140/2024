@@ -1,12 +1,12 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -29,10 +29,10 @@ public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
   private final ADIS16470_IMU gyro = new ADIS16470_IMU();
 
-  private static SwerveModule frontLeft;
-  private static SwerveModule frontRight;
-  private static SwerveModule backLeft;
-  private static SwerveModule backRight;
+  private final SwerveModule frontLeft;
+  private final SwerveModule frontRight;
+  private final SwerveModule backLeft;
+  private final SwerveModule backRight;
 
   private final static Translation2d[] modulePositions = {
     new Translation2d(Units.inchesToMeters(8.625), Units.inchesToMeters(11.875)),  // Front Left
@@ -44,7 +44,7 @@ public class Drivetrain extends SubsystemBase {
   // Set the maximum movement limits for robot kinematics
   private final SwerveKinematicLimits limits = new SwerveKinematicLimits(Constants.Drivetrain.METERS_PER_SECOND, Constants.Drivetrain.ACCELERATION, Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND);
 
-  public static SwerveDriveKinematics swerveKinematics;
+  public final SwerveDriveKinematics swerveKinematics;
   private final SwerveDrivePoseEstimator positionEstimator;
   private SwerveSetpoint prevSetpoint;
 
@@ -211,9 +211,19 @@ public class Drivetrain extends SubsystemBase {
   /**
     * Move the robot to a specified field-relative position.
     * @param target The target field-centric position on the field.
+    * @return A command that moves the robot
    **/
   public Command swerveDrive(Pose2d target) {
-    return new MoveCommand(target, Constants.MoveCommand.ERROR);
+    return new MoveCommand(Constants.allianceBasedPosition(target), Constants.MoveCommand.ERROR);
+  }
+
+  /**
+    * Move the robot relative to its current field position
+    * @param target The target relative translation
+    * @return A command that moves the robot
+   **/
+  public Command swerveDrive(Transform2d target) {
+    return new MoveCommand(this.getPosition().transformBy(target), Constants.MoveCommand.ERROR);
   }
 
   /**
