@@ -75,14 +75,14 @@ public class Robot extends LoggedRobot {
       // Start the intake process
       this.intake.intakeNote();
       // Change the animation to Rainbow
-      candleSystem.changeAnimation(Candle.AnimationTypes.Rainbow);
+      candleSystem.changeAnimation(Candle.AnimationTypes.Rainbow, Constants.CANDLE_DURATION);
     });
 
     InstantCommand intakeOffCommand = new InstantCommand(() -> {
       // Turn off the intake
       this.intake.off();
       // Set the animation to null once intake is done
-      candleSystem.changeAnimation(Candle.AnimationTypes.Empty);
+      candleSystem.changeAnimation(Candle.AnimationTypes.Empty, Constants.CANDLE_DURATION);
     });
 
     this.controller.rightBumper().onTrue(intakeCommand);

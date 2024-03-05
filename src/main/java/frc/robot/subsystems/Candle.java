@@ -3,14 +3,15 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.led.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 
 public class Candle extends SubsystemBase {
   private final CANdle candle = new CANdle(Constants.Ports.CANDLEID, Constants.Ports.CTRE_CANBUS);
 
   private Animation toAnimate;
-
-  private boolean isLedNotAnimated = false; // variable that checks if a LED action that is not an animation is occurring
+  private double animationDuration;
+  private boolean isLedAnimated; // variable that checks if a LED action that is not an animation is occurring
 
   // Different types of animations
   public static enum AnimationTypes {
@@ -27,7 +28,7 @@ public class Candle extends SubsystemBase {
   }
 
   public Candle() {
-    this.changeAnimation(AnimationTypes.Empty);
+    this.changeAnimation(AnimationTypes.Empty, 0);
 
     CANdleConfiguration config = new CANdleConfiguration();
     config.stripType = CANdle.LEDStripType.GRB;
@@ -36,17 +37,26 @@ public class Candle extends SubsystemBase {
   }
 
   public void setColor(int r, int g, int b) {
-    isLedNotAnimated = true;
+    isLedAnimated = true;
     candle.setLEDs(r, g, b);
   }
-  
+
+  public void setColor(int r, int g, int b, double duration){
+    isLedAnimated=true;
+    candle.setLEDs(r, g, b);
+    new WaitCommand(duration);
+    changeAnimation(AnimationTypes.Empty, 0);
+    isLedAnimated=false;
+  }
+
   public void turnOff(){
-    isLedNotAnimated = true;
+    isLedAnimated = true;
     candle.setLEDs(0, 0, 0);
   }
 
-  public void changeAnimation(AnimationTypes animation) {
-    isLedNotAnimated = false;
+  public void changeAnimation(AnimationTypes animation, double duration) {
+    isLedAnimated = false;
+    animationDuration = duration;
     switch (animation) {
       default:
       case Empty:
@@ -85,9 +95,16 @@ public class Candle extends SubsystemBase {
   @Override
   public void periodic() {
     if (this.toAnimate != null) {
-      // Play set animation
-      this.candle.animate(this.toAnimate);
-    } else if (isLedNotAnimated) {
+      if(animationDuration==0) {
+        // Play set animation
+        this.candle.animate(this.toAnimate);
+      }
+      else{
+        this.candle.animate(this.toAnimate);
+        new WaitCommand(animationDuration);
+        animationDuration=0;
+      }
+    } else if (isLedAnimated) {
       // do nothing the LED color is set to a color or turned off
     } else if (Constants.alliance.isPresent() && Constants.alliance.get().equals(DriverStation.Alliance.Red)) {
       // Red alliance color
