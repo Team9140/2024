@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.led.*;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
@@ -37,16 +38,20 @@ public class Candle extends SubsystemBase {
   }
 
   public void setColor(int r, int g, int b) {
+    changeAnimation(AnimationTypes.Empty, 0);
     isLedAnimated = true;
     candle.setLEDs(r, g, b);
   }
 
-  public void setColor(int r, int g, int b, double duration){
-    isLedAnimated=true;
-    candle.setLEDs(r, g, b);
-    new WaitCommand(duration);
+  public void setColor(int r, int g, int b, double duration) {
     changeAnimation(AnimationTypes.Empty, 0);
-    isLedAnimated=false;
+    isLedAnimated = true;
+    candle.setLEDs(r, g, b);
+    // Create a WaitCommand with the specified duration
+    WaitCommand waitCommand = new WaitCommand(duration);
+    CommandScheduler.getInstance().schedule(waitCommand);
+    waitCommand.andThen(() -> changeAnimation(AnimationTypes.Empty, 0));
+    isLedAnimated = false;
   }
 
   public void turnOff(){
@@ -101,8 +106,9 @@ public class Candle extends SubsystemBase {
       }
       else{
         this.candle.animate(this.toAnimate);
-        new WaitCommand(animationDuration);
-        animationDuration=0;
+        WaitCommand waitCommand = new WaitCommand(animationDuration);
+        CommandScheduler.getInstance().schedule(waitCommand);
+        waitCommand.andThen(() -> changeAnimation(AnimationTypes.Empty, 0));
       }
     } else if (isLedAnimated) {
       // do nothing the LED color is set to a color or turned off
