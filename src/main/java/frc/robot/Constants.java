@@ -165,7 +165,7 @@ public final class Constants {
     }
 
     public static class Velocities {
-      public static final double GRAB = 0.0;  // FIXME: unknown units & value
+      public static final double INTAKE = 0.0;  // FIXME: unknown units & value
       public static final double SHOOT = 0.0;  // FIXME: unknown units & value
     }
   }

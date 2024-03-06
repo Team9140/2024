@@ -6,8 +6,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -32,7 +30,7 @@ public class Launcher extends SubsystemBase {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
     this.bottomShooterMotor = new TalonFX(Constants.Ports.BOTTOM_SHOOTER, Constants.Ports.CTRE_CANBUS);
     this.topShooterMotor = new TalonFX(Constants.Ports.TOP_SHOOTER, Constants.Ports.CTRE_CANBUS);
-    this.feederMotor = new TalonSRX(Constants.Ports.FEEDER_PORT);
+    this.feederMotor = new TalonSRX(Constants.Ports.ARM_FEEDER);
 
     TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
     this.topShooterMotor.getConfigurator().apply(shooterMotorConfig);
@@ -148,5 +146,13 @@ public class Launcher extends SubsystemBase {
   }
   public void setAmp(){
     this.setTargetAngle(Constants.Launcher.Positions.AMP);
+  }
+
+  // methods for turning shooters in shooting direction and intaking direction
+  public void intakeNote(){
+    this.setTargetShooterVelocity(Constants.Launcher.Velocities.INTAKE);
+  }
+  public void shootNote(){
+    this.setTargetShooterVelocity(Constants.Launcher.Velocities.SHOOT);
   }
 }
