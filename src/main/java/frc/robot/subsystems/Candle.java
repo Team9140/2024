@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 
 public class Candle extends SubsystemBase {
-  private final CANdle candle = new CANdle(Constants.Ports.CANDLEID, Constants.Ports.CTRE_CANBUS);
+  private final CANdle candle = new CANdle(Constants.Ports.CANDLE, Constants.Ports.CTRE_CANBUS);
 
   private Animation toAnimate;
   private double animationDuration;
