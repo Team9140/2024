@@ -10,6 +10,7 @@ import frc.robot.Constants;
 public class Candle extends SubsystemBase {
   private final CANdle candle = new CANdle(Constants.Ports.CANDLEID, Constants.Ports.CTRE_CANBUS);
 
+  private static Candle instance;
   private Animation toAnimate;
   private double animationDuration;
   private boolean isLedAnimated; // variable that checks if a LED action that is not an animation is occurring
@@ -27,8 +28,10 @@ public class Candle extends SubsystemBase {
     TwinkleOff,
     Empty
   }
-
-  public Candle() {
+  public static Candle getInstance() {
+    return Candle.instance == null ? Candle.instance = new Candle() : Candle.instance;
+  }
+  private Candle() {
     this.changeAnimation(AnimationTypes.Empty, 0);
 
     CANdleConfiguration config = new CANdleConfiguration();
