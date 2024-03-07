@@ -70,6 +70,7 @@ public class Launcher extends SubsystemBase {
             .withKI(Constants.Launcher.Arm.I)
             .withKD(Constants.Launcher.Arm.D);
     TalonFXConfiguration armMotorConfig = new TalonFXConfiguration()
+            .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
             .withTorqueCurrent(armCurrentLimits)
             .withFeedback(armFeedbackConfigs)
             .withSlot0(armMotorGains);
