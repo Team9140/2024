@@ -1,11 +1,13 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -13,9 +15,7 @@ import frc.robot.Constants;
 public class Launcher extends SubsystemBase {
   private static Launcher instance;
   private double targetAngle;  // Target radians for the arm to be moved to
-  private double targetShooterVelocity;  // Velocity for rollers to spin at FIXME: unknown units
-
-  private final Launcher launcher = Launcher.getInstance();
+  private double targetShooterVelocity;  // Velocity for rollers to spin at in rotations per second
 
   // Motor controllers
   private final TalonFX armMotor;  // Kraken for moving arm position
@@ -24,7 +24,7 @@ public class Launcher extends SubsystemBase {
   private final TalonSRX feederMotor;  // Red motor
 
   private final MotionMagicExpoTorqueCurrentFOC armMotionMagic;
-  private final MotionMagicVelocityVoltage shooterMotionMagic;
+  private final VelocityTorqueCurrentFOC shooterController;
 
   private Launcher() {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
@@ -32,26 +32,61 @@ public class Launcher extends SubsystemBase {
     this.topShooterMotor = new TalonFX(Constants.Ports.TOP_LAUNCHER, Constants.Ports.CTRE_CANBUS);
     this.feederMotor = new CANSparkMax(Constants.Ports.ARM_FEEDER, CANSparkLowLevel.MotorType.kBrushed);
 
-    TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
-    this.topShooterMotor.getConfigurator().apply(shooterMotorConfig);
-    this.bottomShooterMotor.getConfigurator().apply(shooterMotorConfig);
-    this.bottomShooterMotor.setInverted(true);
+    // Configure gains for shooter to be used in the controller
+    Slot0Configs shooterGains = new Slot0Configs()
+            .withKP(Constants.Launcher.Shooter.P)
+            .withKI(Constants.Launcher.Shooter.I)
+            .withKD(Constants.Launcher.Shooter.D);
 
-    FeedbackConfigs armFeedbackConfigs = new FeedbackConfigs();
-    armFeedbackConfigs.withSensorToMechanismRatio(Constants.Launcher.ARM_CONVERSION_FACTOR);
-    TalonFXConfiguration armMotorConfig = new TalonFXConfiguration().withFeedback(armFeedbackConfigs);
-    // armMotorConfig.Slot0.kP = ;
-    // armMotorConfig.Slot0.kI = ;
-    // armMotorConfig.Slot0.kD = ;
-    // armMotorConfig.Slot0.kV = ;
+    // Limit current on shooter to avoid breaking motors
+    TorqueCurrentConfigs shooterCurrentConfigs = new TorqueCurrentConfigs()
+            .withPeakReverseTorqueCurrent(-Constants.Launcher.Shooter.MAX_CURRENT)
+            .withPeakForwardTorqueCurrent(Constants.Launcher.Shooter.MAX_CURRENT);
+
+    // Apply configuration values and orientation
+    TalonFXConfiguration topShooterMotorConfig = new TalonFXConfiguration()
+            .withTorqueCurrent(shooterCurrentConfigs)
+            .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
+            .withSlot0(shooterGains);
+    TalonFXConfiguration bottomShooterMotorConfig = new TalonFXConfiguration()
+            .withTorqueCurrent(shooterCurrentConfigs)
+            .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
+            .withSlot0(shooterGains);
+    this.topShooterMotor.getConfigurator().apply(topShooterMotorConfig);
+    this.bottomShooterMotor.getConfigurator().apply(bottomShooterMotorConfig);
+
+    // Configure gains to be used in a velocity controller
+    this.shooterController = new VelocityTorqueCurrentFOC(0.0)
+            .withSlot(0)
+            .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
+
+    TorqueCurrentConfigs armCurrentLimits = new TorqueCurrentConfigs()
+            .withPeakForwardTorqueCurrent(Constants.Launcher.Arm.MAX_CURRENT)
+            .withPeakReverseTorqueCurrent(-Constants.Launcher.Arm.MAX_CURRENT);
+    FeedbackConfigs armFeedbackConfigs = new FeedbackConfigs()
+            .withSensorToMechanismRatio(Constants.Launcher.Arm.CONVERSION_FACTOR);
+    Slot0Configs armMotorGains = new Slot0Configs()
+            .withKP(Constants.Launcher.Arm.P)
+            .withKI(Constants.Launcher.Arm.I)
+            .withKD(Constants.Launcher.Arm.D);
+    TalonFXConfiguration armMotorConfig = new TalonFXConfiguration()
+            .withTorqueCurrent(armCurrentLimits)
+            .withFeedback(armFeedbackConfigs)
+            .withSlot0(armMotorGains);
     this.armMotor.getConfigurator().apply(armMotorConfig);
 
-    // Add MotionMagic to smoothly move the arm rotation
-//     other constructor: MotionMagicExpoTorqueCurrentFOC​(double Position, double FeedForward, int Slot, boolean OverrideCoastDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
-    this.armMotionMagic = new MotionMagicExpoTorqueCurrentFOC(0);
-    this.armMotionMagic.UpdateFreqHz = 1000.0;
-    this.shooterMotionMagic = new MotionMagicVelocityVoltage(0); //parameter is velocity
-    this.shooterMotionMagic.UpdateFreqHz = 1000.0;
+    // Configure MotionMagic Object
+//     other constructor: MotionMagicExpoTorqueCurrentFOC(double Position, double FeedForward, int Slot, boolean OverrideCoastDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
+    this.armMotionMagic = new MotionMagicExpoTorqueCurrentFOC(Constants.Launcher.Arm.Positions.BASE)
+            .withSlot(0)
+            .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
+
+    // Set Feeder Motor Limits
+    TalonSRXConfiguration feederMotorConfigs = new TalonSRXConfiguration();
+    feederMotorConfigs.peakCurrentLimit = Constants.Launcher.Feeder.PEAK_CURRENT_LIMIT;
+    feederMotorConfigs.peakCurrentDuration = Constants.Launcher.Feeder.PEAK_CURRENT_DURATION;
+    feederMotorConfigs.continuousCurrentLimit = Constants.Launcher.Feeder.CONTINUOUS_CURRENT_LIMIT;
+    this.feederMotor.configAllSettings(feederMotorConfigs);
   }
 
   /**
@@ -64,10 +99,10 @@ public class Launcher extends SubsystemBase {
 
   @Override
   public void periodic(){
-    this.armMotor.setControl(this.armMotionMagic.withPosition(this.targetAngle).withSlot(0));
+    this.armMotor.setControl(this.armMotionMagic.withPosition(this.targetAngle));
 
-    // FIXME: feedforward is constant or changes?
-    this.topShooterMotor.setControl(this.shooterMotionMagic.withVelocity(this.targetShooterVelocity).withFeedForward(0).withSlot(0));
+    this.topShooterMotor.setControl(this.shooterController.withVelocity(this.targetShooterVelocity));
+    this.bottomShooterMotor.setControl(this.shooterController.withVelocity(this.targetShooterVelocity));
 
     // if the shooters are at shooting speed and the angle is reasonable, turn on feeder motor to give note to the launcher
 //    if (shootersReady() && armReady()) {
@@ -112,8 +147,8 @@ public class Launcher extends SubsystemBase {
     * @return if the shooters are ready.
    **/
   private boolean shootersReady() {
-    return (this.getTopShooterVelocity() - this.targetShooterVelocity) <= Constants.Launcher.VELOCITY_ERROR
-      && (this.getBottomShooterVelocity() - this.targetShooterVelocity) <= Constants.Launcher.VELOCITY_ERROR;
+    return (this.getTopShooterVelocity() - this.targetShooterVelocity) <= Constants.Launcher.Shooter.VELOCITY_ERROR
+      && (this.getBottomShooterVelocity() - this.targetShooterVelocity) <= Constants.Launcher.Shooter.VELOCITY_ERROR;
   }
 
   /**
@@ -121,38 +156,37 @@ public class Launcher extends SubsystemBase {
     * @return A boolean representing if the arm is ready.
    **/
   private boolean armReady() {
-    return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Launcher.POSITION_ERROR;
+    return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Launcher.Arm.POSITION_ERROR;
   }
 
-  //FIXME: rename me
-  public Command checkStartFeederMotorIfReady() {
+  // Starts the feeder motor if it is ready
+  public Command startFeederMotor() {
     return this.run(() -> {
       if (shootersReady() && armReady()) {
-        // TODO: figure out how to use talonSRX
-        // TODO: turns on kicker motor?
+        this.feederMotor.set(TalonSRXControlMode.Current, Constants.Launcher.Feeder.TARGET_CURRENT);
       }
     });
   }
 
   // methods for each shot position for cleaner code in robot.java
-  public void setIntake(){
-    this.setTargetAngle(Constants.Launcher.Positions.INTAKE);
+  public void setIntake() {
+    this.setTargetAngle(Constants.Launcher.Arm.Positions.INTAKE);
   }
-  public void setOverhandShoot(){
-    this.setTargetAngle(Constants.Launcher.Positions.OVERHAND_SHOOT);
+  public void setOverhandShoot() {
+    this.setTargetAngle(Constants.Launcher.Arm.Positions.OVERHAND_SHOOT);
   }
-  public void setUnderhandShoot(){
-    this.setTargetAngle(Constants.Launcher.Positions.UNDERHAND_SHOOT);
+  public void setUnderhandShoot() {
+    this.setTargetAngle(Constants.Launcher.Arm.Positions.UNDERHAND_SHOOT);
   }
-  public void setAmp(){
-    this.setTargetAngle(Constants.Launcher.Positions.AMP);
+  public void setAmp() {
+    this.setTargetAngle(Constants.Launcher.Arm.Positions.AMP);
   }
 
   // methods for turning shooters in shooting direction and intaking direction
-  public void intakeNote(){
-    this.setTargetShooterVelocity(Constants.Launcher.Velocities.INTAKE);
+  public void intakeNote() {
+    this.setTargetShooterVelocity(Constants.Launcher.Shooter.Velocities.INTAKE);
   }
-  public void shootNote(){
-    this.setTargetShooterVelocity(Constants.Launcher.Velocities.SHOOT);
+  public void shootNote() {
+    this.setTargetShooterVelocity(Constants.Launcher.Shooter.Velocities.SHOOT);
   }
 }
