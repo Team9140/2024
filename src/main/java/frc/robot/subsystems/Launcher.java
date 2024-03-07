@@ -5,7 +5,9 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,8 +25,8 @@ public class Launcher extends SubsystemBase {
   private final TalonFX topShooterMotor;  // Kraken for top roller
   private final TalonSRX feederMotor;  // Red motor
 
-  private final MotionMagicExpoTorqueCurrentFOC armMotionMagic;
-  private final VelocityTorqueCurrentFOC shooterController;
+  private final MotionMagicExpoVoltage armMotionMagic;
+  private final VelocityVoltage shooterController;
 
   private Launcher() {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
@@ -39,30 +41,36 @@ public class Launcher extends SubsystemBase {
             .withKD(Constants.Launcher.Shooter.D);
 
     // Limit current on shooter to avoid breaking motors
-    TorqueCurrentConfigs shooterCurrentConfigs = new TorqueCurrentConfigs()
-            .withPeakReverseTorqueCurrent(-Constants.Launcher.Shooter.MAX_CURRENT)
-            .withPeakForwardTorqueCurrent(Constants.Launcher.Shooter.MAX_CURRENT);
+//    TorqueCurrentConfigs shooterCurrentConfigs = new TorqueCurrentConfigs()
+//            .withPeakReverseTorqueCurrent(-Constants.Launcher.Shooter.MAX_CURRENT)
+//            .withPeakForwardTorqueCurrent(Constants.Launcher.Shooter.MAX_CURRENT);
+
+    CurrentLimitsConfigs shooterCurrentLimits = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(Constants.Launcher.Shooter.MAX_CURRENT);
 
     // Apply configuration values and orientation
     TalonFXConfiguration topShooterMotorConfig = new TalonFXConfiguration()
-            .withTorqueCurrent(shooterCurrentConfigs)
+//            .withTorqueCurrent(shooterCurrentConfigs)
+            .withCurrentLimits(shooterCurrentLimits)
             .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
             .withSlot0(shooterGains);
     TalonFXConfiguration bottomShooterMotorConfig = new TalonFXConfiguration()
-            .withTorqueCurrent(shooterCurrentConfigs)
+//            .withTorqueCurrent(shooterCurrentConfigs)
+            .withCurrentLimits(shooterCurrentLimits)
             .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
             .withSlot0(shooterGains);
     this.topShooterMotor.getConfigurator().apply(topShooterMotorConfig);
     this.bottomShooterMotor.getConfigurator().apply(bottomShooterMotorConfig);
 
     // Configure gains to be used in a velocity controller
-    this.shooterController = new VelocityTorqueCurrentFOC(0.0)
+    this.shooterController = new VelocityVoltage(0.0)
+            .withEnableFOC(true)
             .withSlot(0)
             .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
 
-    TorqueCurrentConfigs armCurrentLimits = new TorqueCurrentConfigs()
-            .withPeakForwardTorqueCurrent(Constants.Launcher.Arm.MAX_CURRENT)
-            .withPeakReverseTorqueCurrent(-Constants.Launcher.Arm.MAX_CURRENT);
+//    TorqueCurrentConfigs armCurrentLimits = new TorqueCurrentConfigs()
+//            .withPeakForwardTorqueCurrent(Constants.Launcher.Arm.MAX_CURRENT)
+//            .withPeakReverseTorqueCurrent(-Constants.Launcher.Arm.MAX_CURRENT);
     FeedbackConfigs armFeedbackConfigs = new FeedbackConfigs()
             .withSensorToMechanismRatio(Constants.Launcher.Arm.CONVERSION_FACTOR);
     Slot0Configs armMotorGains = new Slot0Configs()
@@ -71,16 +79,17 @@ public class Launcher extends SubsystemBase {
             .withKD(Constants.Launcher.Arm.D);
     TalonFXConfiguration armMotorConfig = new TalonFXConfiguration()
             .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
-            .withTorqueCurrent(armCurrentLimits)
+            .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Launcher.Arm.MAX_CURRENT))
+//            .withTorqueCurrent(armCurrentLimits)
             .withFeedback(armFeedbackConfigs)
             .withSlot0(armMotorGains);
     this.armMotor.getConfigurator().apply(armMotorConfig);
 
     // Configure MotionMagic Object
-//     other constructor: MotionMagicExpoTorqueCurrentFOC(double Position, double FeedForward, int Slot, boolean OverrideCoastDurNeutral, boolean LimitForwardMotion, boolean LimitReverseMotion)
-    this.armMotionMagic = new MotionMagicExpoTorqueCurrentFOC(Constants.Launcher.Arm.Positions.BASE)
+    this.armMotionMagic = new MotionMagicExpoVoltage(Constants.Launcher.Arm.Positions.BASE)
             .withSlot(0)
-            .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
+            .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL)
+            .withEnableFOC(true);
 
     // Set Feeder Motor Limits
     TalonSRXConfiguration feederMotorConfigs = new TalonSRXConfiguration();
