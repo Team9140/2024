@@ -30,7 +30,7 @@ public class Launcher extends SubsystemBase {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
     this.bottomShooterMotor = new TalonFX(Constants.Ports.BOTTOM_LAUNCHER, Constants.Ports.CTRE_CANBUS);
     this.topShooterMotor = new TalonFX(Constants.Ports.TOP_LAUNCHER, Constants.Ports.CTRE_CANBUS);
-    this.feederMotor = new CANSparkMax(Constants.Ports.ARM_FEEDER, CANSparkLowLevel.MotorType.kBrushed);
+    this.feederMotor = new TalonSRX(Constants.Ports.ARM_FEEDER);
 
     // Configure gains for shooter to be used in the controller
     Slot0Configs shooterGains = new Slot0Configs()
