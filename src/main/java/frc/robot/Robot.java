@@ -24,7 +24,6 @@ public class Robot extends LoggedRobot {
   private Drivetrain drive;
 //  private PhotonVision camera;
   private Intake intake;
-
   private Candle robot_candle;
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
