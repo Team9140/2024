@@ -181,7 +181,7 @@ public final class Constants {
     }
 
     public static class Arm {
-      public static final double CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
+      public static final double CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI);;
 
       public static final double P = 0.0;
       public static final double I = 0.0;
@@ -189,7 +189,7 @@ public final class Constants {
 
       public static final double POSITION_ERROR = 0.2;
 
-      public static final double MAX_CURRENT = 0.0; // Amps
+      public static final double MAX_CURRENT = 40.0; // Amps
 
       public static class Positions {
         // Won't actually be 0.0, origin will be when the arm is straight down
