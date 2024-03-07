@@ -159,14 +159,13 @@ public final class Constants {
   public static class Launcher {
 
     public static class Feeder {
-      public static final int PEAK_CURRENT_LIMIT = 0; // Amps
-      public static final int PEAK_CURRENT_DURATION = 0; // Milliseconds
       public static final int CONTINUOUS_CURRENT_LIMIT = 0; // Amps
-      public static final double TARGET_CURRENT = 0.0; // Amps
-
+      public static final double TARGET_VOLTAGE = 0.0;
+      public static final double INTAKE_VOLTAGE = -2.0;
     }
 
     public static class Shooter {
+
       public static final double P = 0.0;
       public static final double I = 0.0;
       public static final double D = 0.0;
@@ -175,7 +174,7 @@ public final class Constants {
       public static final double MAX_CURRENT = 30.0; // Amps
 
       public static class Velocities {
-        public static final double INTAKE = 0.0;  // FIXME: unknown units & value
+        public static final double INTAKE = -20.0; // RPS
         public static final double SHOOT = 0.0;  // FIXME: unknown units & value
       }
     }
