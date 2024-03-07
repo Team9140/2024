@@ -28,9 +28,9 @@ public class Launcher extends SubsystemBase {
 
   private Launcher() {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
-    this.bottomShooterMotor = new TalonFX(Constants.Ports.BOTTOM_SHOOTER, Constants.Ports.CTRE_CANBUS);
-    this.topShooterMotor = new TalonFX(Constants.Ports.TOP_SHOOTER, Constants.Ports.CTRE_CANBUS);
-    this.feederMotor = new TalonSRX(Constants.Ports.ARM_FEEDER);
+    this.bottomShooterMotor = new TalonFX(Constants.Ports.BOTTOM_LAUNCHER, Constants.Ports.CTRE_CANBUS);
+    this.topShooterMotor = new TalonFX(Constants.Ports.TOP_LAUNCHER, Constants.Ports.CTRE_CANBUS);
+    this.feederMotor = new CANSparkMax(Constants.Ports.ARM_FEEDER, CANSparkLowLevel.MotorType.kBrushed);
 
     TalonFXConfiguration shooterMotorConfig = new TalonFXConfiguration();
     this.topShooterMotor.getConfigurator().apply(shooterMotorConfig);

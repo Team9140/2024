@@ -86,25 +86,27 @@ public final class Constants {
     public static final int INPUT_CONTROLLER = 0;  // Xbox Controller
     public static final String CAMERA = "ProblemCamera";  // PhotonVision camera ID
 
+    public static final int CANDLE = 5;
+
     // Ports for CANSparkMax motor controllers
     public static final int FRONT_LEFT_DRIVE = 1;
     public static final int FRONT_LEFT_TURN = 4;
     public static final int FRONT_RIGHT_DRIVE = 0;
     public static final int FRONT_RIGHT_TURN = 9;
     public static final int BACK_LEFT_DRIVE = 3;
-    public static final int BACK_LEFT_TURN = 1;
+    public static final int BACK_LEFT_TURN = 7;
     public static final int BACK_RIGHT_DRIVE = 2;
-    public static final int BACK_RIGHT_TURN = 7;
+    public static final int BACK_RIGHT_TURN = 1;
 
     public static final String CTRE_CANBUS = "jama";
-    public static final int ARM_MOTOR = 19;
-    public static final int BOTTOM_SHOOTER = 20;
-    public static final int TOP_SHOOTER = 21;
-    public static final int ARM_FEEDER = 22;
+    public static final int ARM_MOTOR = 4;
+    public static final int BOTTOM_LAUNCHER = 5;
+    public static final int TOP_LAUNCHER = 6;
+    public static final int ARM_FEEDER = 32;
 
-    public static final int FRONT_LEFT_INTAKE = 32;
-    public static final int FRONT_RIGHT_INTAKE = 31;
-    public static final int BACK_INTAKE = 30;
+    public static final int FRONT_LEFT_INTAKE = 3;
+    public static final int FRONT_RIGHT_INTAKE = 30;
+    public static final int BACK_INTAKE = 31;
   }
 
   // Command to move to specified position on field
@@ -140,6 +142,11 @@ public final class Constants {
 //      }
 //    }
   }
+
+  public static final int CANDLE_LEDS_PER_ANIMATION = 30;  // FIXME: Placeholder value
+
+  public static final double CANDLE_DURATION = 4;
+  public static final double CANDLE_BRIGHTNESS = 1.0;
 
   // Electric current limits for intake motors
   public static final int FRONT_INTAKE_CURRENT_LIMIT = 15;
