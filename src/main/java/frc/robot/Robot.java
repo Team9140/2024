@@ -7,17 +7,17 @@ package frc.robot;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+//import frc.robot.subsystems.Candle;
 import frc.robot.subsystems.Candle;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Launcher;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
@@ -25,6 +25,8 @@ public class Robot extends LoggedRobot {
 //  private PhotonVision camera;
   private Intake intake;
   private Candle robot_candle;
+  private Launcher launcher;
+
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 
@@ -46,6 +48,8 @@ public class Robot extends LoggedRobot {
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
     this.robot_candle = Candle.getInstance();
+    this.launcher = Launcher.getInstance();
+
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
       // Remove low, fluctuating values from rotation input joystick
@@ -63,30 +67,61 @@ public class Robot extends LoggedRobot {
       this.drive.swerveDrive(
         leftJoystickY * Math.abs(leftJoystickY) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
         leftJoystickX * Math.abs(leftJoystickX) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
-        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1,  // Rotation (squared to make larger values more sensitive)
-        !this.controller.getHID().getLeftBumper()  // Enable field-relative driving by default
+        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1  // Rotation (squared to make larger values more sensitive)
       );
     }, this.drive));
 
     //Examples where animations are used when the intake is happening. Color defaults to red right now
     InstantCommand intakeCommand = new InstantCommand(() -> {
+      this.launcher.setIntake();
       // Start the intake process
       this.intake.intakeNote();
       // Change the animation to Rainbow
       robot_candle.changeAnimation(Candle.AnimationTypes.Rainbow, Constants.CANDLE_DURATION);
     });
 
+    InstantCommand scoreLow = new InstantCommand(() -> {
+      this.launcher.setUnderhandLaunch();
+    });
+
+    InstantCommand scoreHigh = new InstantCommand(() -> {
+      this.launcher.setOverhandLaunch();
+    });
+
+    InstantCommand scoreAmp = new InstantCommand(() -> {
+      this.launcher.setAmp();
+
+    });
+
     InstantCommand intakeOffCommand = new InstantCommand(() -> {
       // Turn off the intake
       this.intake.off();
+//      this.launcher.setBase();
+      this.launcher.feederOff();
       // Set the animation to null once intake is done
       robot_candle.changeAnimation(Candle.AnimationTypes.Empty, Constants.CANDLE_DURATION);
     });
 
-    this.controller.rightBumper().onTrue(intakeCommand);
+    InstantCommand toggleFieldRelative = new InstantCommand(() -> this.drive.setFieldRelative(!this.drive.getFieldRelative()));
+
+    InstantCommand goToHome = new InstantCommand(() -> {
+      this.intake.off();
+      this.launcher.setBase();
+      this.launcher.feederOff();
+      this.launcher.setLauncherVelocity(0.0);
+    });
+
+    this.controller.b().onTrue(scoreAmp);
+    this.controller.x().onTrue(scoreLow);
+    this.controller.y().onTrue(scoreHigh);
+    this.controller.rightBumper().onTrue(this.launcher.launchNote());
+    this.controller.leftTrigger().onTrue(goToHome);
+    this.controller.leftBumper().onTrue(toggleFieldRelative);
+    this.controller.rightBumper().whileTrue(intake.intakeNote().alongWith(launcher.intakeNote()));
     this.controller.rightBumper().onFalse(intakeOffCommand);
-    this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
-    this.controller.b().onTrue(Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0)))));
+//    this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
+    // TODO: Replace this with a button that will auto-align against a target and then launch the note
+//    this.controller.b().onTrue(Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0)))));
   }
   /**
     * Routinely execute the currently scheduled command.
@@ -96,7 +131,6 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     // TODO: Replace this with a button that will auto-align against a target and then shoot the note
 //    if (controller.getHID().getBButton()) Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(180))));
-
 
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());

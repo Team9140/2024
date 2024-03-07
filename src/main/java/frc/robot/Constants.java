@@ -154,27 +154,55 @@ public final class Constants {
   public static final double FRONT_INTAKE_NOTE_VOLTS = 6.0;
   public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
 
-  public static class Launcher {
-    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
+  // FIXME: Put real values
 
-    public static final double POSITION_ERROR = 0.2;
-    public static final double VELOCITY_ERROR = 0.2;
+  public static class Arm {
 
-    public static class Positions {
-      // Won't actually be 0.0, origin will be when the arm is straight down
-      public static final double INTAKE = 0.0;  // FIXME: unknown units & value
-      public static final double AMP = 0.0;  // FIXME: unknown units & value
-
-
-      // Values for testing arm movement. Set positions will be replaced with photonvision aimbot.
-      public static final double UNDERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
-      public static final double OVERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
+    public static class Feeder {
+      public static final int CONTINUOUS_CURRENT_LIMIT = 0; // Amps
+      public static final double TARGET_VOLTAGE = 0.0;
+      public static final double INTAKE_VOLTAGE = -2.0;
     }
 
-    public static class Velocities {
-      public static final double GRAB = 0.0;  // FIXME: unknown units & value
-      public static final double SHOOT = 0.0;  // FIXME: unknown units & value
+    public static class Launcher {
+
+      public static final double P = 0.0;
+      public static final double I = 0.0;
+      public static final double D = 0.0;
+
+      public static final double VELOCITY_ERROR = 0.2;
+      public static final double MAX_CURRENT = 30.0; // Amps
+
+      public static class Velocities {
+        public static final double INTAKE = -20.0; // RPS
+        public static final double LAUNCH = 0.0;  // FIXME: unknown units & value
+      }
     }
+
+    public static class ArmMechanism {
+      public static final double CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI);;
+
+      public static final double P = 0.0;
+      public static final double I = 0.0;
+      public static final double D = 0.0;
+
+      public static final double POSITION_ERROR = 0.2;
+
+      public static final double MAX_CURRENT = 40.0; // Amps
+
+      public static class Positions {
+        // Won't actually be 0.0, origin will be when the arm is straight down
+        public static final double INTAKE = 0.0;  // FIXME: unknown units & value
+        public static final double AMP = 0.0;  // FIXME: unknown units & value
+
+
+        // Values for testing arm movement. Set positions will be replaced with photonvision aimbot.
+        public static final double UNDERHAND = 0.0;  // FIXME: unknown units & value
+        public static final double OVERHAND = 0.0;  // FIXME: unknown units & value
+        public static final double BASE = 0.0;
+      }
+    }
+
   }
 
   // Side of the field per-match
