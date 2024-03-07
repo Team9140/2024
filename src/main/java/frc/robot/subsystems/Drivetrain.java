@@ -48,11 +48,14 @@ public class Drivetrain extends SubsystemBase {
   public static SwerveDriveKinematics swerveKinematics;
   private final SwerveDrivePoseEstimator positionEstimator;
   private SwerveSetpoint prevSetpoint;
+  private boolean fieldRelative;
 
   /**
     * The drivetrain subsystem for robot movement
    **/
   private Drivetrain() {
+    this.fieldRelative = true;
+
     this.gyro.calibrate();
 
     // Create the SwerveDriveKinematics object
@@ -195,18 +198,26 @@ public class Drivetrain extends SubsystemBase {
     * @param vy Horizontal velocity (positive is left)
     * @param omega Rotational velocity (positive is ccw)
    **/
-  public void swerveDrive(double vx, double vy, double omega, boolean fieldRelative) {
+  public void swerveDrive(double vx, double vy, double omega) {
     SmartDashboard.putNumber("drive vx", vx);
     SmartDashboard.putNumber("drive vy", vy);
     SmartDashboard.putNumber("drive omega", omega);
     SmartDashboard.putNumber("drive velocity", Math.hypot(vx, vy));
     SmartDashboard.putNumber("heading", this.gyro.getAngle());
 
-    if (fieldRelative) {
+    if (this.fieldRelative) {
       this.swerveDrive(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(this.gyro.getAngle())));
     } else {
       this.swerveDrive(new ChassisSpeeds(vx, vy, omega));
     }
+  }
+
+  public void setFieldRelative(boolean fieldRelative) {
+    this.fieldRelative = fieldRelative;
+  }
+
+  public boolean getFieldRelative() {
+    return this.fieldRelative;
   }
 
   /**

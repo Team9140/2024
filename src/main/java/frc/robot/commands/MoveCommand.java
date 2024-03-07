@@ -55,8 +55,7 @@ public class MoveCommand extends Command {
     this.drive.swerveDrive(
       this.forwardPID.calculate(current.getX(), this.targetX),
       this.horizontalPID.calculate(current.getY(), this.targetY),
-      this.rotationPID.calculate(getRadians(current.getRotation()), this.targetTheta),
-      true
+      this.rotationPID.calculate(getRadians(current.getRotation()), this.targetTheta)
     );
   }
 

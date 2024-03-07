@@ -65,8 +65,7 @@ public class Robot extends LoggedRobot {
       this.drive.swerveDrive(
         leftJoystickY * Math.abs(leftJoystickY) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
         leftJoystickX * Math.abs(leftJoystickX) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
-        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1,  // Rotation (squared to make larger values more sensitive)
-        !this.controller.getHID().getLeftBumper()  // Enable field-relative driving by default
+        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1  // Rotation (squared to make larger values more sensitive)
       );
     }, this.drive));
 
@@ -85,6 +84,9 @@ public class Robot extends LoggedRobot {
       candleSystem.changeAnimation(Candle.AnimationTypes.Empty, Constants.CANDLE_DURATION);
     });
 
+    InstantCommand toggleFieldRelative = new InstantCommand(() -> this.drive.setFieldRelative(!this.drive.getFieldRelative()));
+
+    this.controller.leftBumper().onTrue(toggleFieldRelative);
     this.controller.rightBumper().onTrue(intakeCommand);
     this.controller.rightBumper().onFalse(intakeOffCommand);
     this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
