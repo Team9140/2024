@@ -156,7 +156,7 @@ public final class Constants {
 
   // FIXME: Put real values
 
-  public static class Launcher {
+  public static class Arm {
 
     public static class Feeder {
       public static final int CONTINUOUS_CURRENT_LIMIT = 0; // Amps
@@ -164,7 +164,7 @@ public final class Constants {
       public static final double INTAKE_VOLTAGE = -2.0;
     }
 
-    public static class Shooter {
+    public static class Launcher {
 
       public static final double P = 0.0;
       public static final double I = 0.0;
@@ -175,11 +175,11 @@ public final class Constants {
 
       public static class Velocities {
         public static final double INTAKE = -20.0; // RPS
-        public static final double SHOOT = 0.0;  // FIXME: unknown units & value
+        public static final double LAUNCH = 0.0;  // FIXME: unknown units & value
       }
     }
 
-    public static class Arm {
+    public static class ArmMechanism {
       public static final double CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI);;
 
       public static final double P = 0.0;
@@ -197,8 +197,8 @@ public final class Constants {
 
 
         // Values for testing arm movement. Set positions will be replaced with photonvision aimbot.
-        public static final double UNDERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
-        public static final double OVERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
+        public static final double UNDERHAND = 0.0;  // FIXME: unknown units & value
+        public static final double OVERHAND = 0.0;  // FIXME: unknown units & value
         public static final double BASE = 0.0;
       }
     }

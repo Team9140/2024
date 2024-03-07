@@ -7,8 +7,6 @@ package frc.robot;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -83,11 +81,11 @@ public class Robot extends LoggedRobot {
     });
 
     InstantCommand scoreLow = new InstantCommand(() -> {
-      this.launcher.setUnderhandShoot();
+      this.launcher.setUnderhandLaunch();
     });
 
     InstantCommand scoreHigh = new InstantCommand(() -> {
-      this.launcher.setOverhandShoot();
+      this.launcher.setOverhandLaunch();
     });
 
     InstantCommand scoreAmp = new InstantCommand(() -> {
@@ -109,18 +107,19 @@ public class Robot extends LoggedRobot {
       this.intake.off();
       this.launcher.setBase();
       this.launcher.feederOff();
-      this.launcher.setShooterVelocity(0.0);
+      this.launcher.setLauncherVelocity(0.0);
     });
 
     this.controller.b().onTrue(scoreAmp);
     this.controller.x().onTrue(scoreLow);
     this.controller.y().onTrue(scoreHigh);
-    this.controller.rightBumper().onTrue(this.launcher.shootNote());
+    this.controller.rightBumper().onTrue(this.launcher.launchNote());
     this.controller.leftTrigger().onTrue(goToHome);
     this.controller.leftBumper().onTrue(toggleFieldRelative);
     this.controller.rightBumper().whileTrue(intake.intakeNote().alongWith(launcher.intakeNote()));
     this.controller.rightBumper().onFalse(intakeOffCommand);
 //    this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
+    // TODO: Replace this with a button that will auto-align against a target and then launch the note
 //    this.controller.b().onTrue(Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0)))));
   }
   /**
@@ -129,9 +128,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    // TODO: Replace this with a button that will auto-align against a target and then shoot the note
-//    if (controller.getHID().getBButton()) Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(180))));
-
 
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());

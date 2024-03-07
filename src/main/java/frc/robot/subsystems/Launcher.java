@@ -14,83 +14,85 @@ import frc.robot.Constants;
 public class Launcher extends SubsystemBase {
   private static Launcher instance;
   private double targetAngle;  // Target radians for the arm to be moved to
-  private double targetShooterVelocity;  // Velocity for rollers to spin at in rotations per second
+  private double targetLauncherVelocity;  // Velocity for rollers to spin at in rotations per second
 
   // Motor controllers
   private final TalonFX armMotor;  // Kraken for moving arm position
-  private final TalonFX bottomShooterMotor;  // Kraken for bottom roller
-  private final TalonFX topShooterMotor;  // Kraken for top roller
+  private final TalonFX bottomLauncherMotor;  // Kraken for bottom roller
+  private final TalonFX topLauncherMotor;  // Kraken for top roller
   private final WPI_TalonSRX feederMotor;  // Red motor
 
   private final MotionMagicExpoVoltage armMotionMagic;
-  private final VelocityVoltage shooterController;
+  private final VelocityVoltage launcherController;
 
   private Launcher() {
     this.armMotor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
-    this.bottomShooterMotor = new TalonFX(Constants.Ports.BOTTOM_LAUNCHER, Constants.Ports.CTRE_CANBUS);
-    this.topShooterMotor = new TalonFX(Constants.Ports.TOP_LAUNCHER, Constants.Ports.CTRE_CANBUS);
+    this.bottomLauncherMotor = new TalonFX(Constants.Ports.BOTTOM_LAUNCHER, Constants.Ports.CTRE_CANBUS);
+    this.topLauncherMotor = new TalonFX(Constants.Ports.TOP_LAUNCHER, Constants.Ports.CTRE_CANBUS);
     this.feederMotor = new WPI_TalonSRX(Constants.Ports.ARM_FEEDER);
 
-    // Configure gains for shooter to be used in the controller
-    Slot0Configs shooterGains = new Slot0Configs()
-            .withKP(Constants.Launcher.Shooter.P)
-            .withKI(Constants.Launcher.Shooter.I)
-            .withKD(Constants.Launcher.Shooter.D);
+    // Configure gains for launcher to be used in the controller
+    Slot0Configs launcherGains = new Slot0Configs()
+      .withKP(Constants.Arm.Launcher.P)
+      .withKI(Constants.Arm.Launcher.I)
+      .withKD(Constants.Arm.Launcher.D);
 
-    // Limit current on shooter to avoid breaking motors
-//    TorqueCurrentConfigs shooterCurrentConfigs = new TorqueCurrentConfigs()
-//            .withPeakReverseTorqueCurrent(-Constants.Launcher.Shooter.MAX_CURRENT)
-//            .withPeakForwardTorqueCurrent(Constants.Launcher.Shooter.MAX_CURRENT);
+    // Limit current on launcher to avoid breaking motors
+//    TorqueCurrentConfigs launcherCurrentConfigs = new TorqueCurrentConfigs()
+//            .withPeakReverseTorqueCurrent(-Constants.Launcher.Launcher.MAX_CURRENT)
+//            .withPeakForwardTorqueCurrent(Constants.Launcher.Launcher.MAX_CURRENT);
 
-    CurrentLimitsConfigs shooterCurrentLimits = new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Constants.Launcher.Shooter.MAX_CURRENT);
+    CurrentLimitsConfigs launcherCurrentLimits = new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Arm.Launcher.MAX_CURRENT);
 
     // Apply configuration values and orientation
-    TalonFXConfiguration topShooterMotorConfig = new TalonFXConfiguration()
-//            .withTorqueCurrent(shooterCurrentConfigs)
-            .withCurrentLimits(shooterCurrentLimits)
-            .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
-            .withSlot0(shooterGains);
-    TalonFXConfiguration bottomShooterMotorConfig = new TalonFXConfiguration()
-//            .withTorqueCurrent(shooterCurrentConfigs)
-            .withCurrentLimits(shooterCurrentLimits)
-            .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
-            .withSlot0(shooterGains);
-    this.topShooterMotor.getConfigurator().apply(topShooterMotorConfig);
-    this.bottomShooterMotor.getConfigurator().apply(bottomShooterMotorConfig);
+    TalonFXConfiguration topLauncherMotorConfig = new TalonFXConfiguration()
+//            .withTorqueCurrent(launcherCurrentConfigs)
+      .withCurrentLimits(launcherCurrentLimits)
+      .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
+      .withSlot0(launcherGains);
+    this.topLauncherMotor.getConfigurator().apply(topLauncherMotorConfig);
+
+    TalonFXConfiguration bottomLauncherMotorConfig = new TalonFXConfiguration()
+//            .withTorqueCurrent(launcherCurrentConfigs)
+      .withCurrentLimits(launcherCurrentLimits)
+      .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
+      .withSlot0(launcherGains);
+    this.bottomLauncherMotor.getConfigurator().apply(bottomLauncherMotorConfig);
 
     // Configure gains to be used in a velocity controller
-    this.shooterController = new VelocityVoltage(0.0)
-            .withEnableFOC(true)
-            .withSlot(0)
-            .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
+    this.launcherController = new VelocityVoltage(0.0)
+      .withEnableFOC(true)
+      .withSlot(0)
+      .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
 
 //    TorqueCurrentConfigs armCurrentLimits = new TorqueCurrentConfigs()
-//            .withPeakForwardTorqueCurrent(Constants.Launcher.Arm.MAX_CURRENT)
-//            .withPeakReverseTorqueCurrent(-Constants.Launcher.Arm.MAX_CURRENT);
+//      .withPeakForwardTorqueCurrent(Constants.Launcher.Arm.MAX_CURRENT)
+//      .withPeakReverseTorqueCurrent(-Constants.Launcher.Arm.MAX_CURRENT);
     FeedbackConfigs armFeedbackConfigs = new FeedbackConfigs()
-            .withSensorToMechanismRatio(Constants.Launcher.Arm.CONVERSION_FACTOR);
+      .withSensorToMechanismRatio(Constants.Arm.ArmMechanism.CONVERSION_FACTOR);
+
     Slot0Configs armMotorGains = new Slot0Configs()
-            .withKP(Constants.Launcher.Arm.P)
-            .withKI(Constants.Launcher.Arm.I)
-            .withKD(Constants.Launcher.Arm.D);
+      .withKP(Constants.Arm.ArmMechanism.P)
+      .withKI(Constants.Arm.ArmMechanism.I)
+      .withKD(Constants.Arm.ArmMechanism.D);
+
     TalonFXConfiguration armMotorConfig = new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
-            .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Launcher.Arm.MAX_CURRENT))
-//            .withTorqueCurrent(armCurrentLimits)
-            .withFeedback(armFeedbackConfigs)
-            .withSlot0(armMotorGains);
+      .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
+      .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Arm.ArmMechanism.MAX_CURRENT))
+//      .withTorqueCurrent(armCurrentLimits)
+      .withFeedback(armFeedbackConfigs)
+      .withSlot0(armMotorGains);
     this.armMotor.getConfigurator().apply(armMotorConfig);
 
     // Configure MotionMagic Object
-    this.armMotionMagic = new MotionMagicExpoVoltage(Constants.Launcher.Arm.Positions.BASE)
-            .withSlot(0)
-            .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL)
-            .withEnableFOC(true);
+    this.armMotionMagic = new MotionMagicExpoVoltage(Constants.Arm.ArmMechanism.Positions.BASE)
+      .withSlot(0)
+      .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL)
+      .withEnableFOC(true);
 
     // Set Feeder Motor Limits
     this.feederMotor.setInverted(true);
-    this.feederMotor.configContinuousCurrentLimit(Constants.Launcher.Feeder.CONTINUOUS_CURRENT_LIMIT);
+    this.feederMotor.configContinuousCurrentLimit(Constants.Arm.Feeder.CONTINUOUS_CURRENT_LIMIT);
   }
 
   /**
@@ -105,11 +107,11 @@ public class Launcher extends SubsystemBase {
   public void periodic(){
     this.armMotor.setControl(this.armMotionMagic.withPosition(this.targetAngle));
 
-//    this.topShooterMotor.setControl(this.shooterController.withVelocity(this.targetShooterVelocity));
-//    this.bottomShooterMotor.setControl(this.shooterController.withVelocity(this.targetShooterVelocity));
+//    this.topLauncherMotor.setControl(this.launcherController.withVelocity(this.targetLauncherVelocity));
+//    this.bottomLauncherMotor.setControl(this.launcherController.withVelocity(this.targetLauncherVelocity));
 
-    // if the shooters are at shooting speed and the angle is reasonable, turn on feeder motor to give note to the launcher
-//    if (shootersReady() && armReady()) {
+    // if the launchers are at launching speed and the angle is reasonable, turn on feeder motor to give note to the launcher
+//    if (launchersReady() && armReady()) {
 //      this.feederMotor.setVoltage(0.0);
 //    }
   }
@@ -126,33 +128,33 @@ public class Launcher extends SubsystemBase {
     * Sets the target velocity of the launcher motors.
     * @param velocity The requested velocity in radians per second.
    **/
-  public void setTargetShooterVelocity(double velocity) {
-    this.targetShooterVelocity = velocity;
+  public void setTargetLauncherVelocity(double velocity) {
+    this.targetLauncherVelocity = velocity;
   }
 
   /**
     * Get the rotational velocity of the top launcher motor.
     * @return The velocity of the motor in radians per second.
    **/
-  private double getTopShooterVelocity() {
-    return this.topShooterMotor.getVelocity().getValue() * 2 * Math.PI;
+  private double getTopLauncherVelocity() {
+    return this.topLauncherMotor.getVelocity().getValue() * 2 * Math.PI;
   }
 
   /**
     * Get the rotational velocity of the bottom launcher motor.
     * @return The velocity of the motor in radians per second.
    **/
-  private double getBottomShooterVelocity() {
-    return this.bottomShooterMotor.getVelocity().getValue() * 2 * Math.PI;
+  private double getBottomLauncherVelocity() {
+    return this.bottomLauncherMotor.getVelocity().getValue() * 2 * Math.PI;
   }
 
   /**
     * Check if the velocity of the launcher motors are greater than or equal to the target velocity.
-    * @return if the shooters are ready.
+    * @return if the launchers are ready.
    **/
-  private boolean shootersReady() {
-    return (this.getTopShooterVelocity() - this.targetShooterVelocity) <= Constants.Launcher.Shooter.VELOCITY_ERROR
-      && (this.getBottomShooterVelocity() - this.targetShooterVelocity) <= Constants.Launcher.Shooter.VELOCITY_ERROR;
+  private boolean launchersReady() {
+    return (this.getTopLauncherVelocity() - this.targetLauncherVelocity) <= Constants.Arm.Launcher.VELOCITY_ERROR
+      && (this.getBottomLauncherVelocity() - this.targetLauncherVelocity) <= Constants.Arm.Launcher.VELOCITY_ERROR;
   }
 
   /**
@@ -160,14 +162,16 @@ public class Launcher extends SubsystemBase {
     * @return A boolean representing if the arm is ready.
    **/
   private boolean armReady() {
-    return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Launcher.Arm.POSITION_ERROR;
+    return Math.abs(this.armMotor.getPosition().getValueAsDouble() * 2 * Math.PI - this.targetAngle) <= Constants.Arm.ArmMechanism.POSITION_ERROR;
   }
 
   // Starts the feeder motor if it is ready
-  public Command shootNote() {
+  public Command launchNote() {
     return this.run(() -> {
-      if (shootersReady() && armReady()) {
-        this.feederMotor.setVoltage(Constants.Launcher.Feeder.TARGET_VOLTAGE);
+      if (launchersReady() && armReady()) {
+        this.feederMotor.setVoltage(Constants.Arm.Feeder.TARGET_VOLTAGE);
+      } else {
+        this.feederMotor.setVoltage(0.0);
       }
     });
   }
@@ -178,37 +182,37 @@ public class Launcher extends SubsystemBase {
 
   // methods for each shot position for cleaner code in robot.java
   public void setIntake() {
-    this.setTargetAngle(Constants.Launcher.Arm.Positions.INTAKE);
-    this.setTargetShooterVelocity(Constants.Launcher.Shooter.Velocities.INTAKE);
-    this.feederMotor.setVoltage(Constants.Launcher.Feeder.INTAKE_VOLTAGE);
+    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.INTAKE);
+    this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.INTAKE);
+    this.feederMotor.setVoltage(Constants.Arm.Feeder.INTAKE_VOLTAGE);
   }
 
   public Command intakeNote() {
-    return this.run(() -> {
-      this.feederMotor.setVoltage(Constants.Launcher.Feeder.INTAKE_VOLTAGE);
-//      this.setTargetShooterVelocity(-20);
-      this.bottomShooterMotor.setControl(new VoltageOut(-2.0).withEnableFOC(true));
-      this.topShooterMotor.setControl(new VoltageOut(-2.0).withEnableFOC(true));
+    return this.runOnce(() -> {
+      this.feederMotor.setVoltage(Constants.Arm.Feeder.INTAKE_VOLTAGE);
+//      this.setTargetLauncherVelocity(-20);
+      this.bottomLauncherMotor.setControl(new VoltageOut(-2.0).withEnableFOC(true));
+      this.topLauncherMotor.setControl(new VoltageOut(-2.0).withEnableFOC(true));
     });
   }
-  public void setOverhandShoot() {
-    this.setTargetAngle(Constants.Launcher.Arm.Positions.OVERHAND_SHOOT);
-    this.setTargetShooterVelocity(Constants.Launcher.Shooter.Velocities.SHOOT);
+  public void setOverhandLaunch() {
+    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.OVERHAND);
+    this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
   }
-  public void setUnderhandShoot() {
-    this.setTargetAngle(Constants.Launcher.Arm.Positions.UNDERHAND_SHOOT);
-    this.setTargetShooterVelocity(Constants.Launcher.Shooter.Velocities.SHOOT);
+  public void setUnderhandLaunch() {
+    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.UNDERHAND);
+    this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
   }
   public void setAmp() {
-    this.setTargetAngle(Constants.Launcher.Arm.Positions.AMP);
-    this.setTargetShooterVelocity(Constants.Launcher.Shooter.Velocities.SHOOT);
+    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.AMP);
+    this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
   }
 
   public void setBase() {
-    this.setTargetAngle(Constants.Launcher.Arm.Positions.BASE);
+    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.BASE);
   }
 
-  public void setShooterVelocity(double speed) {
-    this.targetShooterVelocity = speed;
+  public void setLauncherVelocity(double speed) {
+    this.targetLauncherVelocity = speed;
   }
 }
