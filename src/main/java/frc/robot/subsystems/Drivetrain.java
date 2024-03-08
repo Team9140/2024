@@ -212,6 +212,10 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
+  public Command toggleFieldRelative() {
+    return this.runOnce(() -> this.fieldRelative = !this.fieldRelative);
+  }
+
   public void setFieldRelative(boolean fieldRelative) {
     this.fieldRelative = fieldRelative;
   }

@@ -162,6 +162,7 @@ public final class Constants {
       public static final int CONTINUOUS_CURRENT_LIMIT = 0; // Amps
       public static final double TARGET_VOLTAGE = 0.0;
       public static final double INTAKE_VOLTAGE = -2.0;
+      public static final double SHOOT_DURATION = 1000; // ms
     }
 
     public static class Launcher {
@@ -189,6 +190,7 @@ public final class Constants {
       public static final double POSITION_ERROR = 0.2;
 
       public static final double MAX_CURRENT = 40.0; // Amps
+      public static final double FEED_FORWARD = 0;
 
       public static class Positions {
         // Won't actually be 0.0, origin will be when the arm is straight down
@@ -199,7 +201,7 @@ public final class Constants {
         // Values for testing arm movement. Set positions will be replaced with photonvision aimbot.
         public static final double UNDERHAND = 0.0;  // FIXME: unknown units & value
         public static final double OVERHAND = 0.0;  // FIXME: unknown units & value
-        public static final double BASE = 0.0;
+//        public static final double BASE = -Math.PI / 2.0;
       }
     }
 

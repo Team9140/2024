@@ -6,12 +6,14 @@
 package frc.robot;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 //import frc.robot.subsystems.Candle;
 import frc.robot.subsystems.Drivetrain;
@@ -25,6 +27,8 @@ public class Robot extends LoggedRobot {
   private Intake intake;
 
   private Launcher launcher;
+
+  private CANSparkMax climber;
 
 //  private Candle candleSystem = new Candle();
 
@@ -80,44 +84,44 @@ public class Robot extends LoggedRobot {
 //      candleSystem.changeAnimation(Candle.AnimationTypes.Rainbow, Constants.CANDLE_DURATION);
     });
 
-    InstantCommand scoreLow = new InstantCommand(() -> {
-      this.launcher.setUnderhandLaunch();
-    });
+//    InstantCommand scoreLow = new InstantCommand(() -> {
+//      this.launcher.setUnderhandLaunch();
+//    });
 
-    InstantCommand scoreHigh = new InstantCommand(() -> {
-      this.launcher.setOverhandLaunch();
-    });
+//    InstantCommand scoreHigh = new InstantCommand(() -> {
+//      this.launcher.setOverhandLaunch();
+//    });
 
-    InstantCommand scoreAmp = new InstantCommand(() -> {
-      this.launcher.setAmp();
-    });
+//    InstantCommand scoreAmp = new InstantCommand(() -> {
+//      this.launcher.setAmp();
+//    });
 
-    InstantCommand intakeOffCommand = new InstantCommand(() -> {
-      // Turn off the intake
-      this.intake.off();
+//    InstantCommand intakeOffCommand = new InstantCommand(() -> {
+//      // Turn off the intake
+//      this.intake.off();
+////      this.launcher.setBase();
+//      this.launcher.feederOff();
+//      // Set the animation to null once intake is done
+////      candleSystem.changeAnimation(Candle.AnimationTypes.Empty, Constants.CANDLE_DURATION);
+//    });
+
+//    InstantCommand toggleFieldRelative = new InstantCommand(() -> this.drive.setFieldRelative(!this.drive.getFieldRelative()));
+
+//    InstantCommand goToHome = new InstantCommand(() -> {
+//      this.intake.off();
 //      this.launcher.setBase();
-      this.launcher.feederOff();
-      // Set the animation to null once intake is done
-//      candleSystem.changeAnimation(Candle.AnimationTypes.Empty, Constants.CANDLE_DURATION);
-    });
+//      this.launcher.feederOff();
+//      this.launcher.setLauncherVelocity(0.0);
+//    });
 
-    InstantCommand toggleFieldRelative = new InstantCommand(() -> this.drive.setFieldRelative(!this.drive.getFieldRelative()));
-
-    InstantCommand goToHome = new InstantCommand(() -> {
-      this.intake.off();
-      this.launcher.setBase();
-      this.launcher.feederOff();
-      this.launcher.setLauncherVelocity(0.0);
-    });
-
-    this.controller.b().onTrue(scoreAmp);
-    this.controller.x().onTrue(scoreLow);
-    this.controller.y().onTrue(scoreHigh);
-    this.controller.rightBumper().onTrue(this.launcher.launchNote());
-    this.controller.leftTrigger().onTrue(goToHome);
-    this.controller.leftBumper().onTrue(toggleFieldRelative);
-    this.controller.rightBumper().whileTrue(intake.intakeNote().alongWith(launcher.intakeNote()));
-    this.controller.rightBumper().onFalse(intakeOffCommand);
+    this.controller.b().onTrue(this.launcher.setAmp());
+    this.controller.x().onTrue(this.launcher.setUnderhandLaunch());
+    this.controller.y().onTrue(this.launcher.setOverhandLaunch());
+    this.controller.rightBumper().onTrue(this.launcher.launchNote()).onFalse(new WaitCommand(Constants.Arm.Feeder.SHOOT_DURATION).andThen(this.launcher.off()));
+    this.controller.a().onTrue(this.intake.off().alongWith(this.launcher.off()));
+    this.controller.leftBumper().onTrue(this.drive.toggleFieldRelative());
+    this.controller.rightBumper().onTrue(this.intake.intakeNote().alongWith(this.launcher.intakeNote()));
+    this.controller.rightBumper().onFalse(this.intake.off().alongWith(this.launcher.off()));
 //    this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
     // TODO: Replace this with a button that will auto-align against a target and then launch the note
 //    this.controller.b().onTrue(Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0)))));

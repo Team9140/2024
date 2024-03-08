@@ -85,9 +85,10 @@ public class Launcher extends SubsystemBase {
     this.armMotor.getConfigurator().apply(armMotorConfig);
 
     // Configure MotionMagic Object
-    this.armMotionMagic = new MotionMagicExpoVoltage(Constants.Arm.ArmMechanism.Positions.BASE)
+    this.armMotionMagic = new MotionMagicExpoVoltage(Constants.Arm.ArmMechanism.Positions.INTAKE)
       .withSlot(0)
       .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL)
+      .withFeedForward(Constants.Arm.ArmMechanism.FEED_FORWARD)
       .withEnableFOC(true);
 
     // Set Feeder Motor Limits
@@ -183,8 +184,6 @@ public class Launcher extends SubsystemBase {
   // methods for each shot position for cleaner code in robot.java
   public void setIntake() {
     this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.INTAKE);
-    this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.INTAKE);
-    this.feederMotor.setVoltage(Constants.Arm.Feeder.INTAKE_VOLTAGE);
   }
 
   public Command intakeNote() {
@@ -195,24 +194,34 @@ public class Launcher extends SubsystemBase {
       this.topLauncherMotor.setControl(new VoltageOut(-2.0).withEnableFOC(true));
     });
   }
-  public void setOverhandLaunch() {
-    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.OVERHAND);
-    this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
+  public Command setOverhandLaunch() {
+    return this.runOnce(() -> {
+      this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.OVERHAND);
+      this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
+    });
   }
-  public void setUnderhandLaunch() {
-    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.UNDERHAND);
-    this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
+  public Command setUnderhandLaunch() {
+    return this.runOnce(() -> {
+      this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.UNDERHAND);
+      this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
+    });
   }
-  public void setAmp() {
-    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.AMP);
-    this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
-  }
-
-  public void setBase() {
-    this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.BASE);
+  public Command setAmp() {
+    return this.runOnce(() -> {
+      this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.AMP);
+      this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
+    });
   }
 
   public void setLauncherVelocity(double speed) {
     this.targetLauncherVelocity = speed;
+  }
+
+  public Command off() {
+    return this.runOnce(() -> {
+      this.feederOff();
+      this.setLauncherVelocity(0);
+      this.setIntake();
+    });
   }
 }
