@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -83,6 +84,8 @@ public class Launcher extends SubsystemBase {
       .withFeedback(armFeedbackConfigs)
       .withSlot0(armMotorGains);
     this.armMotor.getConfigurator().apply(armMotorConfig);
+
+    if (Math.abs(this.armMotor.getPosition().getValueAsDouble()) < Units.degreesToRadians(3.0)) this.armMotor.setPosition(-Math.PI / 2.0);
 
     // Configure MotionMagic Object
     this.armMotionMagic = new MotionMagicExpoVoltage(Constants.Arm.ArmMechanism.Positions.INTAKE)
