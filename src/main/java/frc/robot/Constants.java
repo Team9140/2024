@@ -104,7 +104,9 @@ public final class Constants {
     public static final int TOP_LAUNCHER = 6;
     public static final int ARM_FEEDER = 32;
 
-    public static final int FRONT_LEFT_INTAKE = 3;
+    public static final int CLIMBER = 6969;
+
+    public static final int FRONT_LEFT_INTAKE = 33;
     public static final int FRONT_RIGHT_INTAKE = 30;
     public static final int BACK_INTAKE = 31;
   }

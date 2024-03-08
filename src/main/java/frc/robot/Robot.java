@@ -6,14 +6,12 @@
 package frc.robot;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 //import frc.robot.subsystems.Candle;
 import frc.robot.subsystems.Drivetrain;
@@ -53,6 +51,7 @@ public class Robot extends LoggedRobot {
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
     this.launcher = Launcher.getInstance();
+    this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
 
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
@@ -117,8 +116,9 @@ public class Robot extends LoggedRobot {
     this.controller.b().onTrue(this.launcher.setAmp());
     this.controller.x().onTrue(this.launcher.setUnderhandLaunch());
     this.controller.y().onTrue(this.launcher.setOverhandLaunch());
-    this.controller.rightBumper().onTrue(this.launcher.launchNote()).onFalse(new WaitCommand(Constants.Arm.Feeder.SHOOT_DURATION).andThen(this.launcher.off()));
+    this.controller.rightTrigger().onTrue(this.launcher.launchNote()).onFalse(new WaitCommand(Constants.Arm.Feeder.SHOOT_DURATION).andThen(this.launcher.off()));
     this.controller.a().onTrue(this.intake.off().alongWith(this.launcher.off()));
+//    this.controller.leftTrigger().and(this.controller.a()).whileTrue(() -> this.climber.set(this.controller.getHID().getLeftTriggerAxis()));
     this.controller.leftBumper().onTrue(this.drive.toggleFieldRelative());
     this.controller.rightBumper().onTrue(this.intake.intakeNote().alongWith(this.launcher.intakeNote()));
     this.controller.rightBumper().onFalse(this.intake.off().alongWith(this.launcher.off()));
@@ -132,6 +132,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+
+    if (this.controller.getHID().getAButton()) this.climber.set(this.controller.getHID().getLeftTriggerAxis());
 
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
