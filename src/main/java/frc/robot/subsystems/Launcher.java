@@ -2,9 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix6.configs.*;
-import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.util.Units;
@@ -23,7 +21,7 @@ public class Launcher extends SubsystemBase {
   private final TalonFX topLauncherMotor;  // Kraken for top roller
   private final WPI_TalonSRX feederMotor;  // Red motor
 
-  private final MotionMagicExpoVoltage armMotionMagic;
+  private final MotionMagicVoltage armMotionMagic;
   private final VelocityVoltage launcherController;
 
   private Launcher() {
@@ -75,7 +73,15 @@ public class Launcher extends SubsystemBase {
     Slot0Configs armMotorGains = new Slot0Configs()
       .withKP(Constants.Arm.ArmMechanism.P)
       .withKI(Constants.Arm.ArmMechanism.I)
-      .withKD(Constants.Arm.ArmMechanism.D);
+      .withKD(Constants.Arm.ArmMechanism.D)
+      .withKS(Constants.Arm.ArmMechanism.S)
+      .withKV(Constants.Arm.ArmMechanism.V)
+      .withKA(Constants.Arm.ArmMechanism.A);
+
+    MotionMagicConfigs armMagicConfigs = new MotionMagicConfigs()
+            .withMotionMagicCruiseVelocity(12.0)
+            .withMotionMagicAcceleration(24.0);
+
 
     TalonFXConfiguration armMotorConfig = new TalonFXConfiguration()
       .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
@@ -88,10 +94,9 @@ public class Launcher extends SubsystemBase {
     if (Math.abs(this.armMotor.getPosition().getValueAsDouble()) < Units.degreesToRadians(3.0)) this.armMotor.setPosition(-Math.PI / 2.0);
 
     // Configure MotionMagic Object
-    this.armMotionMagic = new MotionMagicExpoVoltage(Constants.Arm.ArmMechanism.Positions.INTAKE)
+    this.armMotionMagic = new MotionMagicVoltage(Constants.Arm.ArmMechanism.Positions.INTAKE)
       .withSlot(0)
       .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL)
-      .withFeedForward(Constants.Arm.ArmMechanism.FEED_FORWARD)
       .withEnableFOC(true);
 
     // Set Feeder Motor Limits
@@ -110,6 +115,10 @@ public class Launcher extends SubsystemBase {
   @Override
   public void periodic(){
     this.armMotor.setControl(this.armMotionMagic.withPosition(this.targetAngle));
+    if (this.targetLauncherVelocity != 0) {
+      this.bottomLauncherMotor.setControl(new VoltageOut(8.0));
+      this.topLauncherMotor.setControl(new VoltageOut(8.0));
+    }
 
 //    this.topLauncherMotor.setControl(this.launcherController.withVelocity(this.targetLauncherVelocity));
 //    this.bottomLauncherMotor.setControl(this.launcherController.withVelocity(this.targetLauncherVelocity));
@@ -192,7 +201,7 @@ public class Launcher extends SubsystemBase {
   public Command intakeNote() {
     return this.runOnce(() -> {
       this.feederMotor.setVoltage(Constants.Arm.Feeder.INTAKE_VOLTAGE);
-//      this.setTargetLauncherVelocity(-20);
+      this.setTargetLauncherVelocity(0.0);
       this.bottomLauncherMotor.setControl(new VoltageOut(-2.0).withEnableFOC(true));
       this.topLauncherMotor.setControl(new VoltageOut(-2.0).withEnableFOC(true));
     });

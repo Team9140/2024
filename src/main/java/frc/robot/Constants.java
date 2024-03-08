@@ -185,9 +185,12 @@ public final class Constants {
     public static class ArmMechanism {
       public static final double CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI);;
 
-      public static final double P = 0.0;
+      public static final double P = 26;
       public static final double I = 0.0;
-      public static final double D = 0.0;
+      public static final double D = 1.54;
+      public static final double S = 0.14178;
+      public static final double V = 0.94316;
+      public static final double A = 0.07;
 
       public static final double POSITION_ERROR = 0.2;
 
