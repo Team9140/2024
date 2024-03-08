@@ -53,6 +53,7 @@ public class Robot extends LoggedRobot {
     this.intake = Intake.getInstance();
     this.launcher = Launcher.getInstance();
     this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
+    this.climber.setInverted(true);
 
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
