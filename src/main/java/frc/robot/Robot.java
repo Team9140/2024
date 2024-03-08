@@ -120,8 +120,7 @@ public class Robot extends LoggedRobot {
     this.controller.a().onTrue(this.intake.off().alongWith(this.launcher.off()));
 //    this.controller.leftTrigger().and(this.controller.a()).whileTrue(() -> this.climber.set(this.controller.getHID().getLeftTriggerAxis()));
     this.controller.leftBumper().onTrue(this.drive.toggleFieldRelative());
-    this.controller.rightBumper().onTrue(this.intake.intakeNote().alongWith(this.launcher.intakeNote()));
-    this.controller.rightBumper().onFalse(this.intake.off().alongWith(this.launcher.off()));
+    this.controller.rightBumper().onTrue(this.intake.intakeNote().alongWith(this.launcher.intakeNote())).onFalse(this.intake.off().alongWith(this.launcher.off()));
 //    this.controller.a().onTrue(Commands.runOnce(this.drive::resetGyro));
     // TODO: Replace this with a button that will auto-align against a target and then launch the note
 //    this.controller.b().onTrue(Commands.run(() -> this.drive.swerveDrive(new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0)))));

@@ -194,18 +194,21 @@ public class Launcher extends SubsystemBase {
       this.topLauncherMotor.setControl(new VoltageOut(-2.0).withEnableFOC(true));
     });
   }
+
   public Command setOverhandLaunch() {
     return this.runOnce(() -> {
       this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.OVERHAND);
       this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
     });
   }
+
   public Command setUnderhandLaunch() {
     return this.runOnce(() -> {
       this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.UNDERHAND);
       this.setTargetLauncherVelocity(Constants.Arm.Launcher.Velocities.LAUNCH);
     });
   }
+
   public Command setAmp() {
     return this.runOnce(() -> {
       this.setTargetAngle(Constants.Arm.ArmMechanism.Positions.AMP);
