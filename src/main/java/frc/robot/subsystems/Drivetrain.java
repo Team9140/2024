@@ -229,9 +229,9 @@ public class Drivetrain extends SubsystemBase {
     CommandScheduler.getInstance().schedule(new MoveCommand(target, Constants.MoveCommand.ERROR));
   }
 
-  public Command goStraight(double speed, double distance){
+  public Command goStraight(double speed, double distance, int multiplier){
     return new WaitCommand(distance / speed)
-            .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed, 0.0)))
+            .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed * multiplier, 0.0)))
             .andThen(() -> swerveDrive(0, 0, 0)));
   }
   /**

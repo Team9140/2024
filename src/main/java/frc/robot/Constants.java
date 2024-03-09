@@ -165,6 +165,7 @@ public final class Constants {
     public static final double ACCELERATION = 24.0; // Radians per second per second
     public static final double FEED_FORWARD = 0.0; // FIXME: for later
     public static final double INITIAL_VARIANCE = Units.degreesToRadians(3); // Radians
+    public static final double AIM_ERROR = 0.0; // FIXME: ask gijspice
 
     // Positions in radians
     public static class Positions {

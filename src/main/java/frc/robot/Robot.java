@@ -8,6 +8,7 @@ package frc.robot;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
@@ -83,7 +84,7 @@ public class Robot extends LoggedRobot {
     this.controller.y().onTrue(this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
     // Prepare amp throw
     this.controller.b().onTrue(this.arm.setAmp().alongWith(this.thrower.prepareAmp()).alongWith(this.intake.off()));
-    // Stow
+    // Stow TODO: Maybe not turn the intake off?
     this.controller.x().onTrue(this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()));
 
     // Intake Note
@@ -119,6 +120,23 @@ public class Robot extends LoggedRobot {
     //this.drive.resetPosition(Constants.STARTING_POSITIONS[Constants.alliance_position.getAsInt()]);
 
     CommandScheduler.getInstance().cancelAll();
+    new SequentialCommandGroup(
+            this.arm.setOverhand() // overhand aim
+                    .alongWith(this.thrower.prepareSpeaker()), // start launchers before throwing
+            new WaitUntilCommand(this.arm::isReady) // wait until the launchers are spinning fast enough
+                    .andThen(this.thrower.launch()) // yeet
+                    .andThen(this.thrower.setIntake().alongWith(this.arm.setIntake())), // setup arm and launcher for intaking note
+            new WaitUntilCommand(this.arm::isReady) // wait until the launchers are spinning fast enough
+                    .andThen(this.intake.intakeNote()), // start floor intake
+            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), -1) // go backward 45 inches
+                    .andThen(this.intake.off() // done intaking
+                            .alongWith(this.thrower.prepareSpeaker()) // start launchers before throwing
+                            .alongWith(this.arm.setOverhand())), // overhand aim for speaker
+            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), 1) // go forward 45 inches
+                    .andThen(this.thrower.launch()), // take the shot
+            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), -1), // FIXME: Why do we need this?
+            this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()) // turn things off to end auto
+    ).schedule();
     // shoot note (preloaded) (overhand)
     //Go back 45 in
     //Pick up note

@@ -16,8 +16,6 @@ public class Arm extends SubsystemBase {
 
     private final MotionMagicVoltage motionMagic;
 
-    private double targetAngle;
-
     private Arm() {
         // Initialize Kraken
         motor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
@@ -67,6 +65,10 @@ public class Arm extends SubsystemBase {
 
     public static Arm getInstance() {
         return instance == null ? Arm.instance = new Arm() : Arm.instance;
+    }
+
+    public boolean isReady() {
+        return Math.abs(this.motor.getPosition().getValueAsDouble() - this.motionMagic.Position) < Constants.Arm.AIM_ERROR;
     }
 
     // Arm goes to desired angle in radians using motionMagic
