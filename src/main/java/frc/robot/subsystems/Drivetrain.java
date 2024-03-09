@@ -53,6 +53,7 @@ public class Drivetrain extends SubsystemBase {
   private Drivetrain() {
     this.fieldRelative = true;
 
+    // FIXME: Figure out when to do this after autonomous
     this.gyro.calibrate();
 
     // Create the SwerveDriveKinematics object

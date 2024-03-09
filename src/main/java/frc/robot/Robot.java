@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -17,9 +18,9 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Thrower;
-import org.littletonrobotics.junction.LoggedRobot;
+//import org.littletonrobotics.junction.LoggedRobot;
 
-public class Robot extends LoggedRobot {
+public class Robot extends TimedRobot {
   private Drivetrain drive;
 //  private PhotonVision camera;
   private Intake intake;
