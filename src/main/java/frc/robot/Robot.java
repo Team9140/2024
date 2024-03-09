@@ -10,19 +10,22 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Thrower;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
   private Drivetrain drive;
 //  private PhotonVision camera;
   private Intake intake;
+
+  private Arm arm;
+
+  private Thrower thrower;
 
   private CANSparkMax climber;
 
@@ -72,7 +75,24 @@ public class Robot extends LoggedRobot {
       );
     }, this.drive));
 
+    // Prepare underhand throw
+    this.controller.a().onTrue(this.arm.setUnderhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
+    // Prepare overhand throw
+    this.controller.y().onTrue(this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
+    // Prepare amp throw
+    this.controller.b().onTrue(this.arm.setAmp().alongWith(this.thrower.prepareAmp()).alongWith(this.intake.off()));
+    // Stow
+    this.controller.x().onTrue(this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()));
 
+    // Intake Note
+    this.controller.rightBumper()
+            .onTrue(this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake())))
+            .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
+
+    // Throw note
+    this.controller.rightTrigger().onTrue(this.thrower.launch())
+            .onFalse(new SequentialCommandGroup(this.thrower.launch()).alongWith(new WaitCommand(1.0),
+                    this.arm.setStow().alongWith(this.thrower.off())));
   }
   /**
     * Routinely execute the currently scheduled command.
