@@ -78,14 +78,24 @@ public class Robot extends LoggedRobot {
       );
     }, this.drive));
 
+    // FIXME: Find a way to not duplicate long command things
+
     // Prepare underhand throw
-    this.controller.a().onTrue(this.arm.setUnderhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
+    this.controller.a().onTrue(this.arm.setUnderhand()
+            .alongWith(this.thrower.prepareSpeaker())
+            .alongWith(this.intake.off()));
     // Prepare overhand throw
-    this.controller.y().onTrue(this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
+    this.controller.y().onTrue(this.arm.setOverhand()
+            .alongWith(this.thrower.prepareSpeaker())
+            .alongWith(this.intake.off()));
     // Prepare amp throw
-    this.controller.b().onTrue(this.arm.setAmp().alongWith(this.thrower.prepareAmp()).alongWith(this.intake.off()));
+    this.controller.b().onTrue(this.arm.setAmp()
+            .alongWith(this.thrower.prepareAmp())
+            .alongWith(this.intake.off()));
     // Stow TODO: Maybe not turn the intake off?
-    this.controller.x().onTrue(this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()));
+    this.controller.x().onTrue(this.arm.setStow()
+            .alongWith(this.intake.off())
+            .alongWith(this.thrower.off()));
 
     // Intake Note
     this.controller.rightBumper()
