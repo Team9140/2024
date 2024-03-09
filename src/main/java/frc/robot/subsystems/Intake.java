@@ -62,7 +62,7 @@ public class Intake extends SubsystemBase {
     * Turns off the intake motors
    **/
   public Command off() {
-    return this.run(() -> {
+    return this.runOnce(() -> {
       this.frontLeftMotor.setVoltage(0.0);
       this.frontRightMotor.setVoltage((0.0));
       this.backMotor.setVoltage(0.0);
