@@ -65,7 +65,7 @@ public class Arm extends SubsystemBase {
         if (Math.abs(this.motor.getPosition().getValueAsDouble()) < Units.degreesToRadians(Constants.Arm.INITIAL_VARIANCE)) this.motor.setPosition(-Math.PI / 2.0);
     }
 
-    public Arm getInstance() {
+    public static Arm getInstance() {
         return instance == null ? Arm.instance = new Arm() : Arm.instance;
     }
 

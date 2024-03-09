@@ -61,7 +61,7 @@ public class Thrower extends SubsystemBase {
         this.feeder.configContinuousCurrentLimit(Constants.Thrower.Feeder.MAX_CURRENT);
     }
 
-    public Thrower getInstance() {
+    public static Thrower getInstance() {
         return Thrower.instance == null ? Thrower.instance = new Thrower() : Thrower.instance;
     }
 

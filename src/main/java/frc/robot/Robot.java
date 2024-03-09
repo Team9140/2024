@@ -51,6 +51,8 @@ public class Robot extends LoggedRobot {
 //    this.camera = PhotonVision.getInstance();
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
+    this.arm = Arm.getInstance();
+    this.thrower = Thrower.getInstance();
     this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
     this.climber.setInverted(true);
 
