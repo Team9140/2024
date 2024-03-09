@@ -147,6 +147,7 @@ public final class Constants {
   public static final int BACK_INTAKE_CURRENT_LIMIT = 25;
   public static final double FRONT_INTAKE_NOTE_VOLTS = 6.0;
   public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
+  public static final double AUTO_SPEED = 5; //FIXME: Add real values
 
   public static class Arm {
     // PID and SVA, used in motion magic

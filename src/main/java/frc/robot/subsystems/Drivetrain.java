@@ -16,10 +16,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
 import frc.robot.commands.MoveCommand;
 import lib.swerve.SwerveKinematicLimits;
@@ -232,6 +229,11 @@ public class Drivetrain extends SubsystemBase {
     CommandScheduler.getInstance().schedule(new MoveCommand(target, Constants.MoveCommand.ERROR));
   }
 
+  public Command goStraight(double speed, double distance){
+    return new WaitCommand(distance / speed)
+            .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed, 0.0)))
+            .andThen(() -> swerveDrive(0, 0, 0)));
+  }
   /**
     *
     * swerveDrive but with Bezier curves and such

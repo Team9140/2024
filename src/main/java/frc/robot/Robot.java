@@ -116,9 +116,16 @@ public class Robot extends LoggedRobot {
   public void autonomousInit() {
     Constants.UpdateSettings();
 
-    this.drive.resetPosition(Constants.STARTING_POSITIONS[Constants.alliance_position.getAsInt()]);
+    //this.drive.resetPosition(Constants.STARTING_POSITIONS[Constants.alliance_position.getAsInt()]);
 
     CommandScheduler.getInstance().cancelAll();
+    // shoot note (preloaded) (overhand)
+    //Go back 45 in
+    //Pick up note
+    // go forward 45 in
+    //shoot (overhand)
+    //go back 45 in
+    //create command
 //    CommandScheduler.getInstance().schedule(new PathPlannerAuto("New Auto"));
   }
 
