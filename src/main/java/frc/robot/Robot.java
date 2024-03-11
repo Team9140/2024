@@ -131,31 +131,8 @@ public class Robot extends TimedRobot {
     //this.drive.resetPosition(Constants.STARTING_POSITIONS[Constants.alliance_position.getAsInt()]);
 
     CommandScheduler.getInstance().cancelAll();
-    new SequentialCommandGroup(
-            this.arm.setOverhand() // overhand aim
-                    .alongWith(this.thrower.prepareSpeaker()), // start launchers before throwing
-            new WaitUntilCommand(this.arm::isReady) // wait until the launchers are spinning fast enough
-                    .andThen(this.thrower.launch()) // yeet
-                    .andThen(this.thrower.setIntake().alongWith(this.arm.setIntake())), // setup arm and launcher for intaking note
-            new WaitUntilCommand(this.arm::isReady) // wait until the launchers are spinning fast enough
-                    .andThen(this.intake.intakeNote()), // start floor intake
-            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), -1) // go backward 45 inches
-                    .andThen(this.intake.off() // done intaking
-                            .alongWith(this.thrower.prepareSpeaker()) // start launchers before throwing
-                            .alongWith(this.arm.setOverhand())), // overhand aim for speaker
-            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), 1) // go forward 45 inches
-                    .andThen(this.thrower.launch()), // take the shot
-            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), -1), // FIXME: Why do we need this?
-            this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()) // turn things off to end auto
-    ).schedule();
-    // shoot note (preloaded) (overhand)
-    //Go back 45 in
-    //Pick up note
-    // go forward 45 in
-    //shoot (overhand)
-    //go back 45 in
-    //create command
-//    CommandScheduler.getInstance().schedule(new PathPlannerAuto("New Auto"));
+
+    //CommandScheduler.getInstance().schedule(new PathPlannerAuto("New Auto"));
   }
 
   /**
