@@ -81,20 +81,6 @@ public class Drivetrain extends SubsystemBase {
     // FIXME: unclear
     this.prevSetpoint = new SwerveSetpoint(this.getSpeed(), swerveKinematics.toSwerveModuleStates(this.getSpeed()));
 
-    // Configure autonomous routines
-    AutoBuilder.configureHolonomic(
-      this::getPosition,
-      this::resetPosition,
-      this::getSpeed,
-      this::swerveDrive,
-      new HolonomicPathFollowerConfig(
-        Constants.Drivetrain.METERS_PER_SECOND,
-        Units.inchesToMeters(Math.hypot(Constants.WIDTH, Constants.LENGTH) / 2),
-        new ReplanningConfig()
-      ),
-      () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
-      this
-    );
   }
 
   /**
@@ -175,7 +161,7 @@ public class Drivetrain extends SubsystemBase {
     * Move the robot based on a provided ChassisSpeeds value
     * @param movement The requested ChassisSpeeds
    **/
-  private void swerveDrive(ChassisSpeeds movement) {
+  public void swerveDrive(ChassisSpeeds movement) {
     SwerveSetpointGenerator swerveStateGenerator = new SwerveSetpointGenerator(this.swerveKinematics);
     movement = ChassisSpeeds.discretize(movement, Constants.LOOP_INTERVAL);
     SmartDashboard.putNumber("vx", movement.vxMetersPerSecond);
@@ -235,6 +221,7 @@ public class Drivetrain extends SubsystemBase {
             .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed * multiplier, 0.0)))
             .andThen(() -> swerveDrive(0, 0, 0)));
   }
+
   /**
     *
     * swerveDrive but with Bezier curves and such

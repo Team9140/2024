@@ -5,9 +5,17 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -18,6 +26,8 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Thrower;
+
+import java.util.List;
 //import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends TimedRobot {
@@ -47,6 +57,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     Constants.UpdateSettings();
 
+
     // Silence verbose controller connection warnings
     DriverStation.silenceJoystickConnectionWarning(true);
 
@@ -56,6 +67,7 @@ public class Robot extends TimedRobot {
     this.arm = Arm.getInstance();
     this.thrower = Thrower.getInstance();
     this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
+
     this.climber.setInverted(true);
 
     // Make the robot drive in Teleoperated mode by default
@@ -126,36 +138,53 @@ public class Robot extends TimedRobot {
    **/
   @Override
   public void autonomousInit() {
-    Constants.UpdateSettings();
+    // Configure autonomous routines
+    AutoBuilder.configureHolonomic(
+            drive::getPosition,
+            drive::resetPosition,
+            drive::getSpeed,
+            drive::swerveDrive,
+            new HolonomicPathFollowerConfig(
+                    Constants.Drivetrain.METERS_PER_SECOND,
+                    Units.inchesToMeters(Math.hypot(Constants.WIDTH, Constants.LENGTH) / 2),
+                    new ReplanningConfig()
+            ),
+            () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
+            drive
+    );
 
-    //this.drive.resetPosition(Constants.STARTING_POSITIONS[Constants.alliance_position.getAsInt()]);
+    Command overhandLaunchCommand =
+            this.arm.setOverhand() // Set overhand aim
+                    .alongWith(this.thrower.prepareSpeaker()) // Start launchers before throwing
+                    .andThen(new WaitUntilCommand(this.arm::isReady)) // Wait until the launchers are spinning fast enough
+                    .andThen(this.thrower.launch()) // Launch
+                    .andThen(this.thrower.setIntake().alongWith(this.arm.setIntake())); // Adjust intake along with arm
 
-    CommandScheduler.getInstance().cancelAll();
+    Command floorIntake =
+            new WaitUntilCommand(this.arm::isReady) // Wait until the launchers are spinning fast enough
+                    .andThen(this.intake.intakeNote()); // Start floor intake
+
+    NamedCommands.registerCommand("Intake", floorIntake);
+    NamedCommands.registerCommand("Intake_Off", this.intake.off());
+    NamedCommands.registerCommand("Shoot",overhandLaunchCommand);
+
+    List<PathPlannerPath> pathGroup = PathPlannerAuto.getPathGroupFromAutoFile("Auto1");
+    PathPlannerPath path1 = pathGroup.get(0);
+    PathPlannerPath path2 = pathGroup.get(1);
+    PathPlannerPath path3 = pathGroup.get(2);
+    PathPlannerPath path4 = pathGroup.get(3);
+    PathPlannerPath path5 = pathGroup.get(4);
+    PathPlannerPath path6 = pathGroup.get(5);
+
     new SequentialCommandGroup(
-            this.arm.setOverhand() // overhand aim
-                    .alongWith(this.thrower.prepareSpeaker()), // start launchers before throwing
-            new WaitUntilCommand(this.arm::isReady) // wait until the launchers are spinning fast enough
-                    .andThen(this.thrower.launch()) // yeet
-                    .andThen(this.thrower.setIntake().alongWith(this.arm.setIntake())), // setup arm and launcher for intaking note
-            new WaitUntilCommand(this.arm::isReady) // wait until the launchers are spinning fast enough
-                    .andThen(this.intake.intakeNote()), // start floor intake
-            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), -1) // go backward 45 inches
-                    .andThen(this.intake.off() // done intaking
-                            .alongWith(this.thrower.prepareSpeaker()) // start launchers before throwing
-                            .alongWith(this.arm.setOverhand())), // overhand aim for speaker
-            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), 1) // go forward 45 inches
-                    .andThen(this.thrower.launch()), // take the shot
-            this.drive.goStraight(Constants.AUTO_SPEED, Units.inchesToMeters(45), -1), // FIXME: Why do we need this?
-            this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()) // turn things off to end auto
-    ).schedule();
-    // shoot note (preloaded) (overhand)
-    //Go back 45 in
-    //Pick up note
-    // go forward 45 in
-    //shoot (overhand)
-    //go back 45 in
-    //create command
-//    CommandScheduler.getInstance().schedule(new PathPlannerAuto("New Auto"));
+            overhandLaunchCommand,
+            AutoBuilder.followPath(path1),
+            AutoBuilder.followPath(path2),
+            AutoBuilder.followPath(path3),
+            AutoBuilder.followPath(path4),
+            AutoBuilder.followPath(path5),
+            AutoBuilder.followPath(path6)
+    );
   }
 
   /**
