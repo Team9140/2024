@@ -147,8 +147,6 @@ public final class Constants {
   public static final int BACK_INTAKE_CURRENT_LIMIT = 25;
   public static final double FRONT_INTAKE_NOTE_VOLTS = 6.0;
   public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
-  public static final double AUTO_SPEED = 5; //FIXME: Add real values
-
   public static class Arm {
     // PID and SVA, used in motion magic
     public static final double P = 26.0;
@@ -196,15 +194,7 @@ public final class Constants {
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
   public static OptionalInt alliance_position = OptionalInt.empty();
 
-  public static final Pose2d[] STARTING_POSITIONS = {
-    new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)),  // Unknown
-    new Pose2d(613.1875, 47.3541, Rotation2d.fromDegrees(180)),  // Red1
-    new Pose2d(613.1875, 142.0625, Rotation2d.fromDegrees(180)),  // Red2
-    new Pose2d(613.1875, 236.7708, Rotation2d.fromDegrees(180)),  // Red3
-    new Pose2d(38.0625, 47.3541, Rotation2d.fromDegrees(0)),  // Blue1
-    new Pose2d(38.0625, 142.0625, Rotation2d.fromDegrees(0)),  // Blue2
-    new Pose2d(38.0625, 236.7708, Rotation2d.fromDegrees(0))  // Blue3
-  };
+  public static Pose2d ampPos = new Pose2d(5, 3, Rotation2d.fromDegrees(180)); //FIXME: Add real values
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();

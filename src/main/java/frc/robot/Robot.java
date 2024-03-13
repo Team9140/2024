@@ -5,32 +5,18 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+import org.littletonrobotics.junction.LoggedRobot;
+
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.Arm;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Thrower;
+import frc.robot.subsystems.*;
 
-import java.util.List;
-//import org.littletonrobotics.junction.LoggedRobot;
-
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private Drivetrain drive;
 //  private PhotonVision camera;
   private Intake intake;
@@ -40,6 +26,8 @@ public class Robot extends TimedRobot {
   private Thrower thrower;
 
   private CANSparkMax climber;
+
+  private PathFinder pathfinder;
 
 //  private Candle candleSystem = new Candle();
 
@@ -62,6 +50,7 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(true);
 
 //    this.camera = PhotonVision.getInstance();
+    this.pathfinder = PathFinder.getInstance();
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
     this.arm = Arm.getInstance();
@@ -119,6 +108,7 @@ public class Robot extends TimedRobot {
     this.controller.rightTrigger().onTrue(this.thrower.launch())
             .onFalse(new SequentialCommandGroup(this.thrower.launch()).alongWith(new WaitCommand(1.0),
                     this.arm.setStow().alongWith(this.thrower.off())));
+
   }
   /**
     * Routinely execute the currently scheduled command.
@@ -138,53 +128,7 @@ public class Robot extends TimedRobot {
    **/
   @Override
   public void autonomousInit() {
-    // Configure autonomous routines
-    AutoBuilder.configureHolonomic(
-            drive::getPosition,
-            drive::resetPosition,
-            drive::getSpeed,
-            drive::swerveDrive,
-            new HolonomicPathFollowerConfig(
-                    Constants.Drivetrain.METERS_PER_SECOND,
-                    Units.inchesToMeters(Math.hypot(Constants.WIDTH, Constants.LENGTH) / 2),
-                    new ReplanningConfig()
-            ),
-            () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
-            drive
-    );
-
-    Command overhandLaunchCommand =
-            this.arm.setOverhand() // Set overhand aim
-                    .alongWith(this.thrower.prepareSpeaker()) // Start launchers before throwing
-                    .andThen(new WaitUntilCommand(this.arm::isReady)) // Wait until the launchers are spinning fast enough
-                    .andThen(this.thrower.launch()) // Launch
-                    .andThen(this.thrower.setIntake().alongWith(this.arm.setIntake())); // Adjust intake along with arm
-
-    Command floorIntake =
-            new WaitUntilCommand(this.arm::isReady) // Wait until the launchers are spinning fast enough
-                    .andThen(this.intake.intakeNote()); // Start floor intake
-
-    NamedCommands.registerCommand("Intake", floorIntake);
-    NamedCommands.registerCommand("Intake_Off", this.intake.off());
-    NamedCommands.registerCommand("Shoot",overhandLaunchCommand);
-
-    List<PathPlannerPath> pathGroup = PathPlannerAuto.getPathGroupFromAutoFile("Auto1");
-    PathPlannerPath path1 = pathGroup.get(0);
-    PathPlannerPath path2 = pathGroup.get(1);
-    PathPlannerPath path3 = pathGroup.get(2);
-    PathPlannerPath path4 = pathGroup.get(3);
-    PathPlannerPath path5 = pathGroup.get(4);
-    PathPlannerPath path6 = pathGroup.get(5);
-
-    new SequentialCommandGroup(
-            overhandLaunchCommand,
-            AutoBuilder.followPath(path1),
-            AutoBuilder.followPath(path2),
-            AutoBuilder.followPath(path3),
-            AutoBuilder.followPath(path4),
-            AutoBuilder.followPath(path5),
-            AutoBuilder.followPath(path6)
-    );
+    pathfinder.auto();
   }
 
   /**
