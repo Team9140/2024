@@ -67,21 +67,15 @@ public class PathFinder {
         NamedCommands.registerCommand("Shoot", overhandLaunchCommand);
 
         List<PathPlannerPath> pathGroup = PathPlannerAuto.getPathGroupFromAutoFile("Auto1");
-        PathPlannerPath path1 = pathGroup.get(0);
-        PathPlannerPath path2 = pathGroup.get(1);
-        PathPlannerPath path3 = pathGroup.get(2);
-        PathPlannerPath path4 = pathGroup.get(3);
-        PathPlannerPath path5 = pathGroup.get(4);
-        PathPlannerPath path6 = pathGroup.get(5);
 
         new SequentialCommandGroup(
                 overhandLaunchCommand,
-                AutoBuilder.followPath(path1),
-                AutoBuilder.followPath(path2),
-                AutoBuilder.followPath(path3),
-                AutoBuilder.followPath(path4),
-                AutoBuilder.followPath(path5),
-                AutoBuilder.followPath(path6)
+                AutoBuilder.followPath(pathGroup.get(0)),
+                AutoBuilder.followPath(pathGroup.get(1)),
+                AutoBuilder.followPath(pathGroup.get(2)),
+                AutoBuilder.followPath(pathGroup.get(3)),
+                AutoBuilder.followPath(pathGroup.get(4)),
+                AutoBuilder.followPath(pathGroup.get(5))
         );
     }
 
