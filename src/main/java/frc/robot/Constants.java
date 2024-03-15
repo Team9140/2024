@@ -25,6 +25,8 @@ public final class Constants {
   public static final int WIDTH = 29;  // Inches, side-to-side width
   public static final int LENGTH = 29;  // Inches, front-to-back length
 
+  public static final int BASE_RADUS = 15;
+
   // Size of the field
   //  public static final double fieldx = Units.inchesToMeters(501);
   //  public static final double fieldy = Units.inchesToMeters(323.28);

@@ -2,55 +2,62 @@ package frc.robot.subsystems;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
-
-import java.util.List;
 
 public class PathFinder {
     private static PathFinder instance;
     private final Drivetrain drive;
-    private Arm arm;
-    private Thrower thrower;
-    private Intake intake;
+    private final Arm arm;
+    private final Thrower thrower;
+    private final Intake intake;
 
     public static PathFinder getInstance() {
         return PathFinder.instance == null ? PathFinder.instance = new PathFinder() : PathFinder.instance;
     }
-    public PathFinder(){
+
+    private PathFinder() {
         this.drive = Drivetrain.getInstance();
         this.arm = Arm.getInstance();
         this.thrower = Thrower.getInstance();
         this.intake = Intake.getInstance();
-
         configPathPlanner();
     }
 
-    public void configPathPlanner(){
+    public void configPathPlanner() {
         AutoBuilder.configureHolonomic(
                 drive::getPosition,
                 drive::resetPosition,
                 drive::getSpeed,
                 drive::swerveDrive,
                 new HolonomicPathFollowerConfig(
+                        new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
+                        new PIDConstants(1.0, 0.0, 0.0),
                         Constants.Drivetrain.METERS_PER_SECOND,
-                        Units.inchesToMeters(Math.hypot(Constants.WIDTH, Constants.LENGTH) / 2),
+                        Units.inchesToMeters(Constants.BASE_RADUS),
                         new ReplanningConfig()
                 ),
                 () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
                 drive
         );
     }
-    public void auto(){
+
+    public PathConstraints getPathConstraints() {
+        return new PathConstraints(
+                3.0, 4.0,
+                Units.degreesToRadians(540), Units.degreesToRadians(720));
+    }
+
+    public void auto() {
         Command overhandLaunchCommand =
                 this.arm.setOverhand() // Set overhand aim
                         .alongWith(this.thrower.prepareSpeaker()) // Start launchers before throwing
@@ -66,31 +73,14 @@ public class PathFinder {
         NamedCommands.registerCommand("Intake_Off", this.intake.off());
         NamedCommands.registerCommand("Shoot", overhandLaunchCommand);
 
-        List<PathPlannerPath> pathGroup = PathPlannerAuto.getPathGroupFromAutoFile("Auto1");
 
-        new SequentialCommandGroup(
-                overhandLaunchCommand,
-                AutoBuilder.followPath(pathGroup.get(0)),
-                AutoBuilder.followPath(pathGroup.get(1)),
-                AutoBuilder.followPath(pathGroup.get(2)),
-                AutoBuilder.followPath(pathGroup.get(3)),
-                AutoBuilder.followPath(pathGroup.get(4)),
-                AutoBuilder.followPath(pathGroup.get(5))
-        );
+        PathPlannerPath path = PathPlannerPath.fromPathFile("Path1");
+        AutoBuilder.followPath(path).schedule();
+
     }
 
-    public Command autoToBlueAmp(){
+    public void pathFindToPose(Pose2d endPos) {
         configPathPlanner();
-        PathPlannerPath blueAmpPath = PathPlannerPath.fromPathFile("BlueAmp");
-        PathConstraints constraints = new PathConstraints(
-                3.0, 4.0,
-                Units.degreesToRadians(540), Units.degreesToRadians(720));
-        return AutoBuilder.pathfindThenFollowPath(
-                blueAmpPath,
-                constraints,
-                3.0 // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
-        );
+        AutoBuilder.pathfindToPose(endPos, getPathConstraints());
     }
-
-
 }

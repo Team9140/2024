@@ -65,49 +65,50 @@ public class Thrower extends SubsystemBase {
         return Thrower.instance == null ? Thrower.instance = new Thrower() : Thrower.instance;
     }
 
+    private double feederVolts;
+
+    public void periodic() {
+        this.topLauncher.setControl(this.launcherController);
+        this.bottomLauncher.setControl(this.launcherController);
+        feeder.setVoltage(feederVolts);
+    }
+
+
     // Creates command that repeatedly sets the provided launcher voltage
     public Command setLauncherVoltage(double voltage) {
-        return this.run(() -> {
-            this.launcherController.withOutput(voltage);
-            this.topLauncher.setControl(this.launcherController);
-            this.bottomLauncher.setControl(this.launcherController);
-        });
+        return this.runOnce(() -> this.launcherController.withOutput(voltage));
     }
 
     // Creates command that repeatedly sets the provided feeder voltage
     public Command setFeederVoltage(double voltage) {
-        return this.run(() -> this.feeder.setVoltage(voltage));
+        return this.runOnce(() -> this.feederVolts = voltage);
     }
 
     // Prepares launcher and feeder for intaking a note
     public Command setIntake() {
         return setLauncherVoltage(Constants.Thrower.Launcher.INTAKE_VOLTAGE)
-                .alongWith(setFeederVoltage(Constants.Thrower.Feeder.INTAKE_VOLTAGE));
+                .andThen(setFeederVoltage(Constants.Thrower.Feeder.INTAKE_VOLTAGE));
     }
 
     // Prepares launcher and feeder for launching to speaker
     public Command prepareSpeaker() {
         return setLauncherVoltage(Constants.Thrower.Launcher.SPEAKER_VOLTAGE)
-                .alongWith(setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
+                .andThen(setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
     }
 
     // Spins up Launchers at suitable speed for Amp and holds Feeder in place
     public Command prepareAmp() {
-        return setLauncherVoltage(Constants.Thrower.Launcher.AMP_VOLTAGE)
-                .alongWith(setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
+        return setLauncherVoltage(Constants.Thrower.Launcher.AMP_VOLTAGE);
     }
 
     // Pushes the note from the feeder to the Launchers
     public Command launch() {
-        return this.run(() -> {
-            this.topLauncher.setControl(this.launcherController);
-            this.bottomLauncher.setControl(this.launcherController);
-        }).alongWith(setFeederVoltage(Constants.Thrower.Feeder.LAUNCH_VOLTAGE));
+        return setFeederVoltage(Constants.Thrower.Feeder.LAUNCH_VOLTAGE);
     }
 
     // Stops Launchers and Feeder
     public Command off() {
         return setLauncherVoltage(0.0)
-                .alongWith(setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
+                .andThen(setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
     }
 }

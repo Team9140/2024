@@ -5,6 +5,13 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.LoggedRobot;
 
 import com.revrobotics.CANSparkLowLevel;
@@ -27,7 +34,7 @@ public class Robot extends LoggedRobot {
 
   private CANSparkMax climber;
 
-  private PathFinder pathfinder;
+  //private PathFinder pathfinder;
 
 //  private Candle candleSystem = new Candle();
 
@@ -45,20 +52,33 @@ public class Robot extends LoggedRobot {
   public void robotInit() {
     Constants.UpdateSettings();
 
-
     // Silence verbose controller connection warnings
     DriverStation.silenceJoystickConnectionWarning(true);
 
 //    this.camera = PhotonVision.getInstance();
-    this.pathfinder = PathFinder.getInstance();
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
     this.arm = Arm.getInstance();
     this.thrower = Thrower.getInstance();
     this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
-
     this.climber.setInverted(true);
+    //pathfinder = PathFinder.getInstance();
 
+    AutoBuilder.configureHolonomic(
+            drive::getPosition,
+            drive::resetPosition,
+            drive::getSpeed,
+            drive::swerveDrive,
+            new HolonomicPathFollowerConfig(
+                    new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(1.0, 0.0, 0.0),
+                    Constants.Drivetrain.METERS_PER_SECOND,
+                    Units.inchesToMeters(Constants.BASE_RADUS),
+                    new ReplanningConfig()
+            ),
+            () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
+            drive
+    );
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
       // Remove low, fluctuating values from rotation input joystick
@@ -106,9 +126,8 @@ public class Robot extends LoggedRobot {
 
     // Throw note
     this.controller.rightTrigger().onTrue(this.thrower.launch())
-            .onFalse(new SequentialCommandGroup(this.thrower.launch()).alongWith(new WaitCommand(1.0),
+            .onFalse(new SequentialCommandGroup(this.thrower.launch()).andThen(new WaitCommand(1.0),
                     this.arm.setStow().alongWith(this.thrower.off())));
-
   }
   /**
     * Routinely execute the currently scheduled command.
@@ -121,6 +140,13 @@ public class Robot extends LoggedRobot {
 
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
+    Command currentCommand = this.drive.getCurrentCommand();
+    if (currentCommand != null) {
+        SmartDashboard.putString("Auto Path", currentCommand.toString());
+    } else {
+        SmartDashboard.putString("Auto Path", "null");
+    }
+
   }
 
   /**
@@ -128,7 +154,27 @@ public class Robot extends LoggedRobot {
    **/
   @Override
   public void autonomousInit() {
-    pathfinder.auto();
+    Constants.UpdateSettings();
+    CommandScheduler.getInstance().cancelAll();
+
+    Command overhandLaunchCommand =
+            this.arm.setOverhand() // Set overhand aim
+                    .alongWith(this.thrower.prepareSpeaker()) // Start launchers before throwing
+                    .andThen(new WaitUntilCommand(this.arm::isReady)) // Wait until the launchers are spinning fast enough
+                    .andThen(this.thrower.launch()) // Launch
+                    .andThen(this.thrower.setIntake().alongWith(this.arm.setIntake())); // Adjust intake along with arm
+
+    Command floorIntake =
+            new WaitUntilCommand(this.arm::isReady) // Wait until the launchers are spinning fast enough
+                    .andThen(this.intake.intakeNote()); // Start floor intake
+
+    NamedCommands.registerCommand("Intake", floorIntake);
+    NamedCommands.registerCommand("Intake_Off", this.intake.off());
+    NamedCommands.registerCommand("Shoot", overhandLaunchCommand);
+    PathPlannerPath path = PathPlannerPath.fromPathFile("Path1");
+
+    AutoBuilder.followPath(path).execute();
+
   }
 
   /**
