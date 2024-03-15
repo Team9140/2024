@@ -8,21 +8,17 @@ package frc.robot;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.Arm;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Thrower;
+import frc.robot.subsystems.*;
 //import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends TimedRobot {
   private Drivetrain drive;
-//  private PhotonVision camera;
+  //  private PhotonVision camera;
   private Intake intake;
 
   private Arm arm;
@@ -30,8 +26,6 @@ public class Robot extends TimedRobot {
   private Thrower thrower;
 
   private CANSparkMax climber;
-
-//  private Candle candleSystem = new Candle();
 
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
@@ -41,7 +35,7 @@ public class Robot extends TimedRobot {
   }
 
   /**
-    * Initialize the robot and prepare it for operation
+   * Initialize the robot and prepare it for operation
    **/
   @Override
   public void robotInit() {
@@ -73,9 +67,9 @@ public class Robot extends TimedRobot {
 
       // Remove low, fluctuating values and drive at the input joystick as percentage of max velocity
       this.drive.swerveDrive(
-        leftJoystickY * Math.abs(leftJoystickY) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
-        leftJoystickX * Math.abs(leftJoystickX) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
-        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1  // Rotation (squared to make larger values more sensitive)
+              leftJoystickY * Math.abs(leftJoystickY) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
+              leftJoystickX * Math.abs(leftJoystickX) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
+              rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1  // Rotation (squared to make larger values more sensitive)
       );
     }, this.drive));
 
@@ -105,11 +99,11 @@ public class Robot extends TimedRobot {
 
     // Throw note
     this.controller.rightTrigger().onTrue(this.thrower.launch())
-            .onFalse(new SequentialCommandGroup(this.thrower.launch()).alongWith(new WaitCommand(1.0),
+            .onFalse(new SequentialCommandGroup(this.thrower.launch()).andThen(new WaitCommand(1.0),
                     this.arm.setStow().alongWith(this.thrower.off())));
   }
   /**
-    * Routinely execute the currently scheduled command.
+   * Routinely execute the currently scheduled command.
    **/
   @Override
   public void robotPeriodic() {
@@ -119,24 +113,21 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
+
   }
 
   /**
-    * Prepare autonomous mode.
+   * Prepare autonomous mode.
    **/
   @Override
   public void autonomousInit() {
     Constants.UpdateSettings();
-
-    //this.drive.resetPosition(Constants.STARTING_POSITIONS[Constants.alliance_position.getAsInt()]);
-
     CommandScheduler.getInstance().cancelAll();
 
-    //CommandScheduler.getInstance().schedule(new PathPlannerAuto("New Auto"));
   }
 
   /**
-    * Prepare teleoperated mode.
+   * Prepare teleoperated mode.
    **/
   @Override
   public void teleopInit() {
