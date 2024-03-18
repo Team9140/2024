@@ -93,13 +93,13 @@ public class Drivetrain extends SubsystemBase {
     * @param position The new offset/position of the robot
    **/
   public void resetPosition(Pose2d position) {
+    this.gyro.setGyroAngle(this.gyro.getYawAxis(), position.getRotation().getDegrees());
     this.positionEstimator.resetPosition(
       Rotation2d.fromDegrees(gyro.getAngle()),
       this.getPositionArray(),
 //      new Pose2d(position.getX() + 0.64, position.getY() + 4.39, position.getRotation())
       position
     );
-    this.gyro.setGyroAngle(this.gyro.getYawAxis(), position.getRotation().getDegrees());
   }
 
   /**

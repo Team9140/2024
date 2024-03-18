@@ -10,7 +10,6 @@ import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder;
 import com.revrobotics.SparkPIDController;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -24,7 +23,7 @@ import lib.util.Util;
 public class SwerveModule extends SubsystemBase {
   // Various motors FIXME: clarification needed
   private final TalonFX driveMotor;
-  private PIDController driveMotorPID;
+//  private PIDController driveMotorPID;
 
   // Allows full use of 15% power FIXME: clarification needed
   private final VoltageOut driveMotorRequest;
@@ -96,7 +95,7 @@ public class SwerveModule extends SubsystemBase {
     this.turnMotor.burnFlash();
 
 
-    this.driveMotorPID = new PIDController(Constants.Drivetrain.DRIVE_P, Constants.Drivetrain.DRIVE_I, Constants.Drivetrain.DRIVE_D);
+//    this.driveMotorPID = new PIDController(Constants.Drivetrain.DRIVE_P, Constants.Drivetrain.DRIVE_I, Constants.Drivetrain.DRIVE_D);
   }
 
   /**
@@ -109,7 +108,7 @@ public class SwerveModule extends SubsystemBase {
 
     // Set the target angle and velocity for module movement
     this.turnMotor.getPIDController().setReference(this.targetAngle, CANSparkBase.ControlType.kPosition);
-    this.driveMotor.setControl(this.driveMotorRequest.withOutput(this.feedforward.calculate(this.driveMotorPID.calculate(this.driveMotor.getVelocity().getValueAsDouble(), this.targetVelocity))));
+    this.driveMotor.setControl(this.driveMotorRequest.withOutput(this.feedforward.calculate(this.targetVelocity)));
 
     // Output current values to SmartDashboard for debugging
     SmartDashboard.putNumber(this.niceName + " turn angle", this.getTurnAngle());
