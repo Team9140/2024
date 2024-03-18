@@ -19,6 +19,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import lib.util.Util;
 
 public class SwerveModule extends SubsystemBase {
   // Various motors FIXME: clarification needed
@@ -40,6 +41,7 @@ public class SwerveModule extends SubsystemBase {
   // The requested target angle and velocity of the swerve module
   private volatile double targetAngle;
   private volatile double targetVelocity;
+  private double lastTurnValue;
 
   /**
     * Initializes one module for a swerve drive robot
@@ -83,6 +85,7 @@ public class SwerveModule extends SubsystemBase {
 
     // Configure PID values & configuration for rotation motor
     SparkPIDController turnPID = this.turnMotor.getPIDController();
+    // FIXME: Does this need to somehow fix NEO error stuff?
     turnPID.setFeedbackDevice(this.turnMotor.getEncoder());
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(Constants.Drivetrain.PID_MIN_INPUT);
@@ -101,6 +104,9 @@ public class SwerveModule extends SubsystemBase {
    **/
   @Override
   public void periodic() {
+    // Ensure that we don't get an error reading
+    this.lastTurnValue = Util.getSparkPosition(this.turnMotor, this.lastTurnValue);
+
     // Set the target angle and velocity for module movement
     this.turnMotor.getPIDController().setReference(this.targetAngle, CANSparkBase.ControlType.kPosition);
     this.driveMotor.setControl(this.driveMotorRequest.withOutput(this.feedforward.calculate(this.driveMotorPID.calculate(this.driveMotor.getVelocity().getValueAsDouble(), this.targetVelocity))));
@@ -115,8 +121,8 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(this.niceName + " target velocity", this.targetVelocity);
     SmartDashboard.putNumber(this.niceName + " turn current", this.turnMotor.getOutputCurrent());
     SmartDashboard.putNumber(this.niceName + " drive current", this.driveMotor.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber(this.niceName + " turn encoder position", this.turnMotor.getEncoder().getPosition());
-    SmartDashboard.putNumber(this.niceName + " turn encoder position % 2pi", this.turnMotor.getEncoder().getPosition() % (2 * Math.PI));
+    SmartDashboard.putNumber(this.niceName + " turn encoder position", this.getTurnAngle());
+    SmartDashboard.putNumber(this.niceName + " turn encoder position % 2pi", this.getTurnAngle() % (2 * Math.PI));
     SmartDashboard.putNumber(this.niceName + " drive meters per second", this.driveMotor.getVelocity().getValueAsDouble());
   }
 
@@ -134,7 +140,7 @@ public class SwerveModule extends SubsystemBase {
     * @param state A SwerveModuleState object containing the requested values
    **/
   public void setTarget(SwerveModuleState state) {
-    this.targetAngle = bestTurn(state.angle.getRadians(), this.turnMotor.getEncoder().getPosition());
+    this.targetAngle = bestTurn(state.angle.getRadians(), this.getTurnAngle());
     this.targetVelocity = state.speedMetersPerSecond;
   }
 
@@ -159,7 +165,7 @@ public class SwerveModule extends SubsystemBase {
     * @return The swerve module rotation
    **/
   public double getTurnAngle() {
-    return this.turnMotor.getEncoder().getPosition();
+    return this.lastTurnValue;
   }
 
   /**

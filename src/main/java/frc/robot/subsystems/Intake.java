@@ -19,7 +19,6 @@ public class Intake extends SubsystemBase {
     this.frontRightMotor = new WPI_TalonSRX(Constants.Ports.FRONT_RIGHT_INTAKE);
     this.frontRightMotor.configContinuousCurrentLimit(Constants.FRONT_INTAKE_CURRENT_LIMIT);
     this.frontRightMotor.setInverted(true);
-    this.frontRightMotor.follow(this.frontLeftMotor);
 
     this.backMotor = new WPI_TalonSRX(Constants.Ports.BACK_INTAKE);
     this.backMotor.configContinuousCurrentLimit(Constants.BACK_INTAKE_CURRENT_LIMIT);
@@ -42,6 +41,7 @@ public class Intake extends SubsystemBase {
   public Command intakeNote() {
     return this.run(() -> {
       this.frontLeftMotor.setVoltage(Constants.FRONT_INTAKE_NOTE_VOLTS);
+      this.frontRightMotor.setVoltage(Constants.FRONT_INTAKE_NOTE_VOLTS);
       this.backMotor.setVoltage(Constants.BACK_INTAKE_NOTE_VOLTS);
     });
   }
@@ -51,8 +51,9 @@ public class Intake extends SubsystemBase {
     * Intake -> ground
    **/
   public Command releaseNote() {
-    return this.runOnce(() -> {
+    return this.run(() -> {
       this.frontLeftMotor.setVoltage(-Constants.FRONT_INTAKE_NOTE_VOLTS);
+      this.frontRightMotor.setVoltage(-Constants.FRONT_INTAKE_NOTE_VOLTS);
       this.backMotor.setVoltage(-Constants.BACK_INTAKE_NOTE_VOLTS);
     });
   }
@@ -61,8 +62,9 @@ public class Intake extends SubsystemBase {
     * Turns off the intake motors
    **/
   public Command off() {
-    return this.run(() -> {
+    return this.runOnce(() -> {
       this.frontLeftMotor.setVoltage(0.0);
+      this.frontRightMotor.setVoltage((0.0));
       this.backMotor.setVoltage(0.0);
     });
   }
