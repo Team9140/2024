@@ -40,6 +40,8 @@ public class Drivetrain extends SubsystemBase {
   private final SwerveKinematicLimits limits = new SwerveKinematicLimits(Constants.Drivetrain.METERS_PER_SECOND, Constants.Drivetrain.ACCELERATION, Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND);
 
   public final SwerveDriveKinematics swerveKinematics;
+
+  private final SwerveSetpointGenerator swerveStateGenerator;
   private final SwerveDrivePoseEstimator positionEstimator;
   private SwerveSetpoint prevSetpoint;
   private boolean fieldRelative;
@@ -61,6 +63,8 @@ public class Drivetrain extends SubsystemBase {
       new Translation2d(Units.inchesToMeters(-11.125), Units.inchesToMeters(-11.875))  // Back Right
     );
 
+    swerveStateGenerator = new SwerveSetpointGenerator(this.swerveKinematics);
+
     // Initialize swerve modules
     this.frontLeft = new SwerveModule(Constants.Ports.FRONT_LEFT_DRIVE, Constants.Ports.FRONT_LEFT_TURN, Constants.Drivetrain.FRONT_LEFT_KENCODER_OFFSET, "front left");
     this.frontRight = new SwerveModule(Constants.Ports.FRONT_RIGHT_DRIVE, Constants.Ports.FRONT_RIGHT_TURN, Constants.Drivetrain.FRONT_RIGHT_KENCODER_OFFSET, "front right");
@@ -77,7 +81,6 @@ public class Drivetrain extends SubsystemBase {
 
     // FIXME: unclear
     this.prevSetpoint = new SwerveSetpoint(this.getSpeed(), swerveKinematics.toSwerveModuleStates(this.getSpeed()));
-
   }
 
   /**
@@ -93,13 +96,14 @@ public class Drivetrain extends SubsystemBase {
     * @param position The new offset/position of the robot
    **/
   public void resetPosition(Pose2d position) {
-    this.gyro.setGyroAngle(this.gyro.getYawAxis(), position.getRotation().getDegrees());
     this.positionEstimator.resetPosition(
       Rotation2d.fromDegrees(gyro.getAngle()),
       this.getPositionArray(),
 //      new Pose2d(position.getX() + 0.64, position.getY() + 4.39, position.getRotation())
       position
     );
+    // Causes odd dragging movement
+//    this.gyro.setGyroAngle(this.gyro.getYawAxis(), position.getRotation().getDegrees());
   }
 
   /**
@@ -161,7 +165,6 @@ public class Drivetrain extends SubsystemBase {
     * @param movement The requested ChassisSpeeds
    **/
   public void swerveDrive(ChassisSpeeds movement) {
-    SwerveSetpointGenerator swerveStateGenerator = new SwerveSetpointGenerator(this.swerveKinematics);
     movement = ChassisSpeeds.discretize(movement, Constants.LOOP_INTERVAL);
     SmartDashboard.putNumber("vx", movement.vxMetersPerSecond);
     SmartDashboard.putNumber("vy", movement.vyMetersPerSecond);

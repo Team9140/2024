@@ -113,9 +113,9 @@ public class Robot extends LoggedRobot {
 
     Command currentCommand = this.drive.getCurrentCommand();
     if (currentCommand != null) {
-        SmartDashboard.putString("Auto Path", currentCommand.toString());
+      SmartDashboard.putString("Auto Path", currentCommand.toString());
     } else {
-        SmartDashboard.putString("Auto Path", "null");
+      SmartDashboard.putString("Auto Path", "null");
     }
   }
 

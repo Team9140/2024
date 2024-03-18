@@ -220,14 +220,14 @@ public final class Constants {
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
   public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
     // Blue Alliance
-    Map.entry("Abhinav's Position",         pose(0.64,    4.39,        -60)),
-    Map.entry("Amp Corner",                 pose(1.4997,  7.401295403, 0)),
-    Map.entry("Amp-Side Speaker Corner",    pose(1.2813,  6.445974092, 0)),
-    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
-    Map.entry("Inward-Side Speaker Corner", pose(1.2813,  4.667970536, 0)),
-    Map.entry("Field Center",               pose(1.4997,  4.11480823,  0)),
-    Map.entry("Speaker-Side Bar Line",      pose(1.4997,  3.309042418, 0)),
-    Map.entry("Opponent-Side Bar Line",     pose(1.4997,  2.572440945, 0))
+    Map.entry("Abhinav's Position",         pose(0.64,    4.39,        -60))//,
+//    Map.entry("Amp Corner",                 pose(1.4997,  7.401295403, 0)),
+//    Map.entry("Amp-Side Speaker Corner",    pose(1.2813,  6.445974092, 0)),
+//    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
+//    Map.entry("Inward-Side Speaker Corner", pose(1.2813,  4.667970536, 0)),
+//    Map.entry("Field Center",               pose(1.4997,  4.11480823,  0)),
+//    Map.entry("Speaker-Side Bar Line",      pose(1.4997,  3.309042418, 0)),
+//    Map.entry("Opponent-Side Bar Line",     pose(1.4997,  2.572440945, 0))
   ));
 
   public static final int DEFAULT_STARTING_POSITION = 0;
@@ -240,7 +240,7 @@ public final class Constants {
     Integer position = Constants.positionChooser.getSelected();
     if (position != null) {
       String positionString = Constants.STARTING_POSITIONS.keySet().toArray()[position].toString();
-      if (!Constants.STARTING_POSITIONS.containsKey(positionString)) {
+      if (Constants.STARTING_POSITIONS.containsKey(positionString)) {
         Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(positionString);
       } else {
         System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");

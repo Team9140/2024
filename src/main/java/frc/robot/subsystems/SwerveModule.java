@@ -139,7 +139,8 @@ public class SwerveModule extends SubsystemBase {
     * @param state A SwerveModuleState object containing the requested values
    **/
   public void setTarget(SwerveModuleState state) {
-    this.targetAngle = bestTurn(state.angle.getRadians(), this.getTurnAngle());
+//    this.targetAngle = bestTurn(state.angle.getRadians(), this.getTurnAngle());
+    this.targetAngle = state.angle.getRadians();
     this.targetVelocity = state.speedMetersPerSecond;
   }
 
