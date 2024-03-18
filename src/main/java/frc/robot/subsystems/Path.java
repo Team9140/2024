@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -18,100 +16,104 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 
 public class Path {
-    private static Path instance;
-    private final Drivetrain drive;
-    private final Arm arm;
-    private final Thrower thrower;
-    private final Intake intake;
+  private static Path instance;
+  private final Drivetrain drive;
+  private final Arm arm;
+  private final Thrower thrower;
+  private final Intake intake;
 
-    public static Path getInstance() {
-        return Path.instance == null ? Path.instance = new Path() : Path.instance;
-    }
+  public static Path getInstance() {
+      return Path.instance == null ? Path.instance = new Path() : Path.instance;
+  }
 
-    private Path() {
-        this.drive = Drivetrain.getInstance();
-        this.arm = Arm.getInstance();
-        this.thrower = Thrower.getInstance();
-        this.intake = Intake.getInstance();
+  private Path() {
+    this.drive = Drivetrain.getInstance();
+    this.arm = Arm.getInstance();
+    this.thrower = Thrower.getInstance();
+    this.intake = Intake.getInstance();
 
-        AutoBuilder.configureHolonomic(
-                drive::getPosition,
-                drive::resetPosition,
-                drive::getSpeed,
-                drive::swerveDrive,
-                new HolonomicPathFollowerConfig(
-                        new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
-                        new PIDConstants(1.0, 0.0, 0.0),
-                        Constants.Drivetrain.METERS_PER_SECOND,
-                        Units.inchesToMeters(Constants.BASE_RADUS),
-                        new ReplanningConfig()
-                ),
-                () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
-                drive
-        );
+    AutoBuilder.configureHolonomic(
+      this.drive::getPosition,
+      this.drive::resetPosition,
+      this.drive::getSpeed,
+      this.drive::swerveDrive,
+      new HolonomicPathFollowerConfig(
+        new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
+        new PIDConstants(1.0, 0.0, 0.0),
+        Constants.Drivetrain.METERS_PER_SECOND,
+        Units.inchesToMeters(Constants.BASE_RADUS),
+        new ReplanningConfig()
+      ),
+      () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
+      this.drive
+    );
+  }
 
-    }
+  public PathConstraints getPathConstraints() {
+    return new PathConstraints(
+      3.0, 4.0,
+      Units.degreesToRadians(540), Units.degreesToRadians(720)
+    );
+  }
 
+  public Command prepareOverhandLaunch() {
+    return new SequentialCommandGroup(
+      this.arm.setAngle(Constants.Arm.Positions.OVERHAND), // Set overhand aim
+      this.thrower.prepareSpeaker(),
+      new WaitUntilCommand(this.arm::isReady)
+    ); // Wait until the launchers are spinning fast enough
+  }
+  public Command getOverhandLaunch(){
+    return new SequentialCommandGroup(
+      this.thrower.launch(), // Launch
+      new WaitCommand(0.5), // Wait
+      this.thrower.off(),
+      this.arm.setStow()
+    ); // Adjust intake along with arm
+  }
 
-    public PathConstraints getPathConstraints() {
-        return new PathConstraints(
-                3.0, 4.0,
-                Units.degreesToRadians(540), Units.degreesToRadians(720));
-    }
+  public Command getIntakeOn(){
+    return new SequentialCommandGroup(
+      this.thrower.setIntake().alongWith(this.arm.setIntake()),
+      new WaitUntilCommand(this.arm::isReady), // wait until the launchers are spinning fast enough
+      this.intake.intakeNote()
+    );
+  }
 
-    public Command prepareOverhandLaunch() {
-        return new SequentialCommandGroup(this.arm.setAngle(Constants.Arm.Positions.OVERHAND) // Set overhand aim
-                .andThen(this.thrower.prepareSpeaker())
-                .andThen(new WaitUntilCommand(this.arm::isReady))); // Wait until the launchers are spinning fast enough
-    }
-    public Command getOverhandLaunch(){
-        return new SequentialCommandGroup(
-                this.thrower.launch()) //launch
-                        .andThen(new WaitCommand(0.5)) //wait
-                        .andThen(this.thrower.off())
-                        .andThen(this.arm.setStow()); // Adjust intake along with arm
-    }
+  public Command getIntakeOff(){
+    return this.thrower.off().alongWith(this.intake.off());
+  }
 
-    public Command getIntakeOn(){
-        return new SequentialCommandGroup(
-                this.thrower.setIntake().alongWith(this.arm.setIntake())
-                        .andThen(new WaitUntilCommand(this.arm::isReady)) // wait until the launchers are spinning fast enough
-                        .andThen(this.intake.intakeNote()));
-    }
+  public Command auto() {
+    // For starting on left side
+    PathPlannerPath path1 = PathPlannerPath.fromPathFile("Path1");
+    PathPlannerPath path2 = PathPlannerPath.fromPathFile("1Path6");
+    PathPlannerPath path3 = PathPlannerPath.fromPathFile("1Path1");
+    PathPlannerPath path4 = PathPlannerPath.fromPathFile("1Path2");
+    PathPlannerPath path5 = PathPlannerPath.fromPathFile("1Path3");
+    PathPlannerPath path6 = PathPlannerPath.fromPathFile("1Path4");
 
-    public Command getIntakeOff(){
-        return new SequentialCommandGroup(this.thrower.off().alongWith(this.intake.off()));
-    }
-    public Command auto() {
-        //For starting on left side
-        PathPlannerPath path1 = PathPlannerPath.fromPathFile("Path1");
-        PathPlannerPath path2 = PathPlannerPath.fromPathFile("1Path6");
-        PathPlannerPath path3 = PathPlannerPath.fromPathFile("1Path1");
-        PathPlannerPath path4 = PathPlannerPath.fromPathFile("1Path2");
-        PathPlannerPath path5 = PathPlannerPath.fromPathFile("1Path3");
-        PathPlannerPath path6 = PathPlannerPath.fromPathFile("1Path4");
+    // Middle will be 1Path1, 1Path2, 1Path3, 1Path4, 1Path5, 1Path6
 
-        //Middle will be 1Path1, 1Path2, 1Path3, 1Path4, 1Path5, 1Path6
+    // FIXME: Arm code commented due to robot damage
+    return new SequentialCommandGroup(
+//      prepareOverhandLaunch(),
+//      getOverhandLaunch(),
+      AutoBuilder.followPath(path1),//.alongWith(getIntakeOn()),
+//      getIntakeOff(),
+      AutoBuilder.followPath(path2),//alongWith(prepareOverhandLaunch()),
+//      getOverhandLaunch(),
+      AutoBuilder.followPath(path3),//.alongWith(getIntakeOn()),
+//      getIntakeOff(),
+      AutoBuilder.followPath(path4),//.alongWith(prepareOverhandLaunch()),
+//      getOverhandLaunch().alongWith(
+      AutoBuilder.followPath(path5),//),
+//      getIntakeOff(),
+      AutoBuilder.followPath(path6));//.alongWith(prepareOverhandLaunch()),
+//    getOverhandLaunch());
+  }
 
-        //Arm code commented due to robot damage
-        return new SequentialCommandGroup(
-                //prepareOverhandLaunch(),
-                //getOverhandLaunch(),
-                AutoBuilder.followPath(path1),//.alongWith(getIntakeOn()),
-                //getIntakeOff(),
-                AutoBuilder.followPath(path2),//alongWith(prepareOverhandLaunch()),
-                //getOverhandLaunch(),
-                AutoBuilder.followPath(path3),//.alongWith(getIntakeOn()),
-                //getIntakeOff(),
-                AutoBuilder.followPath(path4),//.alongWith(prepareOverhandLaunch()),
-                //getOverhandLaunch().alongWith(
-                AutoBuilder.followPath(path5),//),
-                //getIntakeOff(),
-                AutoBuilder.followPath(path6));//.alongWith(prepareOverhandLaunch()),
-                //getOverhandLaunch());
-    }
-
-    public void pathFindToPose(Pose2d endPos) {
-        AutoBuilder.pathfindToPose(endPos, getPathConstraints());
-    }
+  public void pathFindToPose(Pose2d endPos) {
+    AutoBuilder.pathfindToPose(endPos, getPathConstraints());
+  }
 }
