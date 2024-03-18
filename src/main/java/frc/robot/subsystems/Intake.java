@@ -12,6 +12,10 @@ public class Intake extends SubsystemBase {
   private final WPI_TalonSRX frontRightMotor;  // Big Bad Wolf
   private final WPI_TalonSRX backMotor;  // Three Little Piggies
 
+  private double frontLeftVoltage = 0.0;
+  private double frontRightVoltage = 0.0;
+  private double backVoltage = 0.0;
+
   private Intake() {
     this.frontLeftMotor = new WPI_TalonSRX(Constants.Ports.FRONT_LEFT_INTAKE);
     this.frontLeftMotor.configContinuousCurrentLimit(Constants.FRONT_INTAKE_CURRENT_LIMIT);
@@ -39,10 +43,10 @@ public class Intake extends SubsystemBase {
     * does not grab it, just turns on the motors
    **/
   public Command intakeNote() {
-    return this.run(() -> {
-      this.frontLeftMotor.setVoltage(Constants.FRONT_INTAKE_NOTE_VOLTS);
-      this.frontRightMotor.setVoltage(Constants.FRONT_INTAKE_NOTE_VOLTS);
-      this.backMotor.setVoltage(Constants.BACK_INTAKE_NOTE_VOLTS);
+    return this.runOnce(() -> {
+      this.frontLeftVoltage = Constants.FRONT_INTAKE_NOTE_VOLTS;
+      this.frontRightVoltage = Constants.FRONT_INTAKE_NOTE_VOLTS;
+      this.backVoltage = Constants.BACK_INTAKE_NOTE_VOLTS;
     });
   }
 
@@ -51,10 +55,10 @@ public class Intake extends SubsystemBase {
     * Intake -> ground
    **/
   public Command releaseNote() {
-    return this.run(() -> {
-      this.frontLeftMotor.setVoltage(-Constants.FRONT_INTAKE_NOTE_VOLTS);
-      this.frontRightMotor.setVoltage(-Constants.FRONT_INTAKE_NOTE_VOLTS);
-      this.backMotor.setVoltage(-Constants.BACK_INTAKE_NOTE_VOLTS);
+    return this.runOnce(() -> {
+      this.frontLeftVoltage = -Constants.FRONT_INTAKE_NOTE_VOLTS;
+      this.frontRightVoltage = -Constants.FRONT_INTAKE_NOTE_VOLTS;
+      this.backVoltage = -Constants.BACK_INTAKE_NOTE_VOLTS;
     });
   }
 
@@ -63,9 +67,15 @@ public class Intake extends SubsystemBase {
    **/
   public Command off() {
     return this.runOnce(() -> {
-      this.frontLeftMotor.setVoltage(0.0);
-      this.frontRightMotor.setVoltage((0.0));
-      this.backMotor.setVoltage(0.0);
+      this.frontLeftVoltage = (0.0);
+      this.frontRightVoltage = (0.0);
+      this.backVoltage = (0.0);
     });
+  }
+  @Override
+  public void periodic(){
+      this.frontLeftMotor.setVoltage(frontLeftVoltage);
+      this.frontRightMotor.setVoltage(frontRightVoltage);
+      this.backMotor.setVoltage(backVoltage);
   }
 }

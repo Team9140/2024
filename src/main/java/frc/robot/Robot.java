@@ -5,13 +5,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.LoggedRobot;
 
 import com.revrobotics.CANSparkLowLevel;
@@ -34,7 +27,7 @@ public class Robot extends LoggedRobot {
 
   private CANSparkMax climber;
 
-  //private PathFinder pathfinder;
+  private Path path;
 
 //  private Candle candleSystem = new Candle();
 
@@ -62,23 +55,8 @@ public class Robot extends LoggedRobot {
     this.thrower = Thrower.getInstance();
     this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
     this.climber.setInverted(true);
-    //pathfinder = PathFinder.getInstance();
+    path = Path.getInstance();
 
-    AutoBuilder.configureHolonomic(
-            drive::getPosition,
-            drive::resetPosition,
-            drive::getSpeed,
-            drive::swerveDrive,
-            new HolonomicPathFollowerConfig(
-                    new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(1.0, 0.0, 0.0),
-                    Constants.Drivetrain.METERS_PER_SECOND,
-                    Units.inchesToMeters(Constants.BASE_RADUS),
-                    new ReplanningConfig()
-            ),
-            () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
-            drive
-    );
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
       // Remove low, fluctuating values from rotation input joystick
@@ -156,24 +134,7 @@ public class Robot extends LoggedRobot {
   public void autonomousInit() {
     Constants.UpdateSettings();
     CommandScheduler.getInstance().cancelAll();
-
-    Command overhandLaunchCommand =
-            this.arm.setOverhand() // Set overhand aim
-                    .alongWith(this.thrower.prepareSpeaker()) // Start launchers before throwing
-                    .andThen(new WaitUntilCommand(this.arm::isReady)) // Wait until the launchers are spinning fast enough
-                    .andThen(this.thrower.launch()) // Launch
-                    .andThen(this.thrower.setIntake().alongWith(this.arm.setIntake())); // Adjust intake along with arm
-
-    Command floorIntake =
-            new WaitUntilCommand(this.arm::isReady) // Wait until the launchers are spinning fast enough
-                    .andThen(this.intake.intakeNote()); // Start floor intake
-
-    NamedCommands.registerCommand("Intake", floorIntake);
-    NamedCommands.registerCommand("Intake_Off", this.intake.off());
-    NamedCommands.registerCommand("Shoot", overhandLaunchCommand);
-    PathPlannerPath path = PathPlannerPath.fromPathFile("Path1");
-
-    AutoBuilder.followPath(path).execute();
+    path.auto().schedule();
 
   }
 
@@ -182,6 +143,7 @@ public class Robot extends LoggedRobot {
    **/
   @Override
   public void teleopInit() {
+    CommandScheduler.getInstance().cancelAll();
     Constants.UpdateSettings();
   }
 

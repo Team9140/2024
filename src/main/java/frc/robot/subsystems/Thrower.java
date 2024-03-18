@@ -24,6 +24,7 @@ public class Thrower extends SubsystemBase {
 
     // Provides output for launchers
     private final VoltageOut launcherController;
+    private double feederVolts;
 
     private Thrower() {
         // Creates motors
@@ -65,8 +66,7 @@ public class Thrower extends SubsystemBase {
         return Thrower.instance == null ? Thrower.instance = new Thrower() : Thrower.instance;
     }
 
-    private double feederVolts;
-
+    @Override
     public void periodic() {
         this.topLauncher.setControl(this.launcherController);
         this.bottomLauncher.setControl(this.launcherController);

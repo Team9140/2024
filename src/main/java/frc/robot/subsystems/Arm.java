@@ -73,7 +73,7 @@ public class Arm extends SubsystemBase {
 
     // Arm goes to desired angle in radians using motionMagic
     public Command setAngle(double position) {
-        return this.run(() -> this.motor.setControl(this.motionMagic.withPosition(position)));
+        return this.runOnce(() -> this.motionMagic.withPosition(position));
     }
 
     // Moves arm to stowed position (which is the same as intake)
@@ -99,5 +99,10 @@ public class Arm extends SubsystemBase {
     // Moves arm to throwing position for Amp
     public Command setAmp() {
         return setAngle(Constants.Arm.Positions.AMP);
+    }
+
+    @Override
+    public void periodic(){
+        this.motor.setControl(this.motionMagic);
     }
 }
