@@ -5,27 +5,17 @@
 
 package frc.robot;
 
-<<<<<<< HEAD
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-=======
-import org.littletonrobotics.junction.LoggedRobot;
-
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
->>>>>>> auto
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
 
-public class Robot extends LoggedRobot {
+public class Robot extends TimedRobot {
   private Drivetrain drive;
   //  private PhotonVision camera;
   private Intake intake;
@@ -36,13 +26,10 @@ public class Robot extends LoggedRobot {
 
   private CANSparkMax climber;
 
-<<<<<<< HEAD
-=======
   private Path path;
 
 //  private Candle candleSystem = new Candle();
 
->>>>>>> auto
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 
