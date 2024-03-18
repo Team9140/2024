@@ -67,13 +67,18 @@ public class Arm extends SubsystemBase {
     return instance == null ? Arm.instance = new Arm() : Arm.instance;
   }
 
+  @Override
+  public void periodic(){
+    this.motor.setControl(this.motionMagic);
+  }
+
   public boolean isReady() {
     return Math.abs(this.motor.getPosition().getValueAsDouble() - this.motionMagic.Position) < Constants.Arm.AIM_ERROR;
   }
 
   // Arm goes to desired angle in radians using motionMagic
   public Command setAngle(double position) {
-    return this.run(() -> this.motor.setControl(this.motionMagic.withPosition(position)));
+    return this.runOnce(() -> this.motionMagic.withPosition(position));
   }
 
   // Moves arm to stowed position (which is the same as intake)

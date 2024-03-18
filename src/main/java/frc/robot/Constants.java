@@ -31,6 +31,8 @@ public final class Constants {
   public static final int WIDTH = 29;  // Inches, side-to-side width
   public static final int LENGTH = 29;  // Inches, front-to-back length
 
+  public static final int BASE_RADUS = 15;
+
   // Size of the field
   //  public static final double fieldx = Units.inchesToMeters(501);
   //  public static final double fieldy = Units.inchesToMeters(323.28);
@@ -138,25 +140,25 @@ public final class Constants {
   public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
   public static final double AUTO_SPEED = 5; //FIXME: Add real values
 
-  public static class Launcher {
-    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
-
-    public static final double POSITION_ERROR = 0.2;
-    public static final double VELOCITY_ERROR = 0.2;
-    public static final double SHOOTER_RADIUS = 1.063;
-    public static final double TERMINAL_VELOCITY_ACCOUNTING = 0.1; //accounts for terminal velocity, probably no real need TODO: fine tune through testing
-
-    // Heights for aimbot
-    // TODO: fine tune speaker height for maximum variability resistance
-    public static final double SPEAKER_HEIGHT = 6.8;
-    public static final double JOINT_HEIGHT = 1.72283;
-
-    // The desired upward velocity of the note when it enters the speaker
-    // Higher values mean earlier entry and more upward, lower values mean more horizontal.
-    // Values close to 0 are likely to hit the front instead of going in.
-    public static final double ENTERING_SPEAKER_VELOCITY = 1.0;  // TODO: fine tune velocity through testing
-    public static final double ACCELERATION_GRAVITY = -32.17405;  // Acceleration of gravity ft/s^2
-  }
+//  public static class Launcher {
+//    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
+//
+//    public static final double POSITION_ERROR = 0.2;
+//    public static final double VELOCITY_ERROR = 0.2;
+//    public static final double SHOOTER_RADIUS = 1.063;
+//    public static final double TERMINAL_VELOCITY_ACCOUNTING = 0.1; //accounts for terminal velocity, probably no real need TODO: fine tune through testing
+//
+//    // Heights for aimbot
+//    // TODO: fine tune speaker height for maximum variability resistance
+//    public static final double SPEAKER_HEIGHT = 6.8;
+//    public static final double JOINT_HEIGHT = 1.72283;
+//
+//    // The desired upward velocity of the note when it enters the speaker
+//    // Higher values mean earlier entry and more upward, lower values mean more horizontal.
+//    // Values close to 0 are likely to hit the front instead of going in.
+//    public static final double ENTERING_SPEAKER_VELOCITY = 1.0;  // TODO: fine tune velocity through testing
+//    public static final double ACCELERATION_GRAVITY = -32.17405;  // Acceleration of gravity ft/s^2
+//  }
 
   public static class Arm {
     // PID and SVA, used in motion magic
@@ -174,7 +176,7 @@ public final class Constants {
     public static final double ACCELERATION = 24.0; // Radians per second per second
     public static final double FEED_FORWARD = 0.0; // FIXME: for later
     public static final double INITIAL_VARIANCE = Units.degreesToRadians(3); // Radians
-    public static final double AIM_ERROR = 0.0; // FIXME: ask gijspice
+    public static final double AIM_ERROR = Math.toRadians(3.0); // FIXME: ask gijspice
 
     // Positions in radians
     public static class Positions {
@@ -228,6 +230,7 @@ public final class Constants {
   ));
 
   public static Pose2d STARTING_POSITION = new Pose2d(0.0, 0.0, new Rotation2d(0.0));
+  public static Pose2d ampPos = new Pose2d(5, 3, Rotation2d.fromDegrees(180)); //FIXME: Add real values
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();

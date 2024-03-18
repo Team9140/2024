@@ -4,5 +4,25 @@
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler"
     }
+  },
+  "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    }
+  },
+  "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Connections": {
+      "open": true
+    },
+    "Server": {
+      "Publishers": {
+        "open": true
+      },
+      "open": true
+    },
+    "visible": true
   }
 }

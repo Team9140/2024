@@ -5,20 +5,27 @@
 
 package frc.robot;
 
+<<<<<<< HEAD
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
+=======
+import org.littletonrobotics.junction.LoggedRobot;
+
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import edu.wpi.first.math.MathUtil;
+>>>>>>> auto
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
 
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private Drivetrain drive;
   //  private PhotonVision camera;
   private Intake intake;
@@ -29,6 +36,13 @@ public class Robot extends TimedRobot {
 
   private CANSparkMax climber;
 
+<<<<<<< HEAD
+=======
+  private Path path;
+
+//  private Candle candleSystem = new Candle();
+
+>>>>>>> auto
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
 
@@ -53,6 +67,7 @@ public class Robot extends TimedRobot {
     this.thrower = Thrower.getInstance();
     this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
     this.climber.setInverted(true);
+    path = Path.getInstance();
 
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
@@ -109,6 +124,12 @@ public class Robot extends TimedRobot {
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
 
+    Command currentCommand = this.drive.getCurrentCommand();
+    if (currentCommand != null) {
+        SmartDashboard.putString("Auto Path", currentCommand.toString());
+    } else {
+        SmartDashboard.putString("Auto Path", "null");
+    }
   }
 
   /**
@@ -119,18 +140,19 @@ public class Robot extends TimedRobot {
     Constants.UpdateSettings();
     CommandScheduler.getInstance().cancelAll();
 
-    (switch (0) {
-      case 0:
-        yield new SequentialCommandGroup(
-          this.drive.swerveDrive(new Transform2d(2.0, 0.0, Rotation2d.fromDegrees(0))),
-          this.intake.intakeNote().raceWith(new WaitCommand(1.0)),
-          this.drive.swerveDrive(new Transform2d(2.1, 0.0, Rotation2d.fromDegrees(0))),
-          this.intake.off(),
-          this.drive.swerveDrive(new Transform2d(1.0, 0.0, Rotation2d.fromDegrees(90)))
-        );
-      default:
-        yield new SequentialCommandGroup();
-    }).schedule();
+//    (switch (0) {
+//      case 0:
+//        yield new SequentialCommandGroup(
+//          this.drive.swerveDrive(new Transform2d(2.0, 0.0, Rotation2d.fromDegrees(0))),
+//          this.intake.intakeNote().raceWith(new WaitCommand(1.0)),
+//          this.drive.swerveDrive(new Transform2d(2.1, 0.0, Rotation2d.fromDegrees(0))),
+//          this.intake.off(),
+//          this.drive.swerveDrive(new Transform2d(1.0, 0.0, Rotation2d.fromDegrees(90)))
+//        );
+//      default:
+//        yield new SequentialCommandGroup();
+//    }).schedule();
+    path.auto().schedule();
   }
 
   /**
@@ -138,6 +160,7 @@ public class Robot extends TimedRobot {
    **/
   @Override
   public void teleopInit() {
+    CommandScheduler.getInstance().cancelAll();
     Constants.UpdateSettings();
   }
 
