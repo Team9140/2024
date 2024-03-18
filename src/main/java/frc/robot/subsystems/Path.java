@@ -95,22 +95,23 @@ public class Path {
 
     // Middle will be 1Path1, 1Path2, 1Path3, 1Path4, 1Path5, 1Path6
 
+    return AutoBuilder.followPath(PathPlannerPath.fromPathFile("New Path"));
     // FIXME: Arm code commented due to robot damage
-    return new SequentialCommandGroup(
-//      prepareOverhandLaunch(),
-//      getOverhandLaunch(),
-      AutoBuilder.followPath(path1),//.alongWith(getIntakeOn()),
-//      getIntakeOff(),
-      AutoBuilder.followPath(path2),//alongWith(prepareOverhandLaunch()),
-//      getOverhandLaunch(),
-      AutoBuilder.followPath(path3),//.alongWith(getIntakeOn()),
-//      getIntakeOff(),
-      AutoBuilder.followPath(path4),//.alongWith(prepareOverhandLaunch()),
-//      getOverhandLaunch().alongWith(
-      AutoBuilder.followPath(path5),//),
-//      getIntakeOff(),
-      AutoBuilder.followPath(path6));//.alongWith(prepareOverhandLaunch()),
-//    getOverhandLaunch());
+//    return new SequentialCommandGroup(
+////      prepareOverhandLaunch(),
+////      getOverhandLaunch(),
+//      AutoBuilder.followPath(path1),//.alongWith(getIntakeOn()),
+////      getIntakeOff(),
+//      AutoBuilder.followPath(path2),//alongWith(prepareOverhandLaunch()),
+////      getOverhandLaunch(),
+//      AutoBuilder.followPath(path3),//.alongWith(getIntakeOn()),
+////      getIntakeOff(),
+//      AutoBuilder.followPath(path4),//.alongWith(prepareOverhandLaunch()),
+////      getOverhandLaunch().alongWith(
+//      AutoBuilder.followPath(path5),//),
+////      getIntakeOff(),
+//      AutoBuilder.followPath(path6));//.alongWith(prepareOverhandLaunch()),
+////    getOverhandLaunch());
   }
 
   public void pathFindToPose(Pose2d endPos) {
