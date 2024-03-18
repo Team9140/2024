@@ -59,15 +59,17 @@ public class Path {
                 Units.degreesToRadians(540), Units.degreesToRadians(720));
     }
 
-    public Command getOverhandLaunch(double customPosition){
+    public Command prepareOverhandLaunch() {
+        return new SequentialCommandGroup(this.arm.setAngle(Constants.Arm.Positions.OVERHAND) // Set overhand aim
+                .andThen(this.thrower.prepareSpeaker())
+                .andThen(new WaitUntilCommand(this.arm::isReady))); // Wait until the launchers are spinning fast enough
+    }
+    public Command getOverhandLaunch(){
         return new SequentialCommandGroup(
-                this.arm.setAngle(Constants.Arm.Positions.OVERHAND + customPosition) // Set overhand aim
-                        .andThen(this.thrower.prepareSpeaker()) // Start launchers before throwing
-                        .andThen(new WaitUntilCommand(this.arm::isReady)) // Wait until the launchers are spinning fast enough
-                        .andThen(this.thrower.launch()) //launch
+                this.thrower.launch()) //launch
                         .andThen(new WaitCommand(0.5)) //wait
                         .andThen(this.thrower.off())
-                        .andThen(this.arm.setStow())); // Adjust intake along with arm
+                        .andThen(this.arm.setStow()); // Adjust intake along with arm
     }
 
     public Command getIntakeOn(){
@@ -81,26 +83,32 @@ public class Path {
         return new SequentialCommandGroup(this.thrower.off().alongWith(this.intake.off()));
     }
     public Command auto() {
-
+        //For starting on left side
         PathPlannerPath path1 = PathPlannerPath.fromPathFile("Path1");
-        PathPlannerPath path2 = PathPlannerPath.fromPathFile("Path2");
-        PathPlannerPath path3 = PathPlannerPath.fromPathFile("Path3");
+        PathPlannerPath path2 = PathPlannerPath.fromPathFile("1Path6");
+        PathPlannerPath path3 = PathPlannerPath.fromPathFile("1Path1");
+        PathPlannerPath path4 = PathPlannerPath.fromPathFile("1Path2");
+        PathPlannerPath path5 = PathPlannerPath.fromPathFile("1Path3");
+        PathPlannerPath path6 = PathPlannerPath.fromPathFile("1Path4");
 
+        //Middle will be 1Path1, 1Path2, 1Path3, 1Path4, 1Path5, 1Path6
+
+        //Arm code commented due to robot damage
         return new SequentialCommandGroup(
-                getOverhandLaunch(0),
-                getIntakeOn(),
-                AutoBuilder.followPath(path1),
-                getIntakeOff(),
-                getOverhandLaunch(Math.toRadians(0)),
-                getIntakeOn(),
-                AutoBuilder.followPath(path2),
-                getIntakeOff(),
-                getOverhandLaunch(Math.toRadians(15.0)),
-                getIntakeOn(),
-                AutoBuilder.followPath(path3),
-                getIntakeOff(),
-                getOverhandLaunch(Math.toRadians(15.0))
-        );
+                //prepareOverhandLaunch(),
+                //getOverhandLaunch(),
+                AutoBuilder.followPath(path1),//.alongWith(getIntakeOn()),
+                //getIntakeOff(),
+                AutoBuilder.followPath(path2),//alongWith(prepareOverhandLaunch()),
+                //getOverhandLaunch(),
+                AutoBuilder.followPath(path3),//.alongWith(getIntakeOn()),
+                //getIntakeOff(),
+                AutoBuilder.followPath(path4),//.alongWith(prepareOverhandLaunch()),
+                //getOverhandLaunch().alongWith(
+                AutoBuilder.followPath(path5),//),
+                //getIntakeOff(),
+                AutoBuilder.followPath(path6));//.alongWith(prepareOverhandLaunch()),
+                //getOverhandLaunch());
     }
 
     public void pathFindToPose(Pose2d endPos) {
