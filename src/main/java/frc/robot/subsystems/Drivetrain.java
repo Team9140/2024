@@ -75,7 +75,7 @@ public class Drivetrain extends SubsystemBase {
       this.swerveKinematics,
       Rotation2d.fromDegrees(this.gyro.getAngle()),
       this.getPositionArray(),
-      new Pose2d(1.33, 5.57, Rotation2d.fromDegrees(0)) // Starting Position
+      new Pose2d(0.64, 4.39, Rotation2d.fromDegrees(-60)) // Starting Position
     );
 
     // FIXME: unclear
@@ -99,7 +99,7 @@ public class Drivetrain extends SubsystemBase {
     this.positionEstimator.resetPosition(
       Rotation2d.fromDegrees(gyro.getAngle()),
       this.getPositionArray(),
-      new Pose2d(position.getX() + 1.33, position.getY() + 5.57, position.getRotation())
+      new Pose2d(position.getX() + 0.64, position.getY() + 4.39, position.getRotation())
     );
   }
 
