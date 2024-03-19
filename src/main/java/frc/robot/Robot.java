@@ -20,11 +20,8 @@ public class Robot extends TimedRobot {
   private Drivetrain drive;
   //  private PhotonVision camera;
   private Intake intake;
-
   private Arm arm;
-
   private Thrower thrower;
-
   private CANSparkMax climber;
 
   // The input Xbox controller
@@ -67,40 +64,39 @@ public class Robot extends TimedRobot {
 
       // Remove low, fluctuating values and drive at the input joystick as percentage of max velocity
       this.drive.swerveDrive(
-              leftJoystickY * Math.abs(leftJoystickY) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
-              leftJoystickX * Math.abs(leftJoystickX) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
-              rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1  // Rotation (squared to make larger values more sensitive)
+        leftJoystickY * Math.abs(leftJoystickY) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
+        leftJoystickX * Math.abs(leftJoystickX) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
+        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1  // Rotation (squared to make larger values more sensitive)
       );
     }, this.drive));
 
     // FIXME: Find a way to not duplicate long command things
 
     // Prepare underhand throw
-    this.controller.a().onTrue(this.arm.setUnderhand()
-            .alongWith(this.thrower.prepareSpeaker())
-            .alongWith(this.intake.off()));
+    this.controller.a().onTrue(this.arm.setUnderhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
+
     // Prepare overhand throw
-    this.controller.y().onTrue(this.arm.setOverhand()
-            .alongWith(this.thrower.prepareSpeaker())
-            .alongWith(this.intake.off()));
+    this.controller.y().onTrue(this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
+
     // Prepare amp throw
-    this.controller.b().onTrue(this.arm.setAmp()
-            .alongWith(this.thrower.prepareAmp())
-            .alongWith(this.intake.off()));
+    this.controller.b().onTrue(this.arm.setAmp().alongWith(this.thrower.prepareAmp()).alongWith(this.intake.off()));
+
     // Stow TODO: Maybe not turn the intake off?
-    this.controller.x().onTrue(this.arm.setStow()
-            .alongWith(this.intake.off())
-            .alongWith(this.thrower.off()));
+    this.controller.x().onTrue(this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()));
 
     // Intake Note
     this.controller.rightBumper()
-            .onTrue(this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake())))
-            .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
+      .onTrue(this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake())))
+      .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
 
     // Throw note
-    this.controller.rightTrigger().onTrue(this.thrower.launch())
-            .onFalse(new SequentialCommandGroup(this.thrower.launch()).andThen(new WaitCommand(1.0),
-                    this.arm.setStow().alongWith(this.thrower.off())));
+    this.controller.rightTrigger()
+      .onTrue(this.thrower.launch())
+      .onFalse(new SequentialCommandGroup(
+        this.thrower.launch(),
+        new WaitCommand(1.0),
+        this.arm.setStow().alongWith(this.thrower.off())
+      ));
   }
   /**
    * Routinely execute the currently scheduled command.
@@ -123,7 +119,6 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     Constants.UpdateSettings();
     CommandScheduler.getInstance().cancelAll();
-
   }
 
   /**
