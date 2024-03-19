@@ -60,7 +60,7 @@ public class Arm extends SubsystemBase {
       .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
 
     // Set arm encoder position as starting if it is the first time booting the kraken
-    if (Math.abs(this.motor.getPosition().getValueAsDouble()) < Units.degreesToRadians(Constants.Arm.INITIAL_VARIANCE)) this.motor.setPosition(-Math.PI / 2.0);
+    if (Math.abs(this.motor.getPosition().getValueAsDouble()) < Constants.Arm.INITIAL_VARIANCE) this.motor.setPosition(-Math.PI / 2.0);
   }
 
   public static Arm getInstance() {
@@ -83,27 +83,27 @@ public class Arm extends SubsystemBase {
 
   // Moves arm to stowed position (which is the same as intake)
   public Command setStow() {
-    return setIntake();
+    return this.setIntake();
   }
 
   // Moves arm to intake position
   public Command setIntake() {
-    return setAngle(Constants.Arm.Positions.INTAKE);
+    return this.setAngle(Constants.Arm.Positions.INTAKE);
   }
 
   // Moves arm to overhand throwing position
   public Command setOverhand() {
-    return setAngle(Constants.Arm.Positions.OVERHAND);
+    return this.setAngle(Constants.Arm.Positions.OVERHAND);
   }
 
   // Moves arm to underhand throwing position
   public Command setUnderhand() {
-    return setAngle(Constants.Arm.Positions.UNDERHAND);
+    return this.setAngle(Constants.Arm.Positions.UNDERHAND);
   }
 
   // Moves arm to throwing position for Amp
   public Command setAmp() {
-    return setAngle(Constants.Arm.Positions.AMP);
+    return this.setAngle(Constants.Arm.Positions.AMP);
   }
 
   /**
