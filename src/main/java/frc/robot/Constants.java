@@ -86,25 +86,29 @@ public final class Constants {
     public static final int INPUT_CONTROLLER = 0;  // Xbox Controller
     public static final String CAMERA = "ProblemCamera";  // PhotonVision camera ID
 
+    public static final int CANDLE = 5;
+
     // Ports for CANSparkMax motor controllers
     public static final int FRONT_LEFT_DRIVE = 1;
     public static final int FRONT_LEFT_TURN = 4;
     public static final int FRONT_RIGHT_DRIVE = 0;
     public static final int FRONT_RIGHT_TURN = 9;
     public static final int BACK_LEFT_DRIVE = 3;
-    public static final int BACK_LEFT_TURN = 1;
+    public static final int BACK_LEFT_TURN = 7;
     public static final int BACK_RIGHT_DRIVE = 2;
-    public static final int BACK_RIGHT_TURN = 7;
+    public static final int BACK_RIGHT_TURN = 1;
 
     public static final String CTRE_CANBUS = "jama";
-    public static final int ARM_MOTOR = 19;
-    public static final int BOTTOM_SHOOTER = 20;
-    public static final int TOP_SHOOTER = 21;
-    public static final int ARM_FEEDER = 22;
+    public static final int ARM_MOTOR = 4;
+    public static final int BOTTOM_LAUNCHER = 5;
+    public static final int TOP_LAUNCHER = 6;
+    public static final int THROWER_FEEDER = 32;
 
-    public static final int FRONT_LEFT_INTAKE = 32;
-    public static final int FRONT_RIGHT_INTAKE = 31;
-    public static final int BACK_INTAKE = 30;
+    public static final int CLIMBER = 0;
+
+    public static final int FRONT_LEFT_INTAKE = 33;
+    public static final int FRONT_RIGHT_INTAKE = 30;
+    public static final int BACK_INTAKE = 31;
   }
 
   // Command to move to specified position on field
@@ -131,43 +135,60 @@ public final class Constants {
 
     // Position of camera relative to the robot
     public static final Transform3d cameraToRobot = new Transform3d();
-
-//    static {
-//      try {
-//        field = new AprilTagFieldLayout("2024-crescendo.json");  // FIXME: Add JSON to deploy
-//      } catch (IOException e) {
-//        throw new RuntimeException(e);
-//      }
-//    }
   }
+
+  public static final int CANDLE_LEDS_PER_ANIMATION = 30;  // FIXME: Placeholder value
+
+  public static final double CANDLE_DURATION = 4;
+  public static final double CANDLE_BRIGHTNESS = 1.0;
 
   // Electric current limits for intake motors
   public static final int FRONT_INTAKE_CURRENT_LIMIT = 15;
   public static final int BACK_INTAKE_CURRENT_LIMIT = 25;
   public static final double FRONT_INTAKE_NOTE_VOLTS = 6.0;
   public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
+  public static final double AUTO_SPEED = 5; //FIXME: Add real values
 
-  public static class Launcher {
-    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
+  public static class Arm {
+    // PID and SVA, used in motion magic
+    public static final double P = 26.0;
+    public static final double I = 0.0;
+    public static final double D = 1.54;
+    public static final double S = 0.14178;
+    public static final double V = 0.94316;
+    public static final double A = 0.07;
+    public static final double MAX_CURRENT = 40.0; // Amps
+    public static final double SENSOR_TO_MECHANISM_RATIO = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI); // Radian rotations of arm
 
-    public static final double POSITION_ERROR = 0.2;
-    public static final double VELOCITY_ERROR = 0.2;
+    // Motion Magic Specific Limits
+    public static final double CRUISE_VELOCITY = 12.0; // Radians per second
+    public static final double ACCELERATION = 24.0; // Radians per second per second
+    public static final double FEED_FORWARD = 0.0; // FIXME: for later
+    public static final double INITIAL_VARIANCE = Units.degreesToRadians(3); // Radians
+    public static final double AIM_ERROR = 0.0; // FIXME: ask gijspice
 
+    // Positions in radians
     public static class Positions {
-      // Won't actually be 0.0, origin will be when the arm is straight down
-      public static final double INTAKE = 0.0;  // FIXME: unknown units & value
-      public static final double AMP = 0.0;  // FIXME: unknown units & value
+      public static final double INTAKE = -1.69;
+      public static final double AMP = 2.0;
+      public static final double UNDERHAND = -0.3 * Math.PI;
+      public static final double OVERHAND = 0.25 * Math.PI;
+    }
+  }
 
-
-      // Values for testing arm movement. Set positions will be replaced with photonvision aimbot.
-      public static final double UNDERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
-      public static final double OVERHAND_SHOOT = 0.0;  // FIXME: unknown units & value
-
+  public static class Thrower {
+    public static class Launcher {
+      public static final double MAX_CURRENT = 30.0; // amps
+      public static final double INTAKE_VOLTAGE = -3.0; // volts
+      public static final double SPEAKER_VOLTAGE = 8.0; // volts
+      public static final double AMP_VOLTAGE = 3.0; // volts
     }
 
-    public static class Velocities {
-      public static final double GRAB = 0.0;  // FIXME: unknown units & value
-      public static final double SHOOT = 0.0;  // FIXME: unknown units & value
+    public static class Feeder {
+      public static final int MAX_CURRENT = 0;  // amps // FIXME: ACTUALLY PUT A VALUE
+      public static final double INTAKE_VOLTAGE = -4.0; // volts
+      public static final double PREPARE_VOLTAGE = -1.5; // volts
+      public static final double LAUNCH_VOLTAGE = 12.0; // volts
     }
   }
 
@@ -188,9 +209,6 @@ public final class Constants {
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
     Constants.alliance_position = DriverStation.getLocation();
-
-//    SmartDashboard.putString("Alliance", Constants.alliance.get().toString());
-//    SmartDashboard.putNumber("Position", Constants.alliance_position.getAsInt());
   }
 
 }

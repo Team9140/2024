@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -14,10 +13,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
 import frc.robot.commands.MoveCommand;
 import lib.swerve.SwerveKinematicLimits;
@@ -47,11 +43,15 @@ public class Drivetrain extends SubsystemBase {
   public static SwerveDriveKinematics swerveKinematics;
   private final SwerveDrivePoseEstimator positionEstimator;
   private SwerveSetpoint prevSetpoint;
+  private boolean fieldRelative;
 
   /**
     * The drivetrain subsystem for robot movement
    **/
   private Drivetrain() {
+    this.fieldRelative = true;
+
+    // FIXME: Figure out when to do this after autonomous
     this.gyro.calibrate();
 
     // Create the SwerveDriveKinematics object
@@ -195,18 +195,30 @@ public class Drivetrain extends SubsystemBase {
     * @param vy Horizontal velocity (positive is left)
     * @param omega Rotational velocity (positive is ccw)
    **/
-  public void swerveDrive(double vx, double vy, double omega, boolean fieldRelative) {
+  public void swerveDrive(double vx, double vy, double omega) {
     SmartDashboard.putNumber("drive vx", vx);
     SmartDashboard.putNumber("drive vy", vy);
     SmartDashboard.putNumber("drive omega", omega);
     SmartDashboard.putNumber("drive velocity", Math.hypot(vx, vy));
     SmartDashboard.putNumber("heading", this.gyro.getAngle());
 
-    if (fieldRelative) {
+    if (this.fieldRelative) {
       this.swerveDrive(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(this.gyro.getAngle())));
     } else {
       this.swerveDrive(new ChassisSpeeds(vx, vy, omega));
     }
+  }
+
+  public Command toggleFieldRelative() {
+    return this.runOnce(() -> this.fieldRelative = !this.fieldRelative);
+  }
+
+  public void setFieldRelative(boolean fieldRelative) {
+    this.fieldRelative = fieldRelative;
+  }
+
+  public boolean getFieldRelative() {
+    return this.fieldRelative;
   }
 
   /**
@@ -227,7 +239,12 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-
+  public Command goStraight(double speed, double distance, int multiplier){
+    return new WaitCommand(distance / speed)
+            .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed * multiplier, 0.0)))
+            .andThen(() -> swerveDrive(0, 0, 0)));
+  }
+  
   /**
     *
     * swerveDrive but with Bezier curves and such
