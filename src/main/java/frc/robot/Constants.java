@@ -11,15 +11,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public final class Constants {
   public static final double LOOP_INTERVAL = 0.010;  // Periodic interval delay time FIXME: unknown units
   public static final double TRACK_WIDTH = Units.inchesToMeters(23.75);  // Horizontal (side-to-side) distance between wheels
   public static final double WHEEL_BASE = Units.inchesToMeters(20.75);  // Front-to-back distance between wheels
   public static final double scoringRange = 120.0;  // FIXME: Unknown
+
+  // Full field length
+  public static final double FIELD_LENGTH = 16.54;  // The length of the field in meters
 
   // Full-body dimensions
   public static final int WIDTH = 29;  // Inches, side-to-side width
@@ -63,9 +69,9 @@ public final class Constants {
 
 
     // PID values for the drive motor
-//    public static final double DRIVE_P = 0.1;
-//    public static final double DRIVE_I = 0.0;
-//    public static final double DRIVE_D = 0.0;
+    public static final double DRIVE_P = 6.6544;
+    public static final double DRIVE_I = 0.0;
+    public static final double DRIVE_D = 4.833;
 
 
     // Electric current limits for the swerve modules
@@ -113,23 +119,6 @@ public final class Constants {
     public static final int BACK_INTAKE = 31;
   }
 
-  // Command to move to specified position on field
-  public static final class MoveCommand {
-    // Pose2d containing acceptable target-difference error values
-    public static final Pose2d ERROR = new Pose2d(0.4, 0.4, Rotation2d.fromDegrees(20));
-
-
-    // FORWARD_* and HORIZONTAL* will probably be merged into a single set of DRIVE_* values
-    public static final double DRIVE_P = 0.0;
-    public static final double DRIVE_I = 0.0;
-    public static final double DRIVE_D = 0.0;
-
-    public static final double ROTATION_P = 0.0;
-    public static final double ROTATION_I = 0.0;
-    public static final double ROTATION_D = 0.0;
-  }
-
-
   public static final class Camera {
     public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
     public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
@@ -149,6 +138,28 @@ public final class Constants {
   public static final int BACK_INTAKE_CURRENT_LIMIT = 25;
   public static final double FRONT_INTAKE_NOTE_VOLTS = 6.0;
   public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
+  public static final double AUTO_SPEED = 5; //FIXME: Add real values
+
+//  public static class Launcher {
+//    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
+//
+//    public static final double POSITION_ERROR = 0.2;
+//    public static final double VELOCITY_ERROR = 0.2;
+//    public static final double SHOOTER_RADIUS = 1.063;
+//    public static final double TERMINAL_VELOCITY_ACCOUNTING = 0.1; //accounts for terminal velocity, probably no real need TODO: fine tune through testing
+//
+//    // Heights for aimbot
+//    // TODO: fine tune speaker height for maximum variability resistance
+//    public static final double SPEAKER_HEIGHT = 6.8;
+//    public static final double JOINT_HEIGHT = 1.72283;
+//
+//    // The desired upward velocity of the note when it enters the speaker
+//    // Higher values mean earlier entry and more upward, lower values mean more horizontal.
+//    // Values close to 0 are likely to hit the front instead of going in.
+//    public static final double ENTERING_SPEAKER_VELOCITY = 1.0;  // TODO: fine tune velocity through testing
+//    public static final double ACCELERATION_GRAVITY = -32.17405;  // Acceleration of gravity ft/s^2
+//  }
+
   public static class Arm {
     // PID and SVA, used in motion magic
     public static final double P = 26.0;
@@ -157,20 +168,21 @@ public final class Constants {
     public static final double S = 0.14178;
     public static final double V = 0.94316;
     public static final double A = 0.07;
-    public static final double MAX_CURRENT = 40.0; // Amps
-    public static final double SENSOR_TO_MECHANISM_RATIO = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI); // Radian rotations of arm
+    public static final double MAX_CURRENT = 40.0;  // Amps
+    public static final double SENSOR_TO_MECHANISM_RATIO = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI);  // Radian rotations of arm
 
     // Motion Magic Specific Limits
-    public static final double CRUISE_VELOCITY = 12.0; // Radians per second
-    public static final double ACCELERATION = 24.0; // Radians per second per second
-    public static final double FEED_FORWARD = 0.0; // FIXME: for later
-    public static final double INITIAL_VARIANCE = Units.degreesToRadians(3); // Radians
-    public static final double AIM_ERROR = Math.toRadians(3.0); // FIXME: ask gijspice
+    public static final double CRUISE_VELOCITY = 12.0;  // Radians per second
+    public static final double ACCELERATION = 24.0;  // Radians per second per second
+    public static final double FEED_FORWARD = 0.0;  // FIXME: for later
+    public static final double INITIAL_VARIANCE = Units.degreesToRadians(3);  // Radians
+    public static final double AIM_ERROR = Math.toRadians(3.0);  // FIXME: ask gijspice
 
     // Positions in radians
     public static class Positions {
       public static final double INTAKE = -1.69;
       public static final double AMP = 2.0;
+
       public static final double UNDERHAND = -0.3 * Math.PI;
       public static final double OVERHAND = 0.25 * Math.PI;
     }
@@ -178,29 +190,71 @@ public final class Constants {
 
   public static class Thrower {
     public static class Launcher {
-      public static final double MAX_CURRENT = 30.0; // amps
-      public static final double INTAKE_VOLTAGE = -3.0; // volts
-      public static final double SPEAKER_VOLTAGE = 8.0; // volts
-      public static final double AMP_VOLTAGE = 3.0; // volts
+      public static final double MAX_CURRENT = 30.0;  // amps
+      public static final double INTAKE_VOLTAGE = -3.0;  // volts
+      public static final double SPEAKER_VOLTAGE = 8.0;  // volts
+      public static final double AMP_VOLTAGE = 3.0;  // volts
     }
 
     public static class Feeder {
-      public static final int MAX_CURRENT = 0;  // amps // FIXME: ACTUALLY PUT A VALUE
-      public static final double INTAKE_VOLTAGE = -4.0; // volts
-      public static final double PREPARE_VOLTAGE = -1.5; // volts
-      public static final double LAUNCH_VOLTAGE = 12.0; // volts
+      public static final int MAX_CURRENT = 0;  // amps FIXME: ACTUALLY PUT A VALUE
+      public static final double INTAKE_VOLTAGE = -4.0;  // volts
+      public static final double PREPARE_VOLTAGE = -1.5;  // volts
+      public static final double LAUNCH_VOLTAGE = 12.0;  // volts
     }
   }
 
   // Side of the field per-match
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
-  public static OptionalInt alliance_position = OptionalInt.empty();
 
-  public static Pose2d ampPos = new Pose2d(5, 3, Rotation2d.fromDegrees(180)); //FIXME: Add real values
+  private static Pose2d pose(double x, double y, double theta) {
+    return new Pose2d(x, y, Rotation2d.fromDegrees(theta));
+  }
+
+  public static Pose2d allianceBasedPosition(Pose2d position) {
+    return (Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red)
+      ? pose(FIELD_LENGTH - position.getX(), position.getY(), position.getRotation().getDegrees() + 180)
+      : position;
+  }
+
+  public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
+  public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
+    // Blue Alliance
+    Map.entry("Abhinav's Position",         pose(0.64,    4.39,        -60))//,
+//    Map.entry("Amp Corner",                 pose(1.4997,  7.401295403, 0)),
+//    Map.entry("Amp-Side Speaker Corner",    pose(1.2813,  6.445974092, 0)),
+//    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
+//    Map.entry("Inward-Side Speaker Corner", pose(1.2813,  4.667970536, 0)),
+//    Map.entry("Field Center",               pose(1.4997,  4.11480823,  0)),
+//    Map.entry("Speaker-Side Bar Line",      pose(1.4997,  3.309042418, 0)),
+//    Map.entry("Opponent-Side Bar Line",     pose(1.4997,  2.572440945, 0))
+  ));
+
+  public static final int DEFAULT_STARTING_POSITION = 0;
+  public static Pose2d STARTING_POSITION = new Pose2d(0.0, 0.0, new Rotation2d(0.0));
+//  public static Pose2d ampPos = new Pose2d(5, 3, Rotation2d.fromDegrees(180));  // FIXME: Add real values
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
-    Constants.alliance_position = DriverStation.getLocation();
+
+    Integer position = Constants.positionChooser.getSelected();
+    if (position != null) {
+      String positionString = Constants.STARTING_POSITIONS.keySet().toArray()[position].toString();
+      if (Constants.STARTING_POSITIONS.containsKey(positionString)) {
+        Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(positionString);
+      } else {
+        System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");
+      }
+      SmartDashboard.putString("Auto Starting Position", positionString);
+    } else {
+      // Set the starting position to the default starting position if it cannot read a value from SmartDashboard
+      System.out.println("[ WARN ] The starting position was not updated properly");
+      Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(Constants.STARTING_POSITIONS.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
+    }
+
+
+    SmartDashboard.putString("Alliance", Constants.alliance.isPresent() ? Constants.alliance.get().toString() : "None");
+    SmartDashboard.putString("Auto Starting Coords", Constants.STARTING_POSITION.toString());
   }
 
 }

@@ -1,9 +1,5 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.SignalLogger;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,11 +10,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
-import frc.robot.commands.MoveCommand;
 import lib.swerve.SwerveKinematicLimits;
 import lib.swerve.SwerveSetpoint;
 import lib.swerve.SwerveSetpointGenerator;
@@ -27,10 +24,10 @@ public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
   private final ADIS16470_IMU gyro = new ADIS16470_IMU();
 
-  private static SwerveModule frontLeft;
-  private static SwerveModule frontRight;
-  private static SwerveModule backLeft;
-  private static SwerveModule backRight;
+  private final SwerveModule frontLeft;
+  private final SwerveModule frontRight;
+  private final SwerveModule backLeft;
+  private final SwerveModule backRight;
 
   private final static Translation2d[] modulePositions = {
     new Translation2d(Units.inchesToMeters(8.625), Units.inchesToMeters(11.875)),  // Front Left
@@ -42,7 +39,9 @@ public class Drivetrain extends SubsystemBase {
   // Set the maximum movement limits for robot kinematics
   private final SwerveKinematicLimits limits = new SwerveKinematicLimits(Constants.Drivetrain.METERS_PER_SECOND, Constants.Drivetrain.ACCELERATION, Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND);
 
-  public static SwerveDriveKinematics swerveKinematics;
+  public final SwerveDriveKinematics swerveKinematics;
+
+  private final SwerveSetpointGenerator swerveStateGenerator;
   private final SwerveDrivePoseEstimator positionEstimator;
   private SwerveSetpoint prevSetpoint;
   private boolean fieldRelative;
@@ -64,6 +63,8 @@ public class Drivetrain extends SubsystemBase {
       new Translation2d(Units.inchesToMeters(-11.125), Units.inchesToMeters(-11.875))  // Back Right
     );
 
+    swerveStateGenerator = new SwerveSetpointGenerator(this.swerveKinematics);
+
     // Initialize swerve modules
     this.frontLeft = new SwerveModule(Constants.Ports.FRONT_LEFT_DRIVE, Constants.Ports.FRONT_LEFT_TURN, Constants.Drivetrain.FRONT_LEFT_KENCODER_OFFSET, "front left");
     this.frontRight = new SwerveModule(Constants.Ports.FRONT_RIGHT_DRIVE, Constants.Ports.FRONT_RIGHT_TURN, Constants.Drivetrain.FRONT_RIGHT_KENCODER_OFFSET, "front right");
@@ -75,12 +76,11 @@ public class Drivetrain extends SubsystemBase {
       this.swerveKinematics,
       Rotation2d.fromDegrees(this.gyro.getAngle()),
       this.getPositionArray(),
-      new Pose2d(0.64, 4.39, Rotation2d.fromDegrees(-60)) // Starting Position
+      new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)) // Starting Position
     );
 
     // FIXME: unclear
     this.prevSetpoint = new SwerveSetpoint(this.getSpeed(), swerveKinematics.toSwerveModuleStates(this.getSpeed()));
-
   }
 
   /**
@@ -99,8 +99,11 @@ public class Drivetrain extends SubsystemBase {
     this.positionEstimator.resetPosition(
       Rotation2d.fromDegrees(gyro.getAngle()),
       this.getPositionArray(),
-      new Pose2d(position.getX() + 0.64, position.getY() + 4.39, position.getRotation())
+//      new Pose2d(position.getX() + 0.64, position.getY() + 4.39, position.getRotation())
+      position
     );
+    // Causes odd dragging movement
+//    this.gyro.setGyroAngle(this.gyro.getYawAxis(), position.getRotation().getDegrees());
   }
 
   /**
@@ -162,11 +165,10 @@ public class Drivetrain extends SubsystemBase {
     * @param movement The requested ChassisSpeeds
    **/
   public void swerveDrive(ChassisSpeeds movement) {
-    SwerveSetpointGenerator swerveStateGenerator = new SwerveSetpointGenerator(this.swerveKinematics);
-    movement = ChassisSpeeds.discretize(movement, Constants.LOOP_INTERVAL);
-    SmartDashboard.putNumber("vx", movement.vxMetersPerSecond);
-    SmartDashboard.putNumber("vy", movement.vyMetersPerSecond);
-    SmartDashboard.putNumber("omega", movement.omegaRadiansPerSecond);
+//    movement = ChassisSpeeds.discretize(movement, Constants.LOOP_INTERVAL);
+    SmartDashboard.putNumber("drive vx", movement.vxMetersPerSecond);
+    SmartDashboard.putNumber("drive vy", movement.vyMetersPerSecond);
+    SmartDashboard.putNumber("drive omega", movement.omegaRadiansPerSecond);
     this.prevSetpoint = swerveStateGenerator.generateSetpoint(this.limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
     SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
@@ -208,18 +210,10 @@ public class Drivetrain extends SubsystemBase {
     return this.fieldRelative;
   }
 
-  /**
-    * Move the robot to a specified field-relative position.
-    * @param target The target field-centric position on the field.
-   **/
-  public void swerveDrive(Pose2d target) {
-    CommandScheduler.getInstance().schedule(new MoveCommand(target, Constants.MoveCommand.ERROR));
-  }
-
   public Command goStraight(double speed, double distance, int multiplier){
     return new WaitCommand(distance / speed)
-            .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed * multiplier, 0.0)))
-            .andThen(() -> swerveDrive(0, 0, 0)));
+      .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed * multiplier, 0.0)))
+      .andThen(() -> swerveDrive(0, 0, 0)));
   }
 
   /**

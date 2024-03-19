@@ -23,6 +23,7 @@ import lib.util.Util;
 public class SwerveModule extends SubsystemBase {
   // Various motors FIXME: clarification needed
   private final TalonFX driveMotor;
+//  private PIDController driveMotorPID;
 
   // Allows full use of 15% power FIXME: clarification needed
   private final VoltageOut driveMotorRequest;
@@ -53,11 +54,13 @@ public class SwerveModule extends SubsystemBase {
 
     // TalonFX doesn't use RIO canbus, it uses its own
     this.driveMotor = new TalonFX(drivePort, Constants.Ports.CTRE_CANBUS);
+
     // Enables FOC (15% extra power) FIXME: clarification needed
     this.driveMotorRequest = new VoltageOut(0).withEnableFOC(true);
     this.driveMotor.setPosition(0.0);
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Drivetrain.DRIVE_CURRENT_LIMIT).withStatorCurrentLimitEnable(true);
-    // 1 / ((1 / GR) * Math.PI * Diameter) Solved on whiteboard photo in drive
+
+    // 1 / ((1 / gear ratio) * pi * diameter) Solved on whiteboard photo in drive
     FeedbackConfigs feedbackConfigs = new FeedbackConfigs().withSensorToMechanismRatio(Constants.Drivetrain.DRIVE_GEAR_RATIO / Units.inchesToMeters(Math.PI * Constants.Drivetrain.WHEEL_DIAMETER));
     TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits).withFeedback(feedbackConfigs);
     this.driveMotor.getConfigurator().apply(driveMotorConfiguration);
@@ -91,12 +94,8 @@ public class SwerveModule extends SubsystemBase {
     turnPID.setD(Constants.Drivetrain.TURN_D);
     this.turnMotor.burnFlash();
 
-    // Potentially removable, PID settings for drive motor
-//    SparkPIDController drivePID = this.driveMotor.getPIDController();
-//    drivePID.setFeedbackDevice(this.driveMotor.getEncoder());
-//    turnPID.setP(Constants.Drivetrain.DRIVE_P);
-//    turnPID.setI(Constants.Drivetrain.DRIVE_I);
-//    turnPID.setD(Constants.Drivetrain.DRIVE_D);
+
+//    this.driveMotorPID = new PIDController(Constants.Drivetrain.DRIVE_P, Constants.Drivetrain.DRIVE_I, Constants.Drivetrain.DRIVE_D);
   }
 
   /**
@@ -140,7 +139,8 @@ public class SwerveModule extends SubsystemBase {
     * @param state A SwerveModuleState object containing the requested values
    **/
   public void setTarget(SwerveModuleState state) {
-    this.targetAngle = bestTurn(state.angle.getRadians(), this.getTurnAngle());
+//    this.targetAngle = bestTurn(state.angle.getRadians(), this.getTurnAngle());
+    this.targetAngle = state.angle.getRadians();
     this.targetVelocity = state.speedMetersPerSecond;
   }
 

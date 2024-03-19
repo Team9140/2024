@@ -5,8 +5,6 @@
 
 package frc.robot;
 
-import org.littletonrobotics.junction.LoggedRobot;
-
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
@@ -15,10 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
+import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
   private Drivetrain drive;
-//  private PhotonVision camera;
+  //  private PhotonVision camera;
   private Intake intake;
 
   private Arm arm;
@@ -39,7 +38,7 @@ public class Robot extends LoggedRobot {
   }
 
   /**
-    * Initialize the robot and prepare it for operation
+   * Initialize the robot and prepare it for operation
    **/
   @Override
   public void robotInit() {
@@ -55,7 +54,7 @@ public class Robot extends LoggedRobot {
     this.thrower = Thrower.getInstance();
     this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
     this.climber.setInverted(true);
-    path = Path.getInstance();
+    this.path = Path.getInstance();
 
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
@@ -79,36 +78,29 @@ public class Robot extends LoggedRobot {
     }, this.drive));
 
     // FIXME: Find a way to not duplicate long command things
-
     // Prepare underhand throw
-    this.controller.a().onTrue(this.arm.setUnderhand()
-            .alongWith(this.thrower.prepareSpeaker())
-            .alongWith(this.intake.off()));
+    this.controller.a().onTrue(this.arm.setUnderhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
+
     // Prepare overhand throw
-    this.controller.y().onTrue(this.arm.setOverhand()
-            .alongWith(this.thrower.prepareSpeaker())
-            .alongWith(this.intake.off()));
+    this.controller.y().onTrue(this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
+
     // Prepare amp throw
-    this.controller.b().onTrue(this.arm.setAmp()
-            .alongWith(this.thrower.prepareAmp())
-            .alongWith(this.intake.off()));
+    this.controller.b().onTrue(this.arm.setAmp().alongWith(this.thrower.prepareAmp()).alongWith(this.intake.off()));
+
     // Stow TODO: Maybe not turn the intake off?
-    this.controller.x().onTrue(this.arm.setStow()
-            .alongWith(this.intake.off())
-            .alongWith(this.thrower.off()));
+    this.controller.x().onTrue(this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()));
 
     // Intake Note
-    this.controller.rightBumper()
-            .onTrue(this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake())))
-            .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
+    this.controller.rightBumper().onTrue(this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake()))).onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
 
     // Throw note
-    this.controller.rightTrigger().onTrue(this.thrower.launch())
-            .onFalse(new SequentialCommandGroup(this.thrower.launch()).andThen(new WaitCommand(1.0),
-                    this.arm.setStow().alongWith(this.thrower.off())));
+    this.controller.rightTrigger().onTrue(this.thrower.launch()).onFalse(new SequentialCommandGroup(this.thrower.launch()).andThen(new WaitCommand(1.0), this.arm.setStow().alongWith(this.thrower.off())));
+
+    this.addAutoModes();
   }
+
   /**
-    * Routinely execute the currently scheduled command.
+   * Routinely execute the currently scheduled command.
    **/
   @Override
   public void robotPeriodic() {
@@ -118,35 +110,61 @@ public class Robot extends LoggedRobot {
 
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
+
     Command currentCommand = this.drive.getCurrentCommand();
     if (currentCommand != null) {
-        SmartDashboard.putString("Auto Path", currentCommand.toString());
+      SmartDashboard.putString("Auto Path", currentCommand.toString());
     } else {
-        SmartDashboard.putString("Auto Path", "null");
+      SmartDashboard.putString("Auto Path", "null");
     }
-
   }
 
   /**
-    * Prepare autonomous mode.
+   * Prepare autonomous mode.
    **/
   @Override
   public void autonomousInit() {
     Constants.UpdateSettings();
     CommandScheduler.getInstance().cancelAll();
-    path.auto().schedule();
+    this.drive.resetPosition(Constants.STARTING_POSITION);
 
+//    (switch (0) {
+//      case 0:
+//        yield new SequentialCommandGroup(
+//          this.drive.swerveDrive(new Transform2d(2.0, 0.0, Rotation2d.fromDegrees(0))),
+//          this.intake.intakeNote().raceWith(new WaitCommand(1.0)),
+//          this.drive.swerveDrive(new Transform2d(2.1, 0.0, Rotation2d.fromDegrees(0))),
+//          this.intake.off(),
+//          this.drive.swerveDrive(new Transform2d(1.0, 0.0, Rotation2d.fromDegrees(90)))
+//        );
+//      default:
+//        yield new SequentialCommandGroup();
+//    }).schedule();
+    this.path.auto().schedule();
   }
 
   /**
-    * Prepare teleoperated mode.
+   * Prepare teleoperated mode.
    **/
   @Override
   public void teleopInit() {
-    CommandScheduler.getInstance().cancelAll();
+//    CommandScheduler.getInstance().cancelAll();
     Constants.UpdateSettings();
   }
 
+  private void addAutoModes() {
+    Object[] startingPositions = Constants.STARTING_POSITIONS.keySet().toArray();
+
+    for (int i = 0; i < startingPositions.length; i++) {
+      if (i == Constants.DEFAULT_STARTING_POSITION) {
+        Constants.positionChooser.setDefaultOption("[Position] " + startingPositions[i].toString() + " (Default)", i);
+      } else {
+        Constants.positionChooser.addOption("[Position] " + startingPositions[i].toString(), i);
+      }
+    }
+
+    SmartDashboard.putData(Constants.positionChooser);
+  }
 
   @Override
   public void simulationInit() {
@@ -156,11 +174,10 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationPeriodic() {
     this.teleopPeriodic();
-//    System.out.println("")
   }
 
-//  @Override
-//  public void testInit() {
-//    CommandScheduler.getInstance().cancelAll();
-//  }
+  @Override
+  public void testInit() {
+    CommandScheduler.getInstance().cancelAll();
+  }
 }
