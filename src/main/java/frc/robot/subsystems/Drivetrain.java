@@ -165,7 +165,7 @@ public class Drivetrain extends SubsystemBase {
     * @param movement The requested ChassisSpeeds
    **/
   public void swerveDrive(ChassisSpeeds movement) {
-//    movement = ChassisSpeeds.discretize(movement, Constants.LOOP_INTERVAL);
+    movement = ChassisSpeeds.discretize(movement, Constants.LOOP_INTERVAL);
     SmartDashboard.putNumber("drive vx", movement.vxMetersPerSecond);
     SmartDashboard.putNumber("drive vy", movement.vyMetersPerSecond);
     SmartDashboard.putNumber("drive omega", movement.omegaRadiansPerSecond);

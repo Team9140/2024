@@ -50,9 +50,9 @@ public final class Constants {
 
 
     // Drive motor feedforward values
-    public static final double MODULE_S = 0;
-    public static final double MODULE_V = 2.43219076;
-    public static final double MODULE_A = 0;
+    public static final double MODULE_S = 0.12844;
+    public static final double MODULE_V = 2.1253;
+    public static final double MODULE_A = 0.27452;
 
 
     // Rotation offset for swerve module kencoders
@@ -69,9 +69,9 @@ public final class Constants {
 
 
     // PID values for the drive motor
-    public static final double DRIVE_P = 6.6544;
+    public static final double DRIVE_P = 6.366;
     public static final double DRIVE_I = 0.0;
-    public static final double DRIVE_D = 4.833;
+    public static final double DRIVE_D = 0.0;
 
 
     // Electric current limits for the swerve modules

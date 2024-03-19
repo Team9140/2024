@@ -2,16 +2,15 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder;
 import com.revrobotics.SparkPIDController;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -26,16 +25,13 @@ public class SwerveModule extends SubsystemBase {
   private final TalonFX driveMotor;
 
   // Allows full use of 15% power FIXME: clarification needed
-  private final VoltageOut driveMotorRequest;
+  private final VelocityVoltage driveMotorRequest;
 
   // Controller for the rotation motor
   private final CANSparkMax turnMotor;
 
   // For making SmartDashboard values easily discernible
   private final String niceName;
-
-  // Used to calculate velocity to voltage
-  private final SimpleMotorFeedforward feedforward;
 
   // The requested target angle and velocity of the swerve module
   private volatile double targetAngle;
@@ -56,13 +52,22 @@ public class SwerveModule extends SubsystemBase {
     this.driveMotor = new TalonFX(drivePort, Constants.Ports.CTRE_CANBUS);
 
     // Enables FOC (15% extra power) FIXME: clarification needed
-    this.driveMotorRequest = new VoltageOut(0).withEnableFOC(true);
+//    this.driveMotorRequest = new VoltageOut(0).withEnableFOC(true);
+    this.driveMotorRequest = new VelocityVoltage(0).withEnableFOC(true);
+    Slot0Configs driveMotorSlot0 = new Slot0Configs()
+      .withKP(Constants.Drivetrain.DRIVE_P)
+      .withKI(Constants.Drivetrain.DRIVE_I)
+      .withKD(Constants.Drivetrain.DRIVE_D)
+      .withKS(Constants.Drivetrain.MODULE_S)
+      .withKV(Constants.Drivetrain.MODULE_V)
+      .withKA(Constants.Drivetrain.MODULE_A);
+
     this.driveMotor.setPosition(0.0);
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Drivetrain.DRIVE_CURRENT_LIMIT).withStatorCurrentLimitEnable(true);
 
     // 1 / ((1 / gear ratio) * pi * diameter) Solved on whiteboard photo in drive
     FeedbackConfigs feedbackConfigs = new FeedbackConfigs().withSensorToMechanismRatio(Constants.Drivetrain.DRIVE_GEAR_RATIO / Units.inchesToMeters(Math.PI * Constants.Drivetrain.WHEEL_DIAMETER));
-    TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits).withFeedback(feedbackConfigs);
+    TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits).withFeedback(feedbackConfigs).withSlot0(driveMotorSlot0);
     this.driveMotor.getConfigurator().apply(driveMotorConfiguration);
     this.driveMotor.setInverted(true);
     this.driveMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -78,9 +83,6 @@ public class SwerveModule extends SubsystemBase {
     this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
     this.turnMotor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 60.0 / Constants.Drivetrain.TURN_GEAR_RATIO);
     this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-
-    // Tool to convert requested velocity into voltage
-    this.feedforward = new SimpleMotorFeedforward(Constants.Drivetrain.MODULE_S, Constants.Drivetrain.MODULE_V, Constants.Drivetrain.MODULE_A);
 
     // Configure PID values & configuration for rotation motor
     SparkPIDController turnPID = this.turnMotor.getPIDController();
@@ -105,7 +107,7 @@ public class SwerveModule extends SubsystemBase {
 
     // Set the target angle and velocity for module movement
     this.turnMotor.getPIDController().setReference(this.targetAngle, CANSparkBase.ControlType.kPosition);
-    this.driveMotor.setControl(this.driveMotorRequest.withOutput(this.feedforward.calculate(this.targetVelocity)));
+    this.driveMotor.setControl(this.driveMotorRequest.withVelocity(this.targetVelocity));
 
     // Output current values to SmartDashboard for debugging
     SmartDashboard.putNumber(this.niceName + " turn angle", this.getTurnAngle());
