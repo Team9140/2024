@@ -71,32 +71,37 @@ public class Arm extends SubsystemBase {
         return Math.abs(this.motor.getPosition().getValueAsDouble() - this.motionMagic.Position) < Constants.Arm.AIM_ERROR;
     }
 
-    // Arm goes to desired angle in radians using motionMagic
-    public Command setAngle(double position) {
-        return this.run(() -> this.motor.setControl(this.motionMagic.withPosition(position)));
+    @Override
+    public void periodic(){
+        this.motor.setControl(this.motionMagic);
     }
 
-    // Moves arm to stowed position (which is the same as intake)
+    // updates motionMagic to new target position. The periodic will then actually tell the arm to go to that position (through motionMagic)
+    public Command setAngle(double position) {
+        return this.run(() -> this.motionMagic.Position = position);
+    }
+
+    // updates motionMagic to stow position (which is same as intake position)
     public Command setStow() {
         return setIntake();
     }
 
-    // Moves arm to intake position
+    // updates motionMagic to intake position
     public Command setIntake() {
         return setAngle(Constants.Arm.Positions.INTAKE);
     }
 
-    // Moves arm to overhand throwing position
+    // updates motionMagic to overhand position
     public Command setOverhand() {
         return setAngle(Constants.Arm.Positions.OVERHAND);
     }
 
-    // Moves arm to underhand throwing position
+    // updates motionMagic to underhand position
     public Command setUnderhand() {
         return setAngle(Constants.Arm.Positions.UNDERHAND);
     }
 
-    // Moves arm to throwing position for Amp
+    // updates motionMagic to amp position
     public Command setAmp() {
         return setAngle(Constants.Arm.Positions.AMP);
     }
