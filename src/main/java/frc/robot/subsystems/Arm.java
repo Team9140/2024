@@ -60,7 +60,7 @@ public class Arm extends SubsystemBase {
                 .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
 
         // Set arm encoder position as starting if it is the first time booting the kraken
-        if (Math.abs(this.motor.getPosition().getValueAsDouble()) < Units.degreesToRadians(Constants.Arm.INITIAL_VARIANCE)) this.motor.setPosition(-Math.PI / 2.0);
+        if (Math.abs(this.motor.getPosition().getValueAsDouble()) < Constants.Arm.INITIAL_VARIANCE) this.motor.setPosition(-Math.PI / 2.0);
     }
 
     public static Arm getInstance() {
