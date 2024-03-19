@@ -86,31 +86,31 @@ public class Path {
 
   public Command auto() {
     // For starting on left side
-    PathPlannerPath path1 = PathPlannerPath.fromPathFile("Path1");
-    PathPlannerPath path2 = PathPlannerPath.fromPathFile("1Path6");
-    PathPlannerPath path3 = PathPlannerPath.fromPathFile("1Path1");
-    PathPlannerPath path4 = PathPlannerPath.fromPathFile("1Path2");
-    PathPlannerPath path5 = PathPlannerPath.fromPathFile("1Path3");
-    PathPlannerPath path6 = PathPlannerPath.fromPathFile("1Path4");
+    PathPlannerPath path1 = PathPlannerPath.fromPathFile("1Path1");
+    PathPlannerPath path2 = PathPlannerPath.fromPathFile("1Path2");
+    PathPlannerPath path3 = PathPlannerPath.fromPathFile("1Path3");
+    PathPlannerPath path4 = PathPlannerPath.fromPathFile("1Path4");
+    PathPlannerPath path5 = PathPlannerPath.fromPathFile("1Path5");
+    PathPlannerPath path6 = PathPlannerPath.fromPathFile("1Path6");
 
     // Middle will be 1Path1, 1Path2, 1Path3, 1Path4, 1Path5, 1Path6
 
-    return AutoBuilder.followPath(PathPlannerPath.fromPathFile("New Path"));
+    //return AutoBuilder.followPath(PathPlannerPath.fromPathFile("New Path"));
     // FIXME: Arm code commented due to robot damage
-//    return new SequentialCommandGroup(
+    return new SequentialCommandGroup(
 ////      prepareOverhandLaunch(),
 ////      getOverhandLaunch(),
-//      AutoBuilder.followPath(path1),//.alongWith(getIntakeOn()),
+      AutoBuilder.followPath(path1),//.alongWith(getIntakeOn()),
 ////      getIntakeOff(),
-//      AutoBuilder.followPath(path2),//alongWith(prepareOverhandLaunch()),
+      AutoBuilder.followPath(path2),//alongWith(prepareOverhandLaunch()),
 ////      getOverhandLaunch(),
-//      AutoBuilder.followPath(path3),//.alongWith(getIntakeOn()),
+      AutoBuilder.followPath(path3),//.alongWith(getIntakeOn()),
 ////      getIntakeOff(),
-//      AutoBuilder.followPath(path4),//.alongWith(prepareOverhandLaunch()),
+      AutoBuilder.followPath(path4),//.alongWith(prepareOverhandLaunch()),
 ////      getOverhandLaunch().alongWith(
-//      AutoBuilder.followPath(path5),//),
+      AutoBuilder.followPath(path5),//),
 ////      getIntakeOff(),
-//      AutoBuilder.followPath(path6));//.alongWith(prepareOverhandLaunch()),
+      AutoBuilder.followPath(path6));//.alongWith(prepareOverhandLaunch()),
 ////    getOverhandLaunch());
   }
 

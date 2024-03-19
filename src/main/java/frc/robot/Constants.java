@@ -220,7 +220,7 @@ public final class Constants {
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
   public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
     // Blue Alliance
-    Map.entry("Abhinav's Position",         pose(0.64,    4.39,        -60))//,
+    Map.entry("Abhinav's Position",         pose(1.33,    5.57,        0))//,
 //    Map.entry("Amp Corner",                 pose(1.4997,  7.401295403, 0)),
 //    Map.entry("Amp-Side Speaker Corner",    pose(1.2813,  6.445974092, 0)),
 //    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
@@ -231,7 +231,7 @@ public final class Constants {
   ));
 
   public static final int DEFAULT_STARTING_POSITION = 0;
-  public static Pose2d STARTING_POSITION = new Pose2d(0.0, 0.0, new Rotation2d(0.0));
+  public static Pose2d STARTING_POSITION;
 //  public static Pose2d ampPos = new Pose2d(5, 3, Rotation2d.fromDegrees(180));  // FIXME: Add real values
 
   public static void UpdateSettings() {
