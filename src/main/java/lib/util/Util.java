@@ -1,5 +1,7 @@
 package lib.util;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
@@ -19,5 +21,13 @@ public class Util {
 
     public static boolean epsilonEquals(double a, double b) {
         return epsilonEquals(a, b, Util.EPSILON);
+    }
+
+    public static double getSparkPosition(CANSparkMax motor, double lastPosition) {
+        return motor.getLastError().equals(REVLibError.kOk) ? motor.getEncoder().getPosition() : lastPosition;
+    }
+
+    public static double getSparkVelocity(CANSparkMax motor, double lastVelocity) {
+        return motor.getLastError().equals(REVLibError.kOk) ? motor.getEncoder().getPosition() : lastVelocity;
     }
 }
