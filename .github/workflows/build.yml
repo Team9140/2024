@@ -2,9 +2,9 @@ name: Test compile
 
 on:
   push:
-    branches: [ main, photonvision, path, drivetrain ]
+    branches: [ main, auto, candle, photonvision, path, drivetrain ]
   pull_request:
-    branches: [ main, photonvision, path, drivetrain ]
+    branches: [ main, auto, candle photonvision, path, drivetrain ]
 
 permissions:
   contents: read
