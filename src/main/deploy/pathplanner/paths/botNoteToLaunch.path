@@ -3,35 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.33,
-        "y": 5.57
+        "x": 2.577373140857393,
+        "y": 4.407746074751409
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4946177762725898,
-        "y": 5.9534026660645925
+        "x": 2.8748096257864595,
+        "y": 4.407746074751409
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "botNote"
     },
     {
       "anchor": {
-        "x": 2.89,
-        "y": 6.978334445972496
+        "x": 1.627223092409148,
+        "y": 5.535280675286054
       },
       "prevControl": {
-        "x": 1.7451010827947582,
-        "y": 6.374912981307444
+        "x": 2.0761385739441915,
+        "y": 5.535280675286054
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "launchPos"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.75,
-      "rotationDegrees": 30.0,
+      "waypointRelativePos": 1.0,
+      "rotationDegrees": 0,
       "rotateFast": false
     }
   ],
@@ -45,11 +45,11 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 32.328748175270086,
+    "rotation": 0.7546468711712748,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Path1",
+  "folder": "Swerve",
   "previewStartingState": null,
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

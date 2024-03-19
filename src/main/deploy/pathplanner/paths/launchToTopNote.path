@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.67,
-        "y": 6.727893724305968
+        "x": 1.627223092409148,
+        "y": 5.535280675286054
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.6752587512582433,
-        "y": 6.804440187584079
+        "x": 2.044471958926925,
+        "y": 5.535280675286054
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "launchPos"
     },
     {
       "anchor": {
@@ -20,18 +20,18 @@
         "y": 6.978614568340249
       },
       "prevControl": {
-        "x": 1.6530552968513346,
-        "y": 7.039780477709104
+        "x": 1.7772529729832893,
+        "y": 6.331522806177368
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "topNote"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": 0,
+      "waypointRelativePos": 0.75,
+      "rotationDegrees": 30.0,
       "rotateFast": false
     }
   ],
@@ -45,14 +45,11 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": 32.328748175270086,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "BlueAlliance",
-  "previewStartingState": {
-    "rotation": 60.0,
-    "velocity": 0
-  },
-  "useDefaultConstraints": false
+  "folder": "Swerve",
+  "previewStartingState": null,
+  "useDefaultConstraints": true
 }

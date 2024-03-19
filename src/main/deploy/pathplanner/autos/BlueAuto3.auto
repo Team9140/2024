@@ -14,42 +14,42 @@
         {
           "type": "path",
           "data": {
-            "pathName": "3Path1"
+            "pathName": "topStartToTopNote"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "1Path4"
+            "pathName": "topNoteToLaunch"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "1Path1"
+            "pathName": "launchToMidNote"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "1Path2"
+            "pathName": "midNoteToLaunch"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "1Path6"
+            "pathName": "botNoteToLaunch"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "1Path5"
+            "pathName": "launchToBotNote"
           }
         }
       ]
     }
   },
-  "folder": null,
+  "folder": "Swerve",
   "choreoAuto": false
 }

@@ -3,37 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.8423472692769796,
-        "y": 5.541594214880079
+        "x": 2.893955213133641,
+        "y": 5.535280675286054
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.3612380726501283,
-        "y": 4.209105578275397
+        "x": 2.9888770476415876,
+        "y": 5.535280675286054
       },
       "isLocked": false,
-      "linkedName": "note1"
+      "linkedName": "midNote"
     },
     {
       "anchor": {
-        "x": 1.245861656270957,
-        "y": 5.550345113672027
+        "x": 1.627223092409148,
+        "y": 5.535280675286054
       },
       "prevControl": {
-        "x": 2.5828640964027105,
-        "y": 5.5375473565454625
+        "x": 2.396079963035626,
+        "y": 5.535280675286054
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "launchPos"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 1.0,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
@@ -44,6 +44,9 @@
   },
   "reversed": false,
   "folder": "Swerve",
-  "previewStartingState": null,
-  "useDefaultConstraints": false
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0.0
+  },
+  "useDefaultConstraints": true
 }

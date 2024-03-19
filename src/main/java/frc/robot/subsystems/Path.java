@@ -23,7 +23,7 @@ public class Path {
   private final Intake intake;
 
   public static Path getInstance() {
-      return Path.instance == null ? Path.instance = new Path() : Path.instance;
+    return Path.instance == null ? Path.instance = new Path() : Path.instance;
   }
 
   private Path() {
@@ -33,50 +33,50 @@ public class Path {
     this.intake = Intake.getInstance();
 
     AutoBuilder.configureHolonomic(
-      this.drive::getPosition,
-      this.drive::resetPosition,
-      this.drive::getSpeed,
-      this.drive::swerveDrive,
-      new HolonomicPathFollowerConfig(
-        new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
-        new PIDConstants(1.0, 0.0, 0.0),
-        Constants.Drivetrain.METERS_PER_SECOND,
-        Units.inchesToMeters(Constants.BASE_RADUS),
-        new ReplanningConfig()
-      ),
-      () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
-      this.drive
+            this.drive::getPosition,
+            this.drive::resetPosition,
+            this.drive::getSpeed,
+            this.drive::swerveDrive,
+            new HolonomicPathFollowerConfig(
+                    new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(1.0, 0.0, 0.0),
+                    Constants.Drivetrain.METERS_PER_SECOND,
+                    Units.inchesToMeters(Constants.BASE_RADUS),
+                    new ReplanningConfig()
+            ),
+            () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
+            this.drive
     );
   }
 
   public PathConstraints getPathConstraints() {
     return new PathConstraints(
-      3.0, 4.0,
-      Units.degreesToRadians(540), Units.degreesToRadians(720)
+            3.0, 4.0,
+            Units.degreesToRadians(540), Units.degreesToRadians(720)
     );
   }
 
   public Command prepareOverhandLaunch() {
     return new SequentialCommandGroup(
-      this.arm.setAngle(Constants.Arm.Positions.OVERHAND), // Set overhand aim
-      this.thrower.prepareSpeaker(),
-      new WaitUntilCommand(this.arm::isReady)
+            this.arm.setAngle(Constants.Arm.Positions.OVERHAND), // Set overhand aim
+            this.thrower.prepareSpeaker(),
+            new WaitUntilCommand(this.arm::isReady)
     ); // Wait until the launchers are spinning fast enough
   }
   public Command getOverhandLaunch(){
     return new SequentialCommandGroup(
-      this.thrower.launch(), // Launch
-      new WaitCommand(0.5), // Wait
-      this.thrower.off(),
-      this.arm.setStow()
+            this.thrower.launch(), // Launch
+            new WaitCommand(0.5), // Wait
+            this.thrower.off(),
+            this.arm.setStow()
     ); // Adjust intake along with arm
   }
 
   public Command getIntakeOn(){
     return new SequentialCommandGroup(
-      this.thrower.setIntake().alongWith(this.arm.setIntake()),
-      new WaitUntilCommand(this.arm::isReady), // wait until the launchers are spinning fast enough
-      this.intake.intakeNote()
+            this.thrower.setIntake().alongWith(this.arm.setIntake()),
+            new WaitUntilCommand(this.arm::isReady), // wait until the launchers are spinning fast enough
+            this.intake.intakeNote()
     );
   }
 
@@ -86,12 +86,13 @@ public class Path {
 
   public Command auto() {
     // For starting on left side
-    PathPlannerPath path1 = PathPlannerPath.fromPathFile("1Path1");
-    PathPlannerPath path2 = PathPlannerPath.fromPathFile("1Path2");
-    PathPlannerPath path3 = PathPlannerPath.fromPathFile("1Path3");
-    PathPlannerPath path4 = PathPlannerPath.fromPathFile("1Path4");
-    PathPlannerPath path5 = PathPlannerPath.fromPathFile("1Path5");
-    PathPlannerPath path6 = PathPlannerPath.fromPathFile("1Path6");
+
+    PathPlannerPath path1 = PathPlannerPath.fromPathFile("launchToMidNote");
+    PathPlannerPath path2 = PathPlannerPath.fromPathFile("midNoteToLaunch");
+    PathPlannerPath path3 = PathPlannerPath.fromPathFile("launchToBotNote");
+    PathPlannerPath path4 = PathPlannerPath.fromPathFile("botNoteToLaunch");
+    PathPlannerPath path5 = PathPlannerPath.fromPathFile("launchToTopNote");
+    PathPlannerPath path6 = PathPlannerPath.fromPathFile("topNoteToLaunch");
 
     // Middle will be 1Path1, 1Path2, 1Path3, 1Path4, 1Path5, 1Path6
 

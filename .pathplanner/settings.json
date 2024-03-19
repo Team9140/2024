@@ -3,10 +3,12 @@
   "robotLength": 0.7366,
   "holonomicMode": true,
   "pathFolders": [
-    "BlueAlliance"
+    "Swerve"
   ],
-  "autoFolders": [],
-  "defaultMaxVel": 3.0,
+  "autoFolders": [
+    "Swerve"
+  ],
+  "defaultMaxVel": 1.0,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
