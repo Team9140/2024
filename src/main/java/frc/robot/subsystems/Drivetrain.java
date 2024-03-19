@@ -244,7 +244,7 @@ public class Drivetrain extends SubsystemBase {
             .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed * multiplier, 0.0)))
             .andThen(() -> swerveDrive(0, 0, 0)));
   }
-  
+
   /**
     *
     * swerveDrive but with Bezier curves and such
