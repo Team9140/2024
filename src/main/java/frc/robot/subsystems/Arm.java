@@ -4,7 +4,7 @@ import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import edu.wpi.first.math.util.Units;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -18,7 +18,7 @@ public class Arm extends SubsystemBase {
 
   private Arm() {
     // Initialize Kraken
-    motor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
+    this.motor = new TalonFX(Constants.Ports.ARM_MOTOR, Constants.Ports.CTRE_CANBUS);
 
     // Set PID and SVA values
     Slot0Configs launcherGains = new Slot0Configs()
@@ -51,6 +51,7 @@ public class Arm extends SubsystemBase {
       .withMotionMagic(motionMagicConfigs)
       .withMotorOutput(motorOutputConfigs);
     this.motor.getConfigurator().apply(motorConfig);
+    this.motor.setNeutralMode(NeutralModeValue.Brake);
 
     // Initialize Motion Magic
     this.motionMagic = new MotionMagicVoltage(Constants.Arm.Positions.INTAKE)

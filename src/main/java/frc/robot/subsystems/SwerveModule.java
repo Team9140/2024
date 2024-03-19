@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder;
 import com.revrobotics.SparkPIDController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -23,7 +24,6 @@ import lib.util.Util;
 public class SwerveModule extends SubsystemBase {
   // Various motors FIXME: clarification needed
   private final TalonFX driveMotor;
-//  private PIDController driveMotorPID;
 
   // Allows full use of 15% power FIXME: clarification needed
   private final VoltageOut driveMotorRequest;
@@ -93,9 +93,6 @@ public class SwerveModule extends SubsystemBase {
     turnPID.setI(Constants.Drivetrain.TURN_I);
     turnPID.setD(Constants.Drivetrain.TURN_D);
     this.turnMotor.burnFlash();
-
-
-//    this.driveMotorPID = new PIDController(Constants.Drivetrain.DRIVE_P, Constants.Drivetrain.DRIVE_I, Constants.Drivetrain.DRIVE_D);
   }
 
   /**

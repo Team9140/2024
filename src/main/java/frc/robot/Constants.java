@@ -63,9 +63,9 @@ public final class Constants {
 
 
     // PID values for the turn motor
-    public static final double TURN_P = 1.97;
+    public static final double TURN_P = 3.8069;
     public static final double TURN_I = 0.0;
-    public static final double TURN_D = 0.115;
+    public static final double TURN_D = 0.15584;
 
 
     // PID values for the drive motor
