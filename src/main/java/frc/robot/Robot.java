@@ -19,11 +19,8 @@ public class Robot extends LoggedRobot {
   private Drivetrain drive;
   //  private PhotonVision camera;
   private Intake intake;
-
   private Arm arm;
-
   private Thrower thrower;
-
   private CANSparkMax climber;
 
   private Path path;
@@ -91,10 +88,18 @@ public class Robot extends LoggedRobot {
     this.controller.x().onTrue(this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()));
 
     // Intake Note
-    this.controller.rightBumper().onTrue(this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake()))).onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
+    this.controller.rightBumper()
+      .onTrue(this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake())))
+      .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
 
     // Throw note
-    this.controller.rightTrigger().onTrue(this.thrower.launch()).onFalse(new SequentialCommandGroup(this.thrower.launch()).andThen(new WaitCommand(1.0), this.arm.setStow().alongWith(this.thrower.off())));
+    this.controller.rightTrigger()
+      .onTrue(this.thrower.launch())
+      .onFalse(new SequentialCommandGroup(
+        this.thrower.launch(),
+        new WaitCommand(1.0),
+        this.arm.setStow().alongWith(this.thrower.off())
+      ));
 
     this.addAutoModes();
   }
