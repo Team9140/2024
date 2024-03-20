@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.950010306435742,
-        "y": 7.008614568340249
+        "x": 1.6980487822086756,
+        "y": 6.978614568340249
       },
       "isLocked": false,
       "linkedName": "topNote"
@@ -20,7 +20,7 @@
         "y": 5.535280675286054
       },
       "prevControl": {
-        "x": 2.4666503365713277,
+        "x": 1.677223092409148,
         "y": 5.535280675286054
       },
       "nextControl": null,
@@ -45,7 +45,7 @@
   "reversed": false,
   "folder": "Swerve",
   "previewStartingState": {
-    "rotation": 30.0,
+    "rotation": 0.0,
     "velocity": 0
   },
   "useDefaultConstraints": true
