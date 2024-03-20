@@ -170,7 +170,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("drive vy", movement.vyMetersPerSecond);
     SmartDashboard.putNumber("drive omega", movement.omegaRadiansPerSecond);
     double EPSILON = 0.01;
-    if (movement.vxMetersPerSecond <= EPSILON && movement.vyMetersPerSecond <= EPSILON && movement.omegaRadiansPerSecond <= EPSILON) {
+    if (Math.abs(movement.vxMetersPerSecond) <= EPSILON && Math.abs(movement.vyMetersPerSecond) <= EPSILON && Math.abs(movement.omegaRadiansPerSecond) <= EPSILON) {
       this.prevSetpoint = swerveStateGenerator.generateSetpoint(this.limits, this.prevSetpoint, new ChassisSpeeds(0.0, 0.0, 0.0), Constants.LOOP_INTERVAL);
     }
 

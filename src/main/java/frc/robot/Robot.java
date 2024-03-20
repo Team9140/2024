@@ -60,20 +60,10 @@ public class Robot extends LoggedRobot {
       double leftJoystickY = MathUtil.applyDeadband(this.controller.getHID().getLeftY(), Constants.Drivetrain.DRIVE_DEADBAND);
       double leftJoystickX = MathUtil.applyDeadband(this.controller.getHID().getLeftX(), Constants.Drivetrain.DRIVE_DEADBAND);
 
-      // Apply movement booster
-      rightJoystickX = rightJoystickX * Math.abs(rightJoystickX);
-      leftJoystickX = leftJoystickX * Math.abs(leftJoystickX);
-      leftJoystickY = leftJoystickY * Math.abs(leftJoystickY);
-
-//      rightJoystickX = Constants.Drivetrain.TURN_REGULAR_NOBOOST * rightJoystickX + (1 - Constants.Drivetrain.TURN_REGULAR_NOBOOST) * rightJoystickX * this.controller.getHID().getLeftTriggerAxis();
-//      leftJoystickY = Constants.Drivetrain.DRIVE_REGULAR_NOBOOST * leftJoystickY + (1 - Constants.Drivetrain.DRIVE_REGULAR_NOBOOST) * leftJoystickY * this.controller.getHID().getLeftTriggerAxis();
-//      leftJoystickX = Constants.Drivetrain.DRIVE_REGULAR_NOBOOST * leftJoystickX + (1 - Constants.Drivetrain.DRIVE_REGULAR_NOBOOST) * leftJoystickX * this.controller.getHID().getLeftTriggerAxis();
-
-
       // Remove low, fluctuating values and drive at the input joystick as percentage of max velocity
       this.drive.swerveDrive(
-        leftJoystickY * Math.abs(leftJoystickY) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
-        leftJoystickX * Math.abs(leftJoystickX) * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
+        leftJoystickY * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
+        leftJoystickX * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
         rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1  // Rotation (squared to make larger values more sensitive)
       );
     }, this.drive));

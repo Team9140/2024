@@ -220,7 +220,7 @@ public final class Constants {
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
   public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
     // Blue Alliance
-    Map.entry("Abhinav's Position",         pose(1.33,    5.57,        0))//,
+    Map.entry("Abhinav's Position",         pose(1.63,    5.54,        0))//,
 //    Map.entry("Amp Corner",                 pose(1.4997,  7.401295403, 0)),
 //    Map.entry("Amp-Side Speaker Corner",    pose(1.2813,  6.445974092, 0)),
 //    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
