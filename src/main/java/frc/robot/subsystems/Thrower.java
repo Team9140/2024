@@ -66,7 +66,7 @@ public class Thrower extends SubsystemBase {
   public void periodic() {
     this.topLauncher.setControl(this.launcherController);
     this.bottomLauncher.setControl(this.launcherController);
-    feeder.setVoltage(feederVolts);
+    this.feeder.setVoltage(this.feederVolts);
   }
 
 
@@ -82,26 +82,27 @@ public class Thrower extends SubsystemBase {
 
   // Prepares launcher and feeder for intaking a note
   public Command setIntake() {
-    return setLauncherVoltage(Constants.Thrower.Launcher.INTAKE_VOLTAGE).andThen(setFeederVoltage(Constants.Thrower.Feeder.INTAKE_VOLTAGE));
+    return this.setLauncherVoltage(Constants.Thrower.Launcher.INTAKE_VOLTAGE).andThen(this.setFeederVoltage(Constants.Thrower.Feeder.INTAKE_VOLTAGE));
   }
 
   // Prepares launcher and feeder for launching to speaker
   public Command prepareSpeaker() {
-    return setLauncherVoltage(Constants.Thrower.Launcher.SPEAKER_VOLTAGE).andThen(setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
+    return this.setLauncherVoltage(Constants.Thrower.Launcher.SPEAKER_VOLTAGE).andThen(this.setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
   }
 
   // Spins up Launchers at suitable speed for Amp and holds Feeder in place
   public Command prepareAmp() {
-      return setLauncherVoltage(Constants.Thrower.Launcher.AMP_VOLTAGE);
+      return this.setLauncherVoltage(Constants.Thrower.Launcher.AMP_VOLTAGE);
   }
 
   // Pushes the note from the feeder to the Launchers
   public Command launch() {
-      return setFeederVoltage(Constants.Thrower.Feeder.LAUNCH_VOLTAGE);
+      return this.setFeederVoltage(Constants.Thrower.Feeder.LAUNCH_VOLTAGE);
   }
 
   // Stops Launchers and Feeder
   public Command off() {
-    return setLauncherVoltage(0.0).andThen(setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
+    // TODO: replace andThen with alongWith?
+    return this.setLauncherVoltage(0.0).andThen(this.setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
   }
 }

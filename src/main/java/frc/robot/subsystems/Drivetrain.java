@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import lib.swerve.SwerveKinematicLimits;
 import lib.swerve.SwerveSetpoint;
@@ -132,6 +131,8 @@ public class Drivetrain extends SubsystemBase {
    **/
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("gyro angle", this.gyro.getAngle());
+
     this.positionEstimator.update(
       Rotation2d.fromDegrees(gyro.getAngle()),
       this.getPositionArray()
@@ -203,6 +204,7 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
+
   public Command toggleFieldRelative() {
     return this.runOnce(() -> this.fieldRelative = !this.fieldRelative);
   }
@@ -213,12 +215,6 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean getFieldRelative() {
     return this.fieldRelative;
-  }
-
-  public Command goStraight(double speed, double distance, int multiplier){
-    return new WaitCommand(distance / speed)
-      .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(0.0, speed * multiplier, 0.0)))
-      .andThen(() -> swerveDrive(0, 0, 0)));
   }
 
   /**

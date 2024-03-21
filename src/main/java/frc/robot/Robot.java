@@ -7,13 +7,13 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
+import lib.util.REVSpark;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
@@ -22,7 +22,7 @@ public class Robot extends LoggedRobot {
   private Intake intake;
   private Arm arm;
   private Thrower thrower;
-  private CANSparkMax climber;
+  private REVSpark climber;
 
   private Path path;
 
@@ -55,7 +55,7 @@ public class Robot extends LoggedRobot {
     this.intake = Intake.getInstance();
     this.arm = Arm.getInstance();
     this.thrower = Thrower.getInstance();
-    this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
+    this.climber = new REVSpark(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
     this.climber.setInverted(true);
 
     // Make the robot drive in Teleoperated mode by default
@@ -86,6 +86,11 @@ public class Robot extends LoggedRobot {
     // Stow TODO: Maybe not turn the intake off?
     this.controller.x().onTrue(this.arm.setStow().alongWith(this.intake.off()).alongWith(this.thrower.off()));
 
+    // Eject everything
+    this.controller.leftBumper()
+      .onTrue(this.intake.reverseIntake().alongWith(this.thrower.setLauncherVoltage(12.0)).andThen(this.thrower.setFeederVoltage(12.0)))
+      .onFalse(this.intake.off().alongWith(this.thrower.off()));
+
     // Intake Note
     this.controller.rightBumper()
       .onTrue(this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake())))
@@ -96,9 +101,15 @@ public class Robot extends LoggedRobot {
       .onTrue(this.thrower.launch())
       .onFalse(new SequentialCommandGroup(
         this.thrower.launch(),
-        new WaitCommand(1.0),
+        new WaitCommand(0.25),
         this.arm.setStow().alongWith(this.thrower.off())
       ));
+
+    // Toggle field-relative drive
+    this.controller.start().onTrue(this.drive.toggleFieldRelative());
+
+    // Reset gyro
+    this.controller.back().onTrue(this.drive.resetGyro());
 
     this.addAutoModes();
   }

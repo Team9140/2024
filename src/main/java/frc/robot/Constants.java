@@ -113,7 +113,7 @@ public final class Constants {
     public static final int TOP_LAUNCHER = 6;
     public static final int THROWER_FEEDER = 32;
 
-    public static final int CLIMBER = 0;
+    public static final int CLIMBER = 6;
 
     public static final int FRONT_LEFT_INTAKE = 33;
     public static final int FRONT_RIGHT_INTAKE = 30;
@@ -182,9 +182,9 @@ public final class Constants {
     // Positions in radians
     public static class Positions {
       public static final double INTAKE = -1.69;
-      public static final double AMP = 2.0;
+      public static final double AMP = 1.95;
 
-      public static final double UNDERHAND = -0.3 * Math.PI;
+      public static final double UNDERHAND = -0.25 * Math.PI;
       public static final double OVERHAND = 0.25 * Math.PI;
     }
   }
@@ -193,8 +193,8 @@ public final class Constants {
     public static class Launcher {
       public static final double MAX_CURRENT = 30.0;  // amps
       public static final double INTAKE_VOLTAGE = -3.0;  // volts
-      public static final double SPEAKER_VOLTAGE = 8.0;  // volts
-      public static final double AMP_VOLTAGE = 3.0;  // volts
+      public static final double SPEAKER_VOLTAGE = 11.0;  // volts
+      public static final double AMP_VOLTAGE = 7.0;  // volts
     }
 
     public static class Feeder {

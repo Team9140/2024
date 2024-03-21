@@ -50,6 +50,14 @@ public class Intake extends SubsystemBase {
     });
   }
 
+  public Command reverseIntake() {
+    return this.runOnce(() -> {
+      this.frontLeftVoltage = -Constants.FRONT_INTAKE_NOTE_VOLTS;
+      this.frontRightVoltage = -Constants.FRONT_INTAKE_NOTE_VOLTS;
+      this.backVoltage = -Constants.BACK_INTAKE_NOTE_VOLTS;
+    });
+  }
+
   /**
     * Releases a note that has been grabbed
     * Intake -> ground
