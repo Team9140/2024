@@ -81,17 +81,16 @@ public class SwerveModule extends SubsystemBase {
       this.turnMotor.restoreFactoryDefaults();
       this.turnMotor.setInverted(true);
 //    this.turnMotor.getEncoder().setPosition(0);
-      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
       while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() - kencoderOffset) >= 0.0001) {
+        this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
         System.out.println("\n\n\n\n\nWaiting for zero offset on swerve module " + niceName + "...\nExpected: " + kencoderOffset + ", Actual: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() + "\n\n\n\n\n");
         try {
           Thread.sleep(10);
-        } catch (InterruptedException e) {
-        }
+        } catch (InterruptedException e) {}
       }
-      System.out.println("\n\n\n\n\n\nPOSITION BEFORE FACTOR ON " + niceName + ": " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
+//      System.out.println("\n\n\n\n\n\nPOSITION BEFORE FACTOR ON " + niceName + ": " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
       this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
-      System.out.println("POSITION AFTER FACTOR: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() + "\n\n\n\n\n\n");
+//      System.out.println("POSITION AFTER FACTOR: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() + "\n\n\n\n\n\n");
       this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
       this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
       this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
