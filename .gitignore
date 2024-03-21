@@ -342,3 +342,5 @@ src/main/java/frc/robot/BuildConstants.java
 # Sysid Intellij
 sysid-proj/.idea/*
 sysid-proj/.idea/
+ctre_sim/*
+ctre_sim/
