@@ -173,9 +173,9 @@ public class Drivetrain extends SubsystemBase {
     double EPSILON = 0.01;
     if (Math.abs(movement.vxMetersPerSecond) <= EPSILON && Math.abs(movement.vyMetersPerSecond) <= EPSILON && Math.abs(movement.omegaRadiansPerSecond) <= EPSILON) {
       this.prevSetpoint = swerveStateGenerator.generateSetpoint(this.limits, this.prevSetpoint, new ChassisSpeeds(0.0, 0.0, 0.0), Constants.LOOP_INTERVAL);
+    } else {
+      this.prevSetpoint = swerveStateGenerator.generateSetpoint(this.limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
     }
-
-    this.prevSetpoint = swerveStateGenerator.generateSetpoint(this.limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
     SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
     this.frontLeft.setTarget(moduleStates[0]);

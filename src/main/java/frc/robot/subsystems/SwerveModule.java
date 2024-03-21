@@ -76,27 +76,30 @@ public class SwerveModule extends SubsystemBase {
     // Boilerplate configuration for the turn motor to prevent issues from arriving due to cached values
     this.turnMotor = new REVSpark(turnPort, CANSparkMax.MotorType.kBrushless);
 
-    this.turnMotor.restoreFactoryDefaults();
-    this.turnMotor.setInverted(true);
+    do {
+      System.out.println("\n\n\nInitializing REVSpark for swerve module " + niceName + "...\n\n\n");
+      this.turnMotor.restoreFactoryDefaults();
+      this.turnMotor.setInverted(true);
 //    this.turnMotor.getEncoder().setPosition(0);
-    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
-    while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() - kencoderOffset) >= 0.0001) {
-      System.out.println("\n\n\n\n\n" + kencoderOffset + " " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() + " Waiting for zero offset on swerve module " + niceName + "...\n\n\n\n\n");
-      try {
-        Thread.sleep(10);
-      } catch (InterruptedException e) {}
-    }
-    System.out.println("\n\n\n\n\n\nPOSITION BEFORE FACTOR ON " + niceName + ": " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
-    System.out.println("POSITION AFTER FACTOR: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() + "\n\n\n\n\n\n");
-    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
-    this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
-    this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
-    this.turnMotor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 60.0 / Constants.Drivetrain.TURN_GEAR_RATIO);
+      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
+      while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() - kencoderOffset) >= 0.0001) {
+        System.out.println("\n\n\n\n\n" + kencoderOffset + " " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() + " Waiting for zero offset on swerve module " + niceName + "...\n\n\n\n\n");
+        try {
+          Thread.sleep(10);
+        } catch (InterruptedException e) {
+        }
+      }
+      System.out.println("\n\n\n\n\n\nPOSITION BEFORE FACTOR ON " + niceName + ": " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
+      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
+      System.out.println("POSITION AFTER FACTOR: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() + "\n\n\n\n\n\n");
+      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
+      this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
+      this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
+      this.turnMotor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 60.0 / Constants.Drivetrain.TURN_GEAR_RATIO);
+      this.turnMotor.burnFlash();
+    } while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() - this.turnMotor.getEncoder().getPosition() % (2 * Math.PI)) > 0.05);
 
     this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-
-
 
     // Configure PID values & configuration for rotation motor
     SparkPIDController turnPID = this.turnMotor.getPIDController();
@@ -109,16 +112,6 @@ public class SwerveModule extends SubsystemBase {
     turnPID.setI(Constants.Drivetrain.TURN_I);
     turnPID.setD(Constants.Drivetrain.TURN_D);
     this.turnMotor.burnFlash();
-
-    do {
-      System.out.println("Kencoder offset detected in swerve module " + niceName + ". Retrying...");
-      try {
-        System.out.println("\n\n\n== test == position " + niceName + " " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() + "\n\n\n");
-        this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
-      } catch (Exception e) {
-        System.out.println("oopsie " + e.getMessage());
-      }
-    } while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() - this.turnMotor.getEncoder().getPosition() % (2 * Math.PI)) > 0.05);
   }
 
   /**
