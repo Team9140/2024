@@ -70,7 +70,7 @@ public class Robot extends TimedRobot {
       );
     }, this.drive));
 
-    // FIXME: Find a way to not duplicate long command things
+    // FIXME: Find a way to not duplicate long command things, you can't use variables
 
     // Prepare underhand throw
     this.controller.a().onTrue(this.arm.setUnderhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
