@@ -83,7 +83,7 @@ public class SwerveModule extends SubsystemBase {
 //    this.turnMotor.getEncoder().setPosition(0);
       this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
       while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() - kencoderOffset) >= 0.0001) {
-        System.out.println("\n\n\n\n\n" + kencoderOffset + " " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() + " Waiting for zero offset on swerve module " + niceName + "...\n\n\n\n\n");
+        System.out.println("\n\n\n\n\nWaiting for zero offset on swerve module " + niceName + "...\nExpected: " + kencoderOffset + ", Actual: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() + "\n\n\n\n\n");
         try {
           Thread.sleep(10);
         } catch (InterruptedException e) {
