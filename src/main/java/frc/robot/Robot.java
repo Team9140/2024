@@ -36,7 +36,7 @@ public class Robot extends LoggedRobot {
   }
 
   /**
-   * Initialize the robot and prepare it for operation
+    * Initialize the robot and prepare it for operation
    **/
   @Override
   public void robotInit() {
@@ -115,7 +115,7 @@ public class Robot extends LoggedRobot {
   }
 
   /**
-   * Routinely execute the currently scheduled command.
+    * Routinely execute the currently scheduled command.
    **/
   @Override
   public void robotPeriodic() {
@@ -135,7 +135,7 @@ public class Robot extends LoggedRobot {
   }
 
   /**
-   * Prepare autonomous mode.
+    * Prepare autonomous mode.
    **/
   @Override
   public void autonomousInit() {
@@ -146,11 +146,10 @@ public class Robot extends LoggedRobot {
   }
 
   /**
-   * Prepare teleoperated mode.
+    * Prepare teleoperated mode.
    **/
   @Override
   public void teleopInit() {
-//    CommandScheduler.getInstance().cancelAll();
     Constants.UpdateSettings();
   }
 
