@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -22,6 +23,7 @@ public class Path {
   private final Thrower thrower;
   private final Intake intake;
 
+  private PathPlannerPath autoPath;
   public static Path getInstance() {
     return Path.instance == null ? Path.instance = new Path() : Path.instance;
   }
@@ -47,6 +49,10 @@ public class Path {
             () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
             this.drive
     );
+//    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
+//    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
+    NamedCommands.registerCommand("intake", this.getIntakeOn());
+    NamedCommands.registerCommand("intakeOff", this.getIntakeOff());
   }
 
   public PathConstraints getPathConstraints() {
@@ -56,7 +62,7 @@ public class Path {
     );
   }
 
-  public Command prepareOverhandLaunch() {
+  public Command getPrepareOverhandLaunch() {
     return new SequentialCommandGroup(
             this.arm.setAngle(Constants.Arm.Positions.OVERHAND), // Set overhand aim
             this.thrower.prepareSpeaker(),
@@ -85,34 +91,8 @@ public class Path {
   }
 
   public Command auto() {
-    // For starting on left side
-
-    PathPlannerPath path1 = PathPlannerPath.fromPathFile("launchToMidNote");
-    PathPlannerPath path2 = PathPlannerPath.fromPathFile("midNoteToLaunch");
-    PathPlannerPath path3 = PathPlannerPath.fromPathFile("launchToBotNote");
-    PathPlannerPath path4 = PathPlannerPath.fromPathFile("botNoteToLaunch");
-    PathPlannerPath path5 = PathPlannerPath.fromPathFile("launchToTopNote");
-    PathPlannerPath path6 = PathPlannerPath.fromPathFile("topNoteToLaunch");
-
-    // Middle will be 1Path1, 1Path2, 1Path3, 1Path4, 1Path5, 1Path6
-
-    //return AutoBuilder.followPath(PathPlannerPath.fromPathFile("New Path"));
-    // FIXME: Arm code commented due to robot damage
-    return new SequentialCommandGroup(
-////      prepareOverhandLaunch(),
-////      getOverhandLaunch(),
-      AutoBuilder.followPath(path1),//.alongWith(getIntakeOn()),
-////      getIntakeOff(),
-      AutoBuilder.followPath(path2),//alongWith(prepareOverhandLaunch()),
-////      getOverhandLaunch(),
-      AutoBuilder.followPath(path3),//.alongWith(getIntakeOn()),
-////      getIntakeOff(),
-      AutoBuilder.followPath(path4),//.alongWith(prepareOverhandLaunch()),
-////      getOverhandLaunch().alongWith(
-      AutoBuilder.followPath(path5),//),
-////      getIntakeOff(),
-      AutoBuilder.followPath(path6));//.alongWith(prepareOverhandLaunch()),
-////    getOverhandLaunch());
+    autoPath = Constants.AUTO_PATH;
+    return AutoBuilder.followPath(autoPath);
 
   }
 

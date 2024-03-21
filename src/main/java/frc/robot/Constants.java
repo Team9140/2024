@@ -5,6 +5,7 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -220,9 +221,9 @@ public final class Constants {
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
   public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
     // Blue Alliance
-    Map.entry("Abhinav's Position",         pose(1.63,    5.54,        0))//,
-//    Map.entry("Amp Corner",                 pose(1.4997,  7.401295403, 0)),
-//    Map.entry("Amp-Side Speaker Corner",    pose(1.2813,  6.445974092, 0)),
+    Map.entry("Blue Amp Side", pose(0.71, 6.69, 60.00)),//,
+    Map.entry("Blue Mid Side", pose(1.63, 5.54, 0)),
+    Map.entry("Blue Ref Side", pose(0.71, 4.37, -60.00))
 //    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
 //    Map.entry("Inward-Side Speaker Corner", pose(1.2813,  4.667970536, 0)),
 //    Map.entry("Field Center",               pose(1.4997,  4.11480823,  0)),
@@ -230,9 +231,15 @@ public final class Constants {
 //    Map.entry("Opponent-Side Bar Line",     pose(1.4997,  2.572440945, 0))
   ));
 
+  public static final HashMap<String, PathPlannerPath> AUTO_PATHS = new HashMap<>(Map.ofEntries(
+          Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),
+          Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),
+          Map.entry("Blue Red Side", PathPlannerPath.fromPathFile("BlueRefSideTriple"))
+  ));
+
   public static final int DEFAULT_STARTING_POSITION = 0;
   public static Pose2d STARTING_POSITION;
-//  public static Pose2d ampPos = new Pose2d(5, 3, Rotation2d.fromDegrees(180));  // FIXME: Add real values
+  public static PathPlannerPath AUTO_PATH;
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
@@ -242,6 +249,7 @@ public final class Constants {
       String positionString = Constants.STARTING_POSITIONS.keySet().toArray()[position].toString();
       if (Constants.STARTING_POSITIONS.containsKey(positionString)) {
         Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(positionString);
+        Constants.AUTO_PATH = Constants.AUTO_PATHS.get(positionString);
       } else {
         System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");
       }
@@ -250,6 +258,7 @@ public final class Constants {
       // Set the starting position to the default starting position if it cannot read a value from SmartDashboard
       System.out.println("[ WARN ] The starting position was not updated properly");
       Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(Constants.STARTING_POSITIONS.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
+      Constants.AUTO_PATH = Constants.AUTO_PATHS.get(Constants.AUTO_PATHS.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
     }
 
 

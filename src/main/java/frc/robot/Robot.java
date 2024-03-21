@@ -126,19 +126,6 @@ public class Robot extends LoggedRobot {
     Constants.UpdateSettings();
     CommandScheduler.getInstance().cancelAll();
     this.drive.resetPosition(Constants.STARTING_POSITION);
-
-//    (switch (0) {
-//      case 0:
-//        yield new SequentialCommandGroup(
-//          this.drive.swerveDrive(new Transform2d(2.0, 0.0, Rotation2d.fromDegrees(0))),
-//          this.intake.intakeNote().raceWith(new WaitCommand(1.0)),
-//          this.drive.swerveDrive(new Transform2d(2.1, 0.0, Rotation2d.fromDegrees(0))),
-//          this.intake.off(),
-//          this.drive.swerveDrive(new Transform2d(1.0, 0.0, Rotation2d.fromDegrees(90)))
-//        );
-//      default:
-//        yield new SequentialCommandGroup();
-//    }).schedule();
     this.path.auto().schedule();
   }
 

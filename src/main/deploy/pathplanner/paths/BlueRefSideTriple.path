@@ -1,0 +1,358 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.71,
+        "y": 4.37
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.0059330327149678,
+        "y": 3.8574289516997315
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.400317315309307,
+        "y": 4.07
+      },
+      "prevControl": {
+        "x": 1.3093563130813428,
+        "y": 3.7676547802802607
+      },
+      "nextControl": {
+        "x": 3.165798504524723,
+        "y": 4.282142851918644
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.0512788117164162,
+        "y": 4.76
+      },
+      "prevControl": {
+        "x": 2.378667639527058,
+        "y": 4.614510885301097
+      },
+      "nextControl": {
+        "x": 1.7291333484627578,
+        "y": 4.903159003214828
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.627223092409148,
+        "y": 5.535280675286054
+      },
+      "prevControl": {
+        "x": 1.6671680258425994,
+        "y": 4.757502764390358
+      },
+      "nextControl": {
+        "x": 1.5957861816647434,
+        "y": 6.147396722607374
+      },
+      "isLocked": false,
+      "linkedName": "launchPos"
+    },
+    {
+      "anchor": {
+        "x": 2.4112277624226297,
+        "y": 5.619629643864552
+      },
+      "prevControl": {
+        "x": 2.079832958792831,
+        "y": 5.765792167677983
+      },
+      "nextControl": {
+        "x": 3.0023291941138956,
+        "y": 5.358922849010152
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.146592140445743,
+        "y": 4.92
+      },
+      "prevControl": {
+        "x": 2.573996124856427,
+        "y": 5.08372275804248
+      },
+      "nextControl": {
+        "x": 1.7511106138989323,
+        "y": 4.768505562318581
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.627223092409148,
+        "y": 5.535280675286054
+      },
+      "prevControl": {
+        "x": 1.592744999464096,
+        "y": 4.940931945259126
+      },
+      "nextControl": {
+        "x": 1.6779485194058998,
+        "y": 6.409708189697632
+      },
+      "isLocked": false,
+      "linkedName": "launchPos"
+    },
+    {
+      "anchor": {
+        "x": 2.488126625101934,
+        "y": 6.895897599360988
+      },
+      "prevControl": {
+        "x": 1.6609205595384882,
+        "y": 6.8772701161717364
+      },
+      "nextControl": {
+        "x": 3.0246711504436723,
+        "y": 6.907979805406323
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.389972452642273,
+        "y": 7.422691728607142
+      },
+      "prevControl": {
+        "x": 2.8204198700861713,
+        "y": 7.431783477134311
+      },
+      "nextControl": {
+        "x": 1.675074117279998,
+        "y": 7.407591914729289
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.627223092409148,
+        "y": 5.535280675286054
+      },
+      "prevControl": {
+        "x": 1.6427357579997814,
+        "y": 6.660285665422185
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "launchPos"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.8,
+      "rotationDegrees": 0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "intake",
+      "waypointRelativePos": 0.7,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intake"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "intakeOff",
+      "waypointRelativePos": 1.8,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intakeOff"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "prepareLaunch"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "launch",
+      "waypointRelativePos": 3.0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "launch"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "intake",
+      "waypointRelativePos": 3.65,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intake"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "intakeOff",
+      "waypointRelativePos": 4.95,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intakeOff"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "prepareLaunch"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "launch",
+      "waypointRelativePos": 6.0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "launch"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "intake",
+      "waypointRelativePos": 6.55,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intake"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "intakeOff",
+      "waypointRelativePos": 8.549999999999999,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intakeOff"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "prepareLaunch"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "launch",
+      "waypointRelativePos": 9.0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "launch"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.4896955931291372,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": -60.0,
+    "velocity": 0.0
+  },
+  "useDefaultConstraints": false
+}
