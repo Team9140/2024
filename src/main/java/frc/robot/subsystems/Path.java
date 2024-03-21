@@ -49,10 +49,7 @@ public class Path {
             () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
             this.drive
     );
-//    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
-//    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
-    NamedCommands.registerCommand("intake", this.getIntakeOn());
-    NamedCommands.registerCommand("intakeOff", this.getIntakeOff());
+
   }
 
   public PathConstraints getPathConstraints() {
