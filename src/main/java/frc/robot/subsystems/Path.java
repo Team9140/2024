@@ -37,19 +37,19 @@ public class Path {
     this.intake = Intake.getInstance();
 
     AutoBuilder.configureHolonomic(
-            this.drive::getPosition,
-            this.drive::resetPosition,
-            this.drive::getSpeed,
-            this.drive::swerveDrive,
-            new HolonomicPathFollowerConfig(
-                    new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(1.0, 0.0, 0.0),
-                    Constants.Drivetrain.METERS_PER_SECOND,
-                    Units.inchesToMeters(Constants.BASE_RADUS),
-                    new ReplanningConfig()
-            ),
-            () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
-            this.drive
+      this.drive::getPosition,
+      this.drive::resetPosition,
+      this.drive::getSpeed,
+      this.drive::swerveDrive,
+      new HolonomicPathFollowerConfig(
+        new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
+        new PIDConstants(1.0, 0.0, 0.0),
+        Constants.Drivetrain.METERS_PER_SECOND,
+        Units.inchesToMeters(Constants.BASE_RADUS),
+        new ReplanningConfig()
+      ),
+      () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
+      this.drive
     );
 
     NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
@@ -61,32 +61,32 @@ public class Path {
 
   public PathConstraints getPathConstraints() {
     return new PathConstraints(
-            3.0, 4.0,
-            Units.degreesToRadians(540), Units.degreesToRadians(720)
+      3.0, 4.0,
+      Units.degreesToRadians(540), Units.degreesToRadians(720)
     );
   }
 
   public Command getPrepareOverhandLaunch() {
     return new SequentialCommandGroup(
-            this.arm.setAngle(Constants.Arm.Positions.OVERHAND), // Set overhand aim
-            this.thrower.prepareSpeaker(),
-            new WaitUntilCommand(this.arm::isReady)
+      this.arm.setAngle(Constants.Arm.Positions.OVERHAND), // Set overhand aim
+      this.thrower.prepareSpeaker(),
+      new WaitUntilCommand(this.arm::isReady)
     ); // Wait until the launchers are spinning fast enough
   }
   public Command getOverhandLaunch(){
     return new SequentialCommandGroup(
-            this.thrower.launch(), // Launch
-            new WaitCommand(0.5), // Wait
-            this.thrower.off(),
-            this.arm.setStow()
+      this.thrower.launch(), // Launch
+      new WaitCommand(0.5), // Wait
+      this.thrower.off(),
+      this.arm.setStow()
     ); // Adjust intake along with arm
   }
 
   public Command getIntakeOn(){
     return new SequentialCommandGroup(
-            this.thrower.setIntake().alongWith(this.arm.setIntake()),
-            new WaitUntilCommand(this.arm::isReady), // wait until the launchers are spinning fast enough
-            this.intake.intakeNote()
+      this.thrower.setIntake().alongWith(this.arm.setIntake()),
+      new WaitUntilCommand(this.arm::isReady), // wait until the launchers are spinning fast enough
+      this.intake.intakeNote()
     );
   }
 
@@ -97,14 +97,13 @@ public class Path {
   public Command auto() {
     PathPlannerPath autoPath;
     HashMap<String, PathPlannerPath> autoPaths = new HashMap<>(Map.ofEntries(
-            Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),
-            Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),
-            Map.entry("Blue Red Side", PathPlannerPath.fromPathFile("BlueRefSideTriple"))
+      Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),
+      Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),
+      Map.entry("Blue Red Side", PathPlannerPath.fromPathFile("BlueRefSideTriple"))
     ));
 
     if (Constants.AUTO_START_POS != null) {
       autoPath = autoPaths.get(Constants.AUTO_START_POS);
-
     } else {
       autoPath = autoPaths.get(autoPaths.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
     }
