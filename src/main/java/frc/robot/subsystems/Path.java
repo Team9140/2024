@@ -10,31 +10,51 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Path {
+public class Path extends SubsystemBase {
   private static Path instance;
   private final Drivetrain drive;
   private final Arm arm;
   private final Thrower thrower;
   private final Intake intake;
+  private int autoChoice = Constants.DEFAULT_AUTO;
 
-    public static Path getInstance() {
-    return Path.instance == null ? Path.instance = new Path() : Path.instance;
+  private final HashMap<String, PathPlannerPath> autoPaths;
+
+  private SendableChooser<Integer> autos = new SendableChooser<>();
+
+  public static Path getInstance() {
+    return Path.instance == null
+      ? Path.instance = new Path()
+      : Path.instance;
   }
 
   private Path() {
+    SmartDashboard.putString("Current Auto", "Program resetting...");
     this.drive = Drivetrain.getInstance();
     this.arm = Arm.getInstance();
     this.thrower = Thrower.getInstance();
     this.intake = Intake.getInstance();
+
+    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
+    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
+    NamedCommands.registerCommand("intake", this.getIntakeOn());
+    NamedCommands.registerCommand("intakeOff", this.getIntakeOff());
+
+    this.autoPaths = new HashMap<>(Map.ofEntries(
+      Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),  // NOT WORKING
+      Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),  // NOT WORKING
+      Map.entry("Blue Ref Side", PathPlannerPath.fromPathFile("BlueRefSideTriple")),  // NOT WORKING
+      Map.entry("Blue Leave Source", PathPlannerPath.fromPathFile("LEAVE"))//,
+//      Map.entry("Red Amp Side", PathPlannerPath.fromPathFile("RedAmpSideTriple")),
+    ));
 
     AutoBuilder.configureHolonomic(
       this.drive::getPosition,
@@ -52,11 +72,11 @@ public class Path {
       this.drive
     );
 
-    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
-    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
-    NamedCommands.registerCommand("intake", this.getIntakeOn());
-    NamedCommands.registerCommand("intakeOff", this.getIntakeOff());
+  }
 
+  @Override
+  public void periodic() {
+    this.getAutoChoice();
   }
 
   public PathConstraints getPathConstraints() {
@@ -95,19 +115,35 @@ public class Path {
   }
 
   public Command auto() {
-    PathPlannerPath autoPath;
-    HashMap<String, PathPlannerPath> autoPaths = new HashMap<>(Map.ofEntries(
-      Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),
-      Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),
-      Map.entry("Blue Red Side", PathPlannerPath.fromPathFile("BlueRefSideTriple"))
-    ));
+    return AutoBuilder.followPath(this.autoPaths.get(this.autoPaths.keySet().toArray()[this.autoChoice]));
+  }
 
-    if (Constants.AUTO_START_POS != null) {
-      autoPath = autoPaths.get(Constants.AUTO_START_POS);
-    } else {
-      autoPath = autoPaths.get(autoPaths.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
+  public void autoChooser() {
+    for (int i = 0; i < this.autoPaths.size(); i++) {
+      if (i == Constants.DEFAULT_AUTO) {
+        this.autos.setDefaultOption("[PathPlanner] " + this.autoPaths.keySet().toArray()[i] + " (Default)", i);
+      } else {
+        this.autos.addOption("[PathPlanner] " + this.autoPaths.keySet().toArray()[i], i);
+      }
     }
-    return AutoBuilder.followPath(autoPath);
+
+    for (int i = 0; i < Constants.REGULAR_AUTOS.length; i++) {
+      if (i + Constants.REGULAR_AUTOS_OFFSET == Constants.DEFAULT_AUTO) {
+        this.autos.setDefaultOption("[Auto] " + Constants.REGULAR_AUTOS[i] + " (Default)", i + Constants.REGULAR_AUTOS_OFFSET);
+      } else {
+        this.autos.addOption("[Auto] " + Constants.REGULAR_AUTOS[i], i + Constants.REGULAR_AUTOS_OFFSET);
+      }
+    }
+
+    SmartDashboard.putData("Autos", this.autos);
+  }
+
+  public int getAutoChoice() {
+    Integer choice = this.autos.getSelected();
+    this.autoChoice = choice == null ? Constants.DEFAULT_AUTO : choice;
+
+    SmartDashboard.putString("Current Auto", this.autoChoice < Constants.REGULAR_AUTOS_OFFSET ? this.autoPaths.keySet().toArray()[this.autoChoice].toString() : Constants.REGULAR_AUTOS[this.autoChoice - Constants.REGULAR_AUTOS_OFFSET]);
+    return this.autoChoice;
   }
 
   public void pathFindToPose(Pose2d endPos) {

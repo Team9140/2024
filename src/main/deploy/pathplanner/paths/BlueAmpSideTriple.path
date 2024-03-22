@@ -186,7 +186,7 @@
       "name": "intakeOff",
       "waypointRelativePos": 1.65,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
@@ -243,7 +243,7 @@
       "name": "intakeOff",
       "waypointRelativePos": 4.8999999999999995,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
@@ -300,7 +300,7 @@
       "name": "intakeOff",
       "waypointRelativePos": 8.3,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
@@ -330,6 +330,35 @@
               "type": "named",
               "data": {
                 "name": "launch"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "New Event Marker",
+      "waypointRelativePos": 0,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "prepareLaunch"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "launch"
+              }
+            },
+            {
+              "type": "wait",
+              "data": {
+                "waitTime": 0.75
               }
             }
           ]

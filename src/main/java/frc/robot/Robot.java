@@ -5,15 +5,18 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
-import lib.util.REVSpark;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
@@ -22,7 +25,7 @@ public class Robot extends LoggedRobot {
   private Intake intake;
   private Arm arm;
   private Thrower thrower;
-  private REVSpark climber;
+  private CANSparkMax climber;
   private Path path;
 
 //  private Candle candleSystem
@@ -49,8 +52,9 @@ public class Robot extends LoggedRobot {
     this.intake = Intake.getInstance();
     this.arm = Arm.getInstance();
     this.thrower = Thrower.getInstance();
-    this.climber = new REVSpark(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
+    this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
     this.climber.setInverted(true);
+    this.climber.setIdleMode(CANSparkBase.IdleMode.kBrake);
     //this.candleSystem = Candle.getInstance();
 
     // Make the robot drive in Teleoperated mode by default
@@ -106,7 +110,9 @@ public class Robot extends LoggedRobot {
     // Reset gyro
     this.controller.back().onTrue(this.drive.resetGyro());
 
-    this.addAutoModes();
+    this.path.autoChooser();
+    this.path.getAutoChoice();
+    this.addStartingPositions();
   }
 
   /**
@@ -116,17 +122,15 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
 
-    if (this.controller.getHID().getAButton()) this.climber.set(this.controller.getHID().getLeftTriggerAxis());
+    if (this.controller.getHID().getXButton()) this.climber.set(this.controller.getHID().getLeftTriggerAxis());
 
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
+  }
 
-//    Command currentCommand = this.drive.getCurrentCommand();
-//    if (currentCommand != null) {
-//      SmartDashboard.putString("Auto Path", currentCommand.toString());
-//    } else {
-//      SmartDashboard.putString("Auto Path", "null");
-//    }
+  @Override
+  public void disabledPeriodic() {
+    Constants.UpdateSettings();
   }
 
   /**
@@ -137,7 +141,23 @@ public class Robot extends LoggedRobot {
     Constants.UpdateSettings();
     CommandScheduler.getInstance().cancelAll();
     this.drive.resetPosition(Constants.STARTING_POSITION);
-    this.path.auto().schedule();
+    int autoChoice = this.path.getAutoChoice();
+    if (autoChoice >= Constants.REGULAR_AUTOS_OFFSET) {
+      (switch (autoChoice - Constants.REGULAR_AUTOS_OFFSET) {
+        default:
+          System.out.println("Error: autoChoice value " + autoChoice + " is invalid. Defaulting to 0.");
+        case 0:
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            this.thrower.off().alongWith(this.arm.setStow()),
+            this.drive.goStraight(1, 4)
+          );
+      }).schedule();
+    } else {
+      this.path.auto().schedule();  // FIXME: disabled for a match due to broken arm
+    }
   }
 
   /**
@@ -148,7 +168,7 @@ public class Robot extends LoggedRobot {
     Constants.UpdateSettings();
   }
 
-  private void addAutoModes() {
+  private void addStartingPositions() {
     Object[] startingPositions = Constants.STARTING_POSITIONS.keySet().toArray();
 
     for (int i = 0; i < startingPositions.length; i++) {
@@ -159,7 +179,7 @@ public class Robot extends LoggedRobot {
       }
     }
 
-    SmartDashboard.putData(Constants.positionChooser);
+    SmartDashboard.putData("Positions", Constants.positionChooser);
   }
 
   @Override

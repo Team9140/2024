@@ -60,6 +60,11 @@ public final class Constants {
     public static final double FRONT_RIGHT_KENCODER_OFFSET = 0.795;
     public static final double BACK_LEFT_KENCODER_OFFSET = 0.320;
     public static final double BACK_RIGHT_KENCODER_OFFSET = 0.375;
+    // FIXME: TESTING ONLY
+//    public static final double FRONT_LEFT_KENCODER_OFFSET = 0.0;
+//    public static final double FRONT_RIGHT_KENCODER_OFFSET = 0.0;
+//    public static final double BACK_LEFT_KENCODER_OFFSET = 0.0;
+//    public static final double BACK_RIGHT_KENCODER_OFFSET = 0.0;
 
 
     // PID values for the turn motor
@@ -193,7 +198,8 @@ public final class Constants {
       public static final double MAX_CURRENT = 30.0;  // amps
       public static final double INTAKE_VOLTAGE = -3.0;  // volts
       public static final double SPEAKER_VOLTAGE = 11.0;  // volts
-      public static final double AMP_VOLTAGE = 7.0;  // volts
+      public static final double TOP_AMP_VOLTAGE = 7.0;  // volts
+      public static final double BOTTOM_AMP_VOLTAGE = 3.0;  // volts
     }
 
     public static class Feeder {
@@ -230,19 +236,29 @@ public final class Constants {
 //    Map.entry("Opponent-Side Bar Line",     pose(1.4997,  2.572440945, 0))
   ));
 
+  public static final String[] REGULAR_AUTOS = {
+    "Shoot & drive"
+  };
+  public static final int REGULAR_AUTOS_OFFSET = 100;  // Offset for Ids to make software not confuse with pathplanner
+
   public static final int DEFAULT_STARTING_POSITION = 0;
   public static Pose2d STARTING_POSITION;
 
   public static String AUTO_START_POS;
+  public static final int DEFAULT_AUTO = Constants.REGULAR_AUTOS_OFFSET + 0;  // Set first "regular" auto as default
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
-
     Integer position = Constants.positionChooser.getSelected();
     if (position != null) {
       String positionString = Constants.STARTING_POSITIONS.keySet().toArray()[position].toString();
+
       if (Constants.STARTING_POSITIONS.containsKey(positionString)) {
-        Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(positionString);
+        Pose2d startingPosition = Constants.STARTING_POSITIONS.get(positionString);
+        Constants.STARTING_POSITION = Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red
+          ? new Pose2d(startingPosition.getX(), startingPosition.getY(), Rotation2d.fromDegrees(startingPosition.getRotation().getDegrees() * -1))
+          : startingPosition;
+
         Constants.AUTO_START_POS = positionString;
       } else {
         System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");
@@ -253,10 +269,7 @@ public final class Constants {
       System.out.println("[ WARN ] The starting position was not updated properly");
       Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(Constants.STARTING_POSITIONS.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
     }
-
-
-    SmartDashboard.putString("Alliance", Constants.alliance.isPresent() ? Constants.alliance.get().toString() : "None");
     SmartDashboard.putString("Auto Starting Coords", Constants.STARTING_POSITION.toString());
+    SmartDashboard.putString("Alliance", Constants.alliance.isPresent() ? Constants.alliance.get().toString() : "None");
   }
-
 }

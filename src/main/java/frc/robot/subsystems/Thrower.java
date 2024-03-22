@@ -23,7 +23,9 @@ public class Thrower extends SubsystemBase {
   private final WPI_TalonSRX feeder;
 
   // Provides output for launchers
-  private final VoltageOut launcherController;
+  private final VoltageOut topLauncherController;
+  private final VoltageOut bottomLauncherController;
+
   private double feederVolts;
 
   private Thrower() {
@@ -51,7 +53,8 @@ public class Thrower extends SubsystemBase {
     this.bottomLauncher.getConfigurator().apply(launcherConfiguration.withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)));
 
     // Configure the launcher controller to use extra 15 percent power
-    this.launcherController = new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
+    this.topLauncherController = new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
+    this.bottomLauncherController = new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
 
     // Invert feeder motor, and provide current limits so it doesn't die
     this.feeder.setInverted(true);
@@ -64,15 +67,22 @@ public class Thrower extends SubsystemBase {
 
   @Override
   public void periodic() {
-    this.topLauncher.setControl(this.launcherController);
-    this.bottomLauncher.setControl(this.launcherController);
+    this.topLauncher.setControl(this.topLauncherController);
+    this.bottomLauncher.setControl(this.bottomLauncherController);
     this.feeder.setVoltage(this.feederVolts);
   }
 
 
   // Creates command that repeatedly sets the provided launcher voltage
+  public Command setLauncherVoltage(double topVoltage, double bottomVoltage) {
+    return this.runOnce(() -> {
+      this.topLauncherController.withOutput(topVoltage);
+      this.bottomLauncherController.withOutput(bottomVoltage);
+    });
+  }
+
   public Command setLauncherVoltage(double voltage) {
-    return this.runOnce(() -> this.launcherController.withOutput(voltage));
+    return this.setLauncherVoltage(voltage, voltage);
   }
 
   // Creates command that repeatedly sets the provided feeder voltage
@@ -92,7 +102,7 @@ public class Thrower extends SubsystemBase {
 
   // Spins up Launchers at suitable speed for Amp and holds Feeder in place
   public Command prepareAmp() {
-      return this.setLauncherVoltage(Constants.Thrower.Launcher.AMP_VOLTAGE);
+      return this.setLauncherVoltage(Constants.Thrower.Launcher.TOP_AMP_VOLTAGE, Constants.Thrower.Launcher.BOTTOM_AMP_VOLTAGE);
   }
 
   // Pushes the note from the feeder to the Launchers

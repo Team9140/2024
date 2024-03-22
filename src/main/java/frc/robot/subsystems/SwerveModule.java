@@ -18,7 +18,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import lib.util.REVSpark;
 import lib.util.Util;
 
 public class SwerveModule extends SubsystemBase {
@@ -29,7 +28,7 @@ public class SwerveModule extends SubsystemBase {
   private final VelocityVoltage driveMotorRequest;
 
   // Controller for the rotation motor
-  private final REVSpark turnMotor;
+  private final CANSparkMax turnMotor;
 
   // For making SmartDashboard values easily discernible
   private final String niceName;
@@ -74,36 +73,42 @@ public class SwerveModule extends SubsystemBase {
     this.driveMotor.setNeutralMode(NeutralModeValue.Brake);
 
     // Boilerplate configuration for the turn motor to prevent issues from arriving due to cached values
-    this.turnMotor = new REVSpark(turnPort, CANSparkMax.MotorType.kBrushless);
+    this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
 
-    do {
+//    do {
       System.out.println("\n\n\nInitializing REVSpark for swerve module " + niceName + "...\n\n\n");
-      this.turnMotor.restoreFactoryDefaults();
-      this.turnMotor.setInverted(true);
-//    this.turnMotor.getEncoder().setPosition(0);
-      while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() - kencoderOffset) >= 0.0001) {
-        this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
-        System.out.println("\n\n\n\n\nWaiting for zero offset on swerve module " + niceName + "...\nExpected: " + kencoderOffset + ", Actual: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() + "\n\n\n\n\n");
-        try {
-          Thread.sleep(10);
-        } catch (InterruptedException e) {}
-      }
-//      System.out.println("\n\n\n\n\n\nPOSITION BEFORE FACTOR ON " + niceName + ": " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
-//      System.out.println("POSITION AFTER FACTOR: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() + "\n\n\n\n\n\n");
-      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
-      this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
-      this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
-      this.turnMotor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 60.0 / Constants.Drivetrain.TURN_GEAR_RATIO);
-      this.turnMotor.burnFlash();
-    } while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() - this.turnMotor.getEncoder().getPosition() % (2 * Math.PI)) > 0.05);
+//      this.turnMotor.restoreFactoryDefaults();
 
+//    this.turnMotor.getEncoder().setPosition(0);
+//      while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() - kencoderOffset) >= 0.0001) {
+//        this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
+//        System.out.println("\n\n\n\n\nWaiting for zero offset on swerve module " + niceName + "...\nExpected: " + kencoderOffset + ", Actual: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() + "\n\n\n\n\n");
+//        try {
+//          Thread.sleep(250);
+//        } catch (InterruptedException e) {}
+//      }
+//      System.out.println("\n\n\n\n\n\nPOSITION BEFORE FACTOR ON " + niceName + ": " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
+//    this.turnMotor.setInverted(true);
+//    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
+//      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
+//      System.out.println("POSITION AFTER FACTOR: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() + "\n\n\n\n\n\n");
+//      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
+//      this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
+//      this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
+//      this.turnMotor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 60.0 / Constants.Drivetrain.TURN_GEAR_RATIO);
+//      this.turnMotor.burnFlash();
+//    } while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() - this.turnMotor.getEncoder().getPosition() % (2 * Math.PI)) > 0.05);
+
+
+    this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
+    try {
+      Thread.sleep(250);
+    } catch (InterruptedException e) {}
     this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
 
     // Configure PID values & configuration for rotation motor
     SparkPIDController turnPID = this.turnMotor.getPIDController();
-    // FIXME: Does this need to somehow fix NEO error stuff?
-    turnPID.setFeedbackDevice(((REVSpark.REVEncoder) this.turnMotor.getEncoder()).getRelative());
+    turnPID.setFeedbackDevice(this.turnMotor.getEncoder());
     turnPID.setPositionPIDWrappingEnabled(true);
     turnPID.setPositionPIDWrappingMinInput(Constants.Drivetrain.PID_MIN_INPUT);
     turnPID.setPositionPIDWrappingMaxInput(Constants.Drivetrain.PID_MAX_INPUT);
@@ -119,7 +124,7 @@ public class SwerveModule extends SubsystemBase {
   @Override
   public void periodic() {
     // Ensure that we don't get an error reading
-    this.lastTurnValue = Util.getSparkPosition(this.turnMotor.getSpark(), this.lastTurnValue);
+    this.lastTurnValue = Util.getSparkPosition(this.turnMotor, this.lastTurnValue);
 
     // Set the target angle and velocity for module movement
     this.turnMotor.getPIDController().setReference(this.targetAngle, CANSparkBase.ControlType.kPosition);

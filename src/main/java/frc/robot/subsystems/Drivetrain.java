@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import lib.swerve.SwerveKinematicLimits;
 import lib.swerve.SwerveSetpoint;
@@ -204,6 +205,14 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
+  public Command goStraight(double speed, double distance){
+    return new WaitCommand(distance / speed)
+      .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(speed, 0.0, 0.0)))
+        .andThen(() -> swerveDrive(0, 0, 0)));
+//    return this.run(() -> swerveDrive(new ChassisSpeeds(speed * multiplier, 0.0, 0.0)))
+//      .raceWith(distance / speed)
+//      .andThen(() -> this.swerveDrive(0.0, 0.0, 0.0))
+  }
 
   public Command toggleFieldRelative() {
     return this.runOnce(() -> this.fieldRelative = !this.fieldRelative);
@@ -216,21 +225,4 @@ public class Drivetrain extends SubsystemBase {
   public boolean getFieldRelative() {
     return this.fieldRelative;
   }
-
-  /**
-    *
-    * swerveDrive but with Bezier curves and such
-    * the better way to do things, but more complicated
-    * work on this later
-    *
-    * @param target The target field-centric position on the field.
-    *
-   **/
-//  public void swerveDrive(Pose2d target) {
-//    Command path = AutoBuilder.pathfindThenFollowPath(
-//      target,
-//      new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720)),
-//      Constants.Drivetrain.ROTATION_DELAY_METERS
-//    );
-//  }
 }

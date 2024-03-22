@@ -27,7 +27,7 @@ public class REVSpark implements MotorController, AutoCloseable {
   }
 
   public void reloadCANSpark() {
-    this.close();
+    if (this.spark != null) this.close();
     this.spark = new CANSparkMax(this.port, this.type);
     System.out.println(this.spark);
   }
