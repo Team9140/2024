@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Path {
   private static Path instance;
   private final Drivetrain drive;
@@ -23,8 +26,7 @@ public class Path {
   private final Thrower thrower;
   private final Intake intake;
 
-  private PathPlannerPath autoPath;
-  public static Path getInstance() {
+    public static Path getInstance() {
     return Path.instance == null ? Path.instance = new Path() : Path.instance;
   }
 
@@ -49,6 +51,11 @@ public class Path {
             () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
             this.drive
     );
+
+    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
+    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
+    NamedCommands.registerCommand("intake", this.getIntakeOn());
+    NamedCommands.registerCommand("intakeOff", this.getIntakeOff());
 
   }
 
@@ -88,9 +95,20 @@ public class Path {
   }
 
   public Command auto() {
-    autoPath = Constants.AUTO_PATH;
-    return AutoBuilder.followPath(autoPath);
+    PathPlannerPath autoPath;
+    HashMap<String, PathPlannerPath> autoPaths = new HashMap<>(Map.ofEntries(
+            Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),
+            Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),
+            Map.entry("Blue Red Side", PathPlannerPath.fromPathFile("BlueRefSideTriple"))
+    ));
 
+    if (Constants.AUTO_START_POS != null) {
+      autoPath = autoPaths.get(Constants.AUTO_START_POS);
+
+    } else {
+      autoPath = autoPaths.get(autoPaths.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
+    }
+    return AutoBuilder.followPath(autoPath);
   }
 
   public void pathFindToPose(Pose2d endPos) {

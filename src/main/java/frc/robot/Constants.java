@@ -231,15 +231,10 @@ public final class Constants {
 //    Map.entry("Opponent-Side Bar Line",     pose(1.4997,  2.572440945, 0))
   ));
 
-  public static final HashMap<String, PathPlannerPath> AUTO_PATHS = new HashMap<>(Map.ofEntries(
-          Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),
-          Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),
-          Map.entry("Blue Red Side", PathPlannerPath.fromPathFile("BlueRefSideTriple"))
-  ));
-
   public static final int DEFAULT_STARTING_POSITION = 0;
   public static Pose2d STARTING_POSITION;
-  public static PathPlannerPath AUTO_PATH;
+
+  public static String AUTO_START_POS;
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();
@@ -249,7 +244,7 @@ public final class Constants {
       String positionString = Constants.STARTING_POSITIONS.keySet().toArray()[position].toString();
       if (Constants.STARTING_POSITIONS.containsKey(positionString)) {
         Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(positionString);
-        Constants.AUTO_PATH = Constants.AUTO_PATHS.get(positionString);
+        Constants.AUTO_START_POS = positionString;
       } else {
         System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");
       }
@@ -258,7 +253,6 @@ public final class Constants {
       // Set the starting position to the default starting position if it cannot read a value from SmartDashboard
       System.out.println("[ WARN ] The starting position was not updated properly");
       Constants.STARTING_POSITION = Constants.STARTING_POSITIONS.get(Constants.STARTING_POSITIONS.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
-      Constants.AUTO_PATH = Constants.AUTO_PATHS.get(Constants.AUTO_PATHS.keySet().toArray()[Constants.DEFAULT_STARTING_POSITION]);
     }
 
 

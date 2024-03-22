@@ -23,10 +23,9 @@ public class Robot extends LoggedRobot {
   private Arm arm;
   private Thrower thrower;
   private REVSpark climber;
-
   private Path path;
 
-//  private Candle candleSystem = new Candle();
+//  private Candle candleSystem
 
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
@@ -40,23 +39,19 @@ public class Robot extends LoggedRobot {
    **/
   @Override
   public void robotInit() {
-    this.path = Path.getInstance();
-    NamedCommands.registerCommand("prepareLaunch", this.path.getPrepareOverhandLaunch());
-    NamedCommands.registerCommand("launch", this.path.getOverhandLaunch());
-    NamedCommands.registerCommand("intake", this.path.getIntakeOn());
-    NamedCommands.registerCommand("intakeOff", this.path.getIntakeOff());
     Constants.UpdateSettings();
-
     // Silence verbose controller connection warnings
     DriverStation.silenceJoystickConnectionWarning(true);
 
 //    this.camera = PhotonVision.getInstance();
+    this.path = Path.getInstance();
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
     this.arm = Arm.getInstance();
     this.thrower = Thrower.getInstance();
     this.climber = new REVSpark(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
     this.climber.setInverted(true);
+    //this.candleSystem = Candle.getInstance();
 
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
@@ -126,12 +121,12 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
 
-    Command currentCommand = this.drive.getCurrentCommand();
-    if (currentCommand != null) {
-      SmartDashboard.putString("Auto Path", currentCommand.toString());
-    } else {
-      SmartDashboard.putString("Auto Path", "null");
-    }
+//    Command currentCommand = this.drive.getCurrentCommand();
+//    if (currentCommand != null) {
+//      SmartDashboard.putString("Auto Path", currentCommand.toString());
+//    } else {
+//      SmartDashboard.putString("Auto Path", "null");
+//    }
   }
 
   /**
