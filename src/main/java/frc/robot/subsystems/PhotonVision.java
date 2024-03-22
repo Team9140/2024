@@ -1,11 +1,6 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,11 +14,9 @@ import java.util.Optional;
 
 public class PhotonVision extends SubsystemBase {
   private static PhotonVision instance;
-  private PhotonCamera camera;
+  private final PhotonCamera camera = new PhotonCamera(Constants.Ports.CAMERA);
   private PhotonPipelineResult latestResult = null;
   private PhotonPoseEstimator photonPose;
-  public SwerveDrivePoseEstimator swervePose;
-
 
   public static PhotonVision getInstance() {
     return PhotonVision.instance == null
@@ -32,121 +25,103 @@ public class PhotonVision extends SubsystemBase {
   }
 
   public PhotonVision() {
-    this.camera = new PhotonCamera(Constants.Ports.CAMERA);
-    photonPose = new PhotonPoseEstimator(
+    this.photonPose = new PhotonPoseEstimator(
       Constants.Camera.field,
       PhotonPoseEstimator.PoseStrategy.AVERAGE_BEST_TARGETS,
-      camera,
+      this.camera,
       Constants.Camera.cameraToRobot
     );
   }
 
-  /**
-   * Routinely sends debugging information to SmartDashboard
-   */
   @Override
   public void periodic() {
-    SmartDashboard.putString("Camera junk: ", camera.getLatestResult().getTargets().toString());
-    Optional<EstimatedRobotPose> pose = getRobotPose();
-    pose.ifPresent(estimatedRobotPose -> SmartDashboard.putString("Camera Results", "X: " + Drivetrain.getInstance().getPosition().getX() + " Y: " + Drivetrain.getInstance().getPosition().getY()));
+    String coordinates = "X: " + this.getRobotPose().get().estimatedPose.getX() + " Y: " + this.getRobotPose().get().estimatedPose.getY();
+    SmartDashboard.putString("Camera Results", coordinates);
   }
 
-  /**
-    * Gets current pose and timestamp on field using PhotonPoseEstimator
-   **/
+  //Gets current pose and timestamp on field using PhotonPoseEstimator
   public Optional<EstimatedRobotPose> getRobotPose(){
-    return photonPose.update();
+    return this.photonPose.update();
   }
 
-  /**
-    * Gets the distance from a goal based on the AprilTag data as viewed by the camera
-    * @param pose The robot's current position FIXME: uncertain
-    * @return The distance from a goal
-   **/
-  public double distanceFromGoal(Pose2d pose){
-    return switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
-      case Red -> {
-        Transform2d transRed = new Transform2d(Constants.Camera.field.getTagPose(7).get().toPose2d(), pose);
+
+  //takes a pose3d and returns the distance from the goal.
+  public double distanceFromGoal(Pose3d pose){
+    return switch (DriverStation.getAlliance()) {
+      case Red:
+        Transform3d transRed = new Transform3d(Constants.Camera.field.getTagPose(7).get(), pose);
         yield Math.sqrt(Math.pow(transRed.getX(), 2) + Math.pow(transRed.getY(), 2));
-      }
-      case Blue -> {
-        Transform2d transBlue = new Transform2d(Constants.Camera.field.getTagPose(4).get().toPose2d(), pose);
+      case Blue:
+        Transform3d transBlue = new Transform3d(Constants.Camera.field.getTagPose(4).get(), pose);
         yield Math.sqrt(Math.pow(transBlue.getX(), 2) + Math.pow(transBlue.getY(), 2));
-      }
     };
   }
 
-  /**
-    * Gets a coordinate point representing the closest scoring goal.
-    * @return A Pose3d containing that coordinate
-   *
-   * In inches rn will change to meters later
-   **/
+  public Rotation2d angleFromGoal(Pose3d pose){
+    return switch (DriverStation.getAlliance()) {
+      case Red:
+        yield pose.getRotation().toRotation2d().minus(new Rotation2d(180));
+      case Blue:
+        yield pose.getRotation().toRotation2d();
+    };
+  }
+
+  //Returns a Pose3d
   public Pose2d getClosestScoringPoint() {
     double xPoint = 0;
     double yPoint = 0;
-    switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
-      // Math will change when angleRelativeToGoal is finished
+    switch (DriverStation.getAlliance()) {
+      //math will change when angleRelativeToGoal is finished
       case Blue:
-        xPoint = Constants.scoringRange * Math.cos(angleRelativeToGoal()) - 1.5;
+        xPoint = Constants.scoringRange * Math.cos(angleRelativeToGoal());
         yPoint = Constants.scoringRange * Math.sin(angleRelativeToGoal()) + 218.42;
       case Red:
-        xPoint = Constants.scoringRange * Math.cos(angleRelativeToGoal()) + 652.73;
-        yPoint = Constants.scoringRange * Math.sin(angleRelativeToGoal()) + 218.42;
+        xPoint = 652.73 + Constants.scoringRange * Math.cos(angleRelativeToGoal());
+        yPoint = 218 + Constants.scoringRange * Math.sin(angleRelativeToGoal());
     }
-    return new Pose2d(Units.inchesToMeters(xPoint), Units.inchesToMeters(yPoint), new Rotation2d(angleToScore()));
+    return new Pose2d(xPoint, yPoint, getRobotPose().get().estimatedPose.getRotation().toRotation2d());
   }
 
-  /**
-    * Returns angle relative to the goal regardless of what way the robot is facing
-    * @return The angle relative to the goal.
-   *
-   * In inches change to meters later
-   **/
+  //Returns angle relative to the goal regardless of what way the robot is facing
   public double angleRelativeToGoal() {
-    return switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
-      case Red -> Math.PI - Math.asin((Drivetrain.getInstance().getPosition().getY() - Units.inchesToMeters(218.42)) / Math.sqrt(
-          Math.pow(Drivetrain.getInstance().getPosition().getY() - Units.inchesToMeters(218.42), 2) + Math.pow(Drivetrain.getInstance().getPosition().getX() - Units.inchesToMeters(652.73), 2)
-        ));
-      case Blue -> Math.asin((Drivetrain.getInstance().getPosition().getY() - Units.inchesToMeters(218.42)) / Math.sqrt(
-          Math.pow(Drivetrain.getInstance().getPosition().getY() - Units.inchesToMeters(218.42), 2) + Math.pow(Drivetrain.getInstance().getPosition().getX() + Units.inchesToMeters(1.5), 2)
-        )) + (2 * Math.PI);
+    return switch (DriverStation.getAlliance().get()) {
+      case Red:
+        if (getRobotPose().get().estimatedPose.getY() >= 218.42) {
+          yield Math.asin((getRobotPose().get().estimatedPose.getY() - 218.42)
+            / Math.sqrt(Math.pow(getRobotPose().get().estimatedPose.getY() - 218.42, 2)
+            + Math.pow(getRobotPose().get().estimatedPose.getX() - 652.73, 2)));
+        } else {
+          yield 2 * Math.PI - Math.asin((getRobotPose().get().estimatedPose.getY() - 218.42)
+            / Math.sqrt(Math.pow(getRobotPose().get().estimatedPose.getY() - 218.42, 2)
+            + Math.pow(getRobotPose().get().estimatedPose.getX() - 652.73, 2)));
+        }
+      case Blue:
+        if (getRobotPose().get().estimatedPose.getY() >= 218.42) {
+          yield Math.asin((getRobotPose().get().estimatedPose.getY() - 218.42)
+            / Math.sqrt(Math.pow(getRobotPose().get().estimatedPose.getY() - 218.42, 2)
+            + Math.pow(getRobotPose().get().estimatedPose.getX() + 1.5, 2)));
+        } else {
+          yield 2 * Math.PI - Math.asin((getRobotPose().get().estimatedPose.getY() - 218.42)
+            / Math.sqrt(Math.pow(getRobotPose().get().estimatedPose.getY() - 218.42, 2)
+            + Math.pow(getRobotPose().get().estimatedPose.getX() + 1.5, 2)));
+        }
     };
   }
 
-  /**
-   * Returns the angle that the robot needs to be facing to be lined up with the goal
-   */
-  public double angleToScore() {
-    return switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
-      case Red -> angleRelativeToGoal() - Math.PI;
-
-      case Blue -> angleRelativeToGoal() + Math.PI;
-    };
-  }
-
-  /**
-    * Returns a Transform2d with the distance needed to move(if at all) and the rotation needed to face the goal
-    * Can be adjusted to be in certain scoring spots rather than FIXME: unclear
-    * @return The Transform2d object
-   **/
+  // Returns a Transform2d with the distance needed to move(if at all) and the rotation needed to face the goal
+  // Can be adjusted to be in certain scoring spots rather than
   public Transform2d getToScoringPosition() {
-    // If in scoring range assuming that the range has a radius
-    if (distanceFromGoal(Drivetrain.getInstance().getPosition()) <= Constants.scoringRange) {
-      // Return Transform2d staying in same place and just rotating to line up with goal
-      return new Transform2d(new Translation2d(), new Rotation2d(angleToScore()));
+    // if in scoring range assuming that the range has a radius
+    if (distanceFromGoal(getRobotPose().get().estimatedPose) <= Constants.scoringRange) {
+      // return Transform2d staying in same place and just rotating to line up with goal
+      return new Transform2d(new Translation2d(), Rotation2d.fromRadians(getRobotPose().get().estimatedPose.getRotation().getZ()));
     } else {
-      // Hopefully returns a Transform2d that tells robot where to go and how much to rotate by
+      // hopefully returns a Transform2d that tells robot where to go and how much to rotate by
       return new Transform2d(
-              new Translation2d(getClosestScoringPoint().getX() - Drivetrain.getInstance().getPosition().getX(),
-                      getClosestScoringPoint().getY() - Drivetrain.getInstance().getPosition().getY()),
-              new Rotation2d(angleToScore())
+        new Translation2d(Math.abs(getClosestScoringPoint().getX() - getRobotPose().get().estimatedPose.getX()),
+        Math.abs(getClosestScoringPoint().getY() - getRobotPose().get().estimatedPose.getY())),
+        Rotation2d.fromRadians(getRobotPose().get().estimatedPose.getRotation().getZ())
       );
     }
-  }
-
-  public PhotonPipelineResult getLatestResult(){
-    Drivetrain.getInstance().getPosition();
-    return camera.getLatestResult();
   }
 }
