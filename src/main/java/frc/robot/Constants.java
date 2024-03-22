@@ -5,7 +5,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -221,9 +220,9 @@ public final class Constants {
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
   public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
     // Blue Alliance
-    Map.entry("Blue Amp Side", pose(0.71, 6.69, 60.00)),//,
-    Map.entry("Blue Mid Side", pose(1.63, 5.54, 0)),
-    Map.entry("Blue Ref Side", pose(0.71, 4.37, -60.00))
+    Map.entry("Amp Side", pose(0.71, 6.69, 60.00)),//,
+    Map.entry("Mid Side", pose(1.63, 5.54, 0)),
+    Map.entry("Ref Side", pose(0.71, 4.37, -60.00))
 //    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
 //    Map.entry("Inward-Side Speaker Corner", pose(1.2813,  4.667970536, 0)),
 //    Map.entry("Field Center",               pose(1.4997,  4.11480823,  0)),
