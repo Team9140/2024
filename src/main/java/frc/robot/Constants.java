@@ -237,7 +237,8 @@ public final class Constants {
   ));
 
   public static final String[] REGULAR_AUTOS = {
-    "Shoot & drive"
+    "Shoot & drive",
+    "Amp 4-note"
   };
   public static final int REGULAR_AUTOS_OFFSET = 100;  // Offset for Ids to make software not confuse with pathplanner
 

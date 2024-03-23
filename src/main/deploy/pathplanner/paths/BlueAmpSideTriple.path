@@ -169,13 +169,13 @@
       "name": "intake",
       "waypointRelativePos": 0.85,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "intake"
+                "name": "e1"
               }
             }
           ]
@@ -192,13 +192,7 @@
             {
               "type": "named",
               "data": {
-                "name": "intakeOff"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "prepareLaunch"
+                "name": "e2"
               }
             }
           ]
@@ -209,13 +203,13 @@
       "name": "launch",
       "waypointRelativePos": 3.0,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "launch"
+                "name": "e3"
               }
             }
           ]
@@ -226,13 +220,13 @@
       "name": "intake",
       "waypointRelativePos": 3.8499999999999996,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "intake"
+                "name": "e4"
               }
             }
           ]
@@ -249,13 +243,7 @@
             {
               "type": "named",
               "data": {
-                "name": "intakeOff"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "prepareLaunch"
+                "name": "e5"
               }
             }
           ]
@@ -266,13 +254,13 @@
       "name": "launch",
       "waypointRelativePos": 6.0,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "launch"
+                "name": "e6"
               }
             }
           ]
@@ -283,13 +271,13 @@
       "name": "intake",
       "waypointRelativePos": 6.85,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "intake"
+                "name": "e7"
               }
             }
           ]
@@ -306,13 +294,7 @@
             {
               "type": "named",
               "data": {
-                "name": "intakeOff"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "prepareLaunch"
+                "name": "e8"
               }
             }
           ]
@@ -323,42 +305,13 @@
       "name": "launch",
       "waypointRelativePos": 9.0,
       "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "launch"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "New Event Marker",
-      "waypointRelativePos": 0,
-      "command": {
         "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "prepareLaunch"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "launch"
-              }
-            },
-            {
-              "type": "wait",
-              "data": {
-                "waitTime": 0.75
+                "name": "e9"
               }
             }
           ]

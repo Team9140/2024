@@ -43,16 +43,25 @@ public class Path extends SubsystemBase {
     this.thrower = Thrower.getInstance();
     this.intake = Intake.getInstance();
 
-    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
-    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
-    NamedCommands.registerCommand("intake", this.getIntakeOn());
-    NamedCommands.registerCommand("intakeOff", this.getIntakeOff());
+    NamedCommands.registerCommand("e1", this.getIntakeOn());
+    NamedCommands.registerCommand("e2", this.prepareOverhand());
+    NamedCommands.registerCommand("e3", this.thrower.launch());
+    NamedCommands.registerCommand("e4", this.getIntakeOn());
+    NamedCommands.registerCommand("e5", this.prepareOverhand());
+    NamedCommands.registerCommand("e6", this.thrower.launch());
+    NamedCommands.registerCommand("e7", this.getIntakeOn());
+    NamedCommands.registerCommand("e8", this.prepareOverhand());
+    NamedCommands.registerCommand("e9", this.thrower.launch());
+//    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
+//    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
+//    NamedCommands.registerCommand("intake", this.getIntakeOn());
+//    NamedCommands.registerCommand("intakeOff", this.getIntakeOff());
 
     this.autoPaths = new HashMap<>(Map.ofEntries(
-      Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),  // NOT WORKING
-      Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),  // NOT WORKING
-      Map.entry("Blue Ref Side", PathPlannerPath.fromPathFile("BlueRefSideTriple")),  // NOT WORKING
-      Map.entry("Blue Leave Source", PathPlannerPath.fromPathFile("LEAVE"))//,
+//      Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),  // NOT WORKING
+//      Map.entry("Blue Mid Side", PathPlannerPath.fromPathFile("BlueMidSideTriple")),  // NOT WORKING
+//      Map.entry("Blue Ref Side", PathPlannerPath.fromPathFile("BlueRefSideTriple")),  // NOT WORKING
+//      Map.entry("Blue Leave Source", PathPlannerPath.fromPathFile("LEAVE"))//,
 //      Map.entry("Red Amp Side", PathPlannerPath.fromPathFile("RedAmpSideTriple")),
     ));
 
@@ -93,21 +102,20 @@ public class Path extends SubsystemBase {
       new WaitUntilCommand(this.arm::isReady)
     ); // Wait until the launchers are spinning fast enough
   }
-  public Command getOverhandLaunch(){
+  public Command prepareOverhand(){
+    return this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()); // Adjust intake along with arm
+  }
+
+  public Command launch() {
     return new SequentialCommandGroup(
-      this.thrower.launch(), // Launch
-      new WaitCommand(0.5), // Wait
-      this.thrower.off(),
-      this.arm.setStow()
-    ); // Adjust intake along with arm
+      this.thrower.launch(),
+      new WaitCommand(0.25),
+      this.arm.setStow().alongWith(this.thrower.off())
+    );
   }
 
   public Command getIntakeOn(){
-    return new SequentialCommandGroup(
-      this.thrower.setIntake().alongWith(this.arm.setIntake()),
-      new WaitUntilCommand(this.arm::isReady), // wait until the launchers are spinning fast enough
-      this.intake.intakeNote()
-    );
+    return this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake()));
   }
 
   public Command getIntakeOff(){
@@ -116,6 +124,10 @@ public class Path extends SubsystemBase {
 
   public Command auto() {
     return AutoBuilder.followPath(this.autoPaths.get(this.autoPaths.keySet().toArray()[this.autoChoice]));
+  }
+
+  public Command amp4NoteAuto() {
+    return AutoBuilder.followPath(PathPlannerPath.fromPathFile("BlueAmpSideTriple"));
   }
 
   public void autoChooser() {

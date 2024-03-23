@@ -154,6 +154,18 @@ public class Robot extends LoggedRobot {
             this.thrower.off().alongWith(this.arm.setStow()),
             this.drive.goStraight(1, 4)
           );
+        case 1:
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(0.25),
+            this.thrower.launch(),
+            new WaitCommand(0.25),
+            this.thrower.off().alongWith(this.arm.setStow()),
+            new WaitCommand(0.25),
+            this.path.amp4NoteAuto(),
+            new WaitCommand(0.5),
+            this.arm.setStow()
+          );
       }).schedule();
     } else {
       this.path.auto().schedule();  // FIXME: disabled for a match due to broken arm
