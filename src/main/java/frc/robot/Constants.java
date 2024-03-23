@@ -24,6 +24,7 @@ public final class Constants {
   // Full-body dimensions
   public static final int WIDTH = 29;  // Inches, side-to-side width
   public static final int LENGTH = 29;  // Inches, front-to-back length
+  public static double cameraRange = 10.0;
 
   // Size of the field
   //  public static final double fieldx = Units.inchesToMeters(501);

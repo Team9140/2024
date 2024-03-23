@@ -1,13 +1,10 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -18,10 +15,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 import frc.robot.commands.MoveCommand;
 import lib.swerve.SwerveKinematicLimits;
 import lib.swerve.SwerveSetpoint;
 import lib.swerve.SwerveSetpointGenerator;
+
+import static frc.robot.LimelightHelpers.getBotPoseEstimate_wpiBlue;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance;
@@ -147,7 +147,35 @@ public class Drivetrain extends SubsystemBase {
       Rotation2d.fromDegrees(gyro.getAngle()),
       this.getPositionArray()
     );
-//    this.positionEstimator.addVisionMeasurement(Pose2d position, double timestamp);
+    LimelightHelpers.PoseEstimate pose = getBotPoseEstimate_wpiBlue("limelight");
+    this.positionEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
+  }
+
+  public double getTXAngle(){
+    switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)) {
+      case Red: {
+        LimelightHelpers.setPriorityTagID("limelight", 4);
+        if(LimelightHelpers.getFiducialID("limelight") == 4){
+          return LimelightHelpers.getTX("limelight");
+        }
+      }
+      case Blue: {
+        LimelightHelpers.setPriorityTagID("limelight", 7);
+        if(LimelightHelpers.getFiducialID("limelight") == 7){
+          return LimelightHelpers.getTX("limelight");
+        }
+      }
+      default: return 0;
+    }
+  }
+
+  public Transform2d getToAmpScore() {
+      return switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)) {
+          case Red ->
+                  new Transform2d(Units.inchesToMeters(578.77), Units.inchesToMeters(287), new Rotation2d(90 - positionEstimator.getEstimatedPosition().getRotation().getDegrees()));
+          case Blue ->
+                  new Transform2d(Units.inchesToMeters(72.5), Units.inchesToMeters(287), new Rotation2d(90 - positionEstimator.getEstimatedPosition().getRotation().getDegrees()));
+      };
   }
 
   /**
