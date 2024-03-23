@@ -45,13 +45,13 @@ public class Path extends SubsystemBase {
 
     NamedCommands.registerCommand("e1", this.getIntakeOn());
     NamedCommands.registerCommand("e2", this.prepareOverhand());
-    NamedCommands.registerCommand("e3", this.thrower.launch());
+    NamedCommands.registerCommand("e3", this.launch());
     NamedCommands.registerCommand("e4", this.getIntakeOn());
     NamedCommands.registerCommand("e5", this.prepareOverhand());
-    NamedCommands.registerCommand("e6", this.thrower.launch());
+    NamedCommands.registerCommand("e6", this.launch());
     NamedCommands.registerCommand("e7", this.getIntakeOn());
     NamedCommands.registerCommand("e8", this.prepareOverhand());
-    NamedCommands.registerCommand("e9", this.thrower.launch());
+    NamedCommands.registerCommand("e9", this.launch());
 //    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
 //    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
 //    NamedCommands.registerCommand("intake", this.getIntakeOn());
@@ -95,13 +95,6 @@ public class Path extends SubsystemBase {
     );
   }
 
-  public Command getPrepareOverhandLaunch() {
-    return new SequentialCommandGroup(
-      this.arm.setAngle(Constants.Arm.Positions.OVERHAND), // Set overhand aim
-      this.thrower.prepareSpeaker(),
-      new WaitUntilCommand(this.arm::isReady)
-    ); // Wait until the launchers are spinning fast enough
-  }
   public Command prepareOverhand(){
     return this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()); // Adjust intake along with arm
   }
@@ -110,32 +103,32 @@ public class Path extends SubsystemBase {
     return new SequentialCommandGroup(
       this.thrower.launch(),
       new WaitCommand(0.25),
-      this.arm.setStow().alongWith(this.thrower.off())
+      this.arm.setStow()
     );
   }
 
   public Command getIntakeOn(){
-    return this.intake.intakeNote().alongWith(this.arm.setIntake().alongWith(this.thrower.setIntake()));
+    return this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake());
   }
 
   public Command getIntakeOff(){
     return this.thrower.off().alongWith(this.intake.off());
   }
 
-  public Command auto() {
-    return AutoBuilder.followPath(this.autoPaths.get(this.autoPaths.keySet().toArray()[this.autoChoice]));
+  public Command auto(String path) {
+    return AutoBuilder.followPath(this.autoPaths.get(path));
   }
 
-  public Command amp4NoteAuto() {
-    return AutoBuilder.followPath(PathPlannerPath.fromPathFile("BlueAmpSideTriple"));
+  public Command auto() {
+    return this.auto(this.autoPaths.keySet().toArray()[this.autoChoice].toString());
   }
 
   public void autoChooser() {
     for (int i = 0; i < this.autoPaths.size(); i++) {
       if (i == Constants.DEFAULT_AUTO) {
-        this.autos.setDefaultOption("[PathPlanner] " + this.autoPaths.keySet().toArray()[i] + " (Default)", i);
+        this.autos.setDefaultOption("[Path] " + this.autoPaths.keySet().toArray()[i] + " (Default)", i);
       } else {
-        this.autos.addOption("[PathPlanner] " + this.autoPaths.keySet().toArray()[i], i);
+        this.autos.addOption("[Path] " + this.autoPaths.keySet().toArray()[i], i);
       }
     }
 

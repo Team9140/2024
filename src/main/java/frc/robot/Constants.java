@@ -226,7 +226,7 @@ public final class Constants {
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
   public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
     // Blue Alliance
-    Map.entry("Amp Side", pose(0.71, 6.69, 60.00)),//,
+    Map.entry("Amp Side", pose(0.71, 6.69, 60.00)),
     Map.entry("Mid Side", pose(1.63, 5.54, 0)),
     Map.entry("Ref Side", pose(0.71, 4.37, -60.00))
 //    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
@@ -238,7 +238,8 @@ public final class Constants {
 
   public static final String[] REGULAR_AUTOS = {
     "Shoot & drive",
-    "Amp 4-note"
+    "Amp-side 4-note",
+    "2-note"
   };
   public static final int REGULAR_AUTOS_OFFSET = 100;  // Offset for Ids to make software not confuse with pathplanner
 

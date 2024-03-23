@@ -151,9 +151,25 @@
         "x": 1.6427922576091836,
         "y": 4.410276465640642
       },
-      "nextControl": null,
+      "nextControl": {
+        "x": 1.6116539272091124,
+        "y": 6.660284884931466
+      },
       "isLocked": false,
       "linkedName": "launchPos"
+    },
+    {
+      "anchor": {
+        "x": 1.6291198936787592,
+        "y": 5.530785298388049
+      },
+      "prevControl": {
+        "x": 1.6203869104439357,
+        "y": 6.095535091659757
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
     }
   ],
   "rotationTargets": [

@@ -157,14 +157,31 @@ public class Robot extends LoggedRobot {
         case 1:
           yield new SequentialCommandGroup(
             this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
-            new WaitCommand(0.25),
+            new WaitCommand(0.75),
             this.thrower.launch(),
             new WaitCommand(0.25),
             this.thrower.off().alongWith(this.arm.setStow()),
             new WaitCommand(0.25),
-            this.path.amp4NoteAuto(),
+            this.path.auto("BlueAmpSideTriple"),
             new WaitCommand(0.5),
             this.arm.setStow()
+          );
+        case 3:
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            new WaitCommand(0.25),
+            this.thrower.off().alongWith(this.arm.setStow()),
+            new WaitCommand(1),
+            this.intake.intakeNote().alongWith(this.thrower.setIntake()),
+            this.drive.goStraight(1, 2.142),
+            this.drive.goStraight(-1, 2.642),
+            this.intake.off().alongWith(this.thrower.off()),
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            this.thrower.off().alongWith(this.arm.setStow())
           );
       }).schedule();
     } else {
