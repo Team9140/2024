@@ -177,7 +177,11 @@ public class SwerveModule extends SubsystemBase {
     * @return The distance in meters
    **/
   public double getPositionMeters() {
-    return this.driveMotor.getPosition().getValueAsDouble() / Constants.Drivetrain.DRIVE_GEAR_RATIO * Constants.Drivetrain.WHEEL_DIAMETER * Math.PI;
+    return this.driveMotor.getPosition().getValueAsDouble();
+  }
+
+  public void setPositionMeters(double position) {
+    this.driveMotor.setPosition(position);
   }
 
   /**

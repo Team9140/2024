@@ -188,7 +188,7 @@ public final class Constants {
       public static final double INTAKE = -1.69;
       public static final double AMP = 1.95;
 
-      public static final double UNDERHAND = -0.25 * Math.PI;
+      public static final double UNDERHAND = -1.4;
       public static final double OVERHAND = 0.25 * Math.PI;
     }
   }
@@ -239,7 +239,8 @@ public final class Constants {
   public static final String[] REGULAR_AUTOS = {
     "Shoot & drive",
     "Amp-side 4-note",
-    "2-note"
+    "2-note",
+    "3-note"
   };
   public static final int REGULAR_AUTOS_OFFSET = 100;  // Offset for Ids to make software not confuse with pathplanner
 

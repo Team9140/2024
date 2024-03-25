@@ -11,10 +11,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
 import lib.swerve.SwerveKinematicLimits;
 import lib.swerve.SwerveSetpoint;
@@ -205,13 +202,31 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
+  public void setPositionMeters(double position) {
+    this.frontLeft.setPositionMeters(position);
+    this.frontRight.setPositionMeters(position);
+    this.backLeft.setPositionMeters(position);
+    this.backRight.setPositionMeters(position);
+  }
+
   public Command goStraight(double speed, double distance){
-    return new WaitCommand(distance / speed)
+    return new WaitCommand(Math.abs(distance / speed))
       .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(speed, 0.0, 0.0)))
-        .andThen(() -> swerveDrive(0, 0, 0)));
-//    return this.run(() -> swerveDrive(new ChassisSpeeds(speed * multiplier, 0.0, 0.0)))
-//      .raceWith(distance / speed)
-//      .andThen(() -> this.swerveDrive(0.0, 0.0, 0.0))
+        .andThen(() -> swerveDrive(new ChassisSpeeds(0, 0, 0))));
+//    this.setPositionMeters(0);
+//    return this.run(() -> swerveDrive(new ChassisSpeeds(speed, 0.0, 0.0)))
+//      .until(() -> (Math.abs(this.frontLeft.getPosition().distanceMeters) >= Math.abs(distance)))
+//      .andThen(this.runOnce(() -> swerveDrive(new ChassisSpeeds(0, 0, 0))));
+  }
+
+  public Command goStraight(double vx_field, double vy_field, double distance){
+//    return new WaitCommand(distance / speed)
+//      .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(speed, 0.0, 0.0)))
+//        .andThen(() -> swerveDrive(new ChassisSpeeds(0, 0, 0)));
+    this.setPositionMeters(0);
+    return this.run(() -> swerveDrive(vx_field, vy_field, 0.0))
+      .until(() -> (Math.abs(this.frontLeft.getPosition().distanceMeters) >= Math.abs(distance)))
+      .andThen(this.runOnce(() -> swerveDrive(new ChassisSpeeds(0, 0, 0))));
   }
 
   public Command toggleFieldRelative() {

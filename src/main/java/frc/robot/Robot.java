@@ -9,12 +9,10 @@ import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -152,7 +150,7 @@ public class Robot extends LoggedRobot {
             new WaitCommand(1),
             this.thrower.launch(),
             this.thrower.off().alongWith(this.arm.setStow()),
-            this.drive.goStraight(1, 4)
+            this.drive.goStraight(1, 2)
           );
         case 1:
           yield new SequentialCommandGroup(
@@ -166,23 +164,55 @@ public class Robot extends LoggedRobot {
             new WaitCommand(0.5),
             this.arm.setStow()
           );
+        case 2:
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            new WaitCommand(0.25),
+            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
+            new WaitCommand(1),
+            this.drive.goStraight(1.0, Units.inchesToMeters(50)),
+            new WaitCommand(0.25),
+            this.drive.goStraight(-1.0, Units.inchesToMeters(60)),
+            this.intake.off().alongWith(this.thrower.off()),
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch()
+          );
         case 3:
           yield new SequentialCommandGroup(
             this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
             new WaitCommand(1),
             this.thrower.launch(),
             new WaitCommand(0.25),
-            this.thrower.off().alongWith(this.arm.setStow()),
+            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
             new WaitCommand(1),
-            this.intake.intakeNote().alongWith(this.thrower.setIntake()),
-            this.drive.goStraight(1, 2.142),
-            this.drive.goStraight(-1, 2.642),
+            this.drive.goStraight(1.0, 0.0, Units.inchesToMeters(50)),
+            new WaitCommand(0.25),
+            this.drive.goStraight(-1.0, 0.0, Units.inchesToMeters(60)),
+            this.intake.off().alongWith(this.thrower.off()),
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            new WaitCommand(0.25),
+
+            // add a 3rd note driving diagonal to another one
+            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
+            new WaitCommand(1),
+            this.drive.goStraight(0.47, -0.57, Units.inchesToMeters(80)),
+            new WaitCommand(0.25),
+            this.drive.goStraight(-0.47, 0.57, Units.inchesToMeters(90)),
             this.intake.off().alongWith(this.thrower.off()),
             this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
             new WaitCommand(1),
             this.thrower.launch(),
             this.thrower.off().alongWith(this.arm.setStow())
           );
+//        case 4:  // Disabled for now
+//          yield this.path.auto("osdifhsodihg").alongWith(new SequentialCommandGroup(
+//            // Timed events go here
+//          ));
       }).schedule();
     } else {
       this.path.auto().schedule();  // FIXME: disabled for a match due to broken arm
