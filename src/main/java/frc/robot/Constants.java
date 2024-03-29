@@ -18,83 +18,151 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+  * A class containing settings and values needed by several subsystems
+ **/
 public final class Constants {
-  public static final double LOOP_INTERVAL = 0.010;  // Periodic interval delay time FIXME: unknown units
-  public static final double TRACK_WIDTH = Units.inchesToMeters(23.75);  // Horizontal (side-to-side) distance between wheels
-  public static final double WHEEL_BASE = Units.inchesToMeters(20.75);  // Front-to-back distance between wheels
-  public static final double scoringRange = 120.0;  // FIXME: Unknown
+  /**
+    * Periodic interval delay time in seconds
+   **/
+  public static final double LOOP_INTERVAL = 0.010;
+  /**
+    * The scoring range for PhotonVision
+    * FIXME: Unknown purpose
+   **/
+  public static final double scoringRange = 120.0;
 
-  // Full field length
-  public static final double FIELD_LENGTH = 16.54;  // The length of the field in meters
+  /**
+    * The offset for the front motors. For swerve kinematics.
+   **/
+  public static final double FRONT_OFFSET = Units.inchesToMeters(8.625);
+  /**
+    * The offset for the back motors. For swerve kinematics.
+   **/
+  public static final double BACK_OFFSET = Units.inchesToMeters(-11.125);
+  /**
+    * The offset for the left motors. For swerve kinematics.
+   **/
+  public static final double LEFT_OFFSET = Units.inchesToMeters(11.875);
+  /**
+    * The offset for the right motors. For swerve kinematics.
+   **/
+  public static final double RIGHT_OFFSET = Units.inchesToMeters(-11.875);
 
-  // Full-body dimensions
-  public static final int WIDTH = 29;  // Inches, side-to-side width
-  public static final int LENGTH = 29;  // Inches, front-to-back length
-
-  public static final int BASE_RADUS = 15;
+  /**
+    * The radius of the robot for usage by PathPlanner
+   **/
+  public static final int BASE_RADIUS = 15;
 
   // Size of the field
   //  public static final double fieldx = Units.inchesToMeters(501);
   //  public static final double fieldy = Units.inchesToMeters(323.28);
   public static final class Drivetrain {
-    public static final double TURN_GEAR_RATIO = 150.0 / 7.0;
+    /**
+      * The gear ratio for the drive motors
+     **/
     public static final double DRIVE_GEAR_RATIO = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
-    public static final double WHEEL_DIAMETER = 4;  // Diameter of each wheel in inches
-    public static final double DRIVE_DEADBAND = 0.10;  // Input deadband value for left joystick
-    public static final double TURN_DEADBAND = 0.15;  // Input deadband value for right joystick
+    /**
+      * Diameter of each wheel in inches
+     **/
+    public static final double WHEEL_DIAMETER = 4;
+    /**
+      * Input deadband value for left joystick
+     **/
+    public static final double DRIVE_DEADBAND = 0.10;
+    /**
+      * Input deadband value for right joystick
+     **/
+    public static final double TURN_DEADBAND = 0.15;
 
-    // Max linear and rotational speeds
-    public static final double METERS_PER_SECOND = Units.feetToMeters(19);  // ft/s max velocity
+    /**
+      * Max linear velocity in m/s
+      */
+    public static final double LINEAR_VELOCITY = Units.feetToMeters(19);
+    /**
+      * Max acceleration in m/s^2
+     **/
     public static final double ACCELERATION = Units.feetToMeters(80);  // ft/s^2 max acceleration
-    public static final double ROTATION_RADIANS_PER_SECOND = (2 * Math.PI) * 2;  // 2 complete rotations per second (720 deg/s)
+    /**
+      * Max rotational velocity in rad/s
+     **/
+    public static final double ROTATION_VELOCITY = (2 * Math.PI) * 2;  // 2 complete rotations per second (720 deg/s)
 
 
-    // Drive motor feedforward values
+    /**
+      * The kS value. This is part of the drive motor controller's feedforward.
+      * @see <a href="https://www.chiefdelphi.com/uploads/default/original/3X/d/8/d8c45602d966d596cd37b43017385db0b5a36bc7.pdf">Understanding Feedforward Models for FRC</a>
+     **/
     public static final double MODULE_S = 0.12844;
+    /**
+      * The motor speed constant. This is part of the drive motor controller's feedforward.
+      * @see <a href="https://www.chiefdelphi.com/uploads/default/original/3X/d/8/d8c45602d966d596cd37b43017385db0b5a36bc7.pdf">Understanding Feedforward Models for FRC</a>
+     **/
     public static final double MODULE_V = 2.1253;
+    /**
+      * The kA value. This is part of the drive motor controller's feedforward.
+      * @see <a href="https://www.chiefdelphi.com/uploads/default/original/3X/d/8/d8c45602d966d596cd37b43017385db0b5a36bc7.pdf">Understanding Feedforward Models for FRC</a>
+     **/
     public static final double MODULE_A = 0.27452;
 
 
-    // Rotation offset for swerve module kencoders
-    public static final double FRONT_LEFT_KENCODER_OFFSET = 0.605;
-    public static final double FRONT_RIGHT_KENCODER_OFFSET = 0.795;
-    public static final double BACK_LEFT_KENCODER_OFFSET = 0.320;
-    public static final double BACK_RIGHT_KENCODER_OFFSET = 0.375;
-    // FIXME: TESTING ONLY
-//    public static final double FRONT_LEFT_KENCODER_OFFSET = 0.0;
-//    public static final double FRONT_RIGHT_KENCODER_OFFSET = 0.0;
-//    public static final double BACK_LEFT_KENCODER_OFFSET = 0.0;
-//    public static final double BACK_RIGHT_KENCODER_OFFSET = 0.0;
-
-
-    // PID values for the turn motor
+    /**
+      * PID value for the turn motor controller
+      * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
+     **/
     public static final double TURN_P = 3.8069;
+    /**
+      * PID value for the turn motor controller
+      * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
+     **/
     public static final double TURN_I = 0.0;
+    /**
+      * PID value for the turn motor controller
+      * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
+     **/
     public static final double TURN_D = 0.15584;
 
 
-    // PID values for the drive motor
+    /**
+      * PID value for the drive motor controller
+      * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
+     **/
     public static final double DRIVE_P = 6.366;
+    /**
+      * PID value for the drive motor controller
+      * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
+     **/
     public static final double DRIVE_I = 0.0;
+    /**
+      * PID value for the drive motor controller
+      * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
+     **/
     public static final double DRIVE_D = 0.0;
 
 
-    // Electric current limits for the swerve modules
+    /**
+      * Electric current limits for the drive motors
+     **/
     public static final int DRIVE_CURRENT_LIMIT = 60;
-    public static final int TURN_CURRENT_LIMIT = 30;
+//    public static final int TURN_CURRENT_LIMIT = 30;
 
 
-    // PID wrapping values for the turn motor
+    /**
+      * Lower bound wrapping value for the turn motor encoder
+     **/
     public static final double PID_MIN_INPUT = 0.0;
+    /**
+     * Upper bound wrapping value for the turn motor encoder
+     **/
     public static final double PID_MAX_INPUT = 2 * Math.PI;
-
-    public static final double TURN_REGULAR_NOBOOST = 70.0 / 100.0;  // Percent requested rotation without boost enabled
-    public static final double DRIVE_REGULAR_NOBOOST = 70.0 / 100.0;  // Percent requested drive without boost enabled
 
     // Distance to travel before rotation is attempted
 //    public static final double ROTATION_DELAY_METERS = 1.0;
   }
 
+  /**
+    * All of the device Ids
+   **/
   public static class Ports {
     public static final int INPUT_CONTROLLER = 0;  // Xbox Controller
     public static final String CAMERA = "ProblemCamera";  // PhotonVision camera ID
@@ -124,6 +192,9 @@ public final class Constants {
     public static final int BACK_INTAKE = 31;
   }
 
+  /**
+    * Values for usage by the vision camera
+   **/
   public static final class Camera {
     public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
     public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
@@ -135,7 +206,7 @@ public final class Constants {
 
   public static final int CANDLE_LEDS_PER_ANIMATION = 30;  // FIXME: Placeholder value
 
-  public static final double CANDLE_DURATION = 4;
+//  public static final double CANDLE_DURATION = 4;
   public static final double CANDLE_BRIGHTNESS = 1.0;
 
   // Electric current limits for intake motors
@@ -143,27 +214,7 @@ public final class Constants {
   public static final int BACK_INTAKE_CURRENT_LIMIT = 25;
   public static final double FRONT_INTAKE_NOTE_VOLTS = 6.0;
   public static final double BACK_INTAKE_NOTE_VOLTS = 8.0;
-  public static final double AUTO_SPEED = 5; //FIXME: Add real values
-
-//  public static class Launcher {
-//    public static final double ARM_CONVERSION_FACTOR = 80.0 / 9.0 * 58.0 / 11.0;
-//
-//    public static final double POSITION_ERROR = 0.2;
-//    public static final double VELOCITY_ERROR = 0.2;
-//    public static final double SHOOTER_RADIUS = 1.063;
-//    public static final double TERMINAL_VELOCITY_ACCOUNTING = 0.1; //accounts for terminal velocity, probably no real need TODO: fine tune through testing
-//
-//    // Heights for aimbot
-//    // TODO: fine tune speaker height for maximum variability resistance
-//    public static final double SPEAKER_HEIGHT = 6.8;
-//    public static final double JOINT_HEIGHT = 1.72283;
-//
-//    // The desired upward velocity of the note when it enters the speaker
-//    // Higher values mean earlier entry and more upward, lower values mean more horizontal.
-//    // Values close to 0 are likely to hit the front instead of going in.
-//    public static final double ENTERING_SPEAKER_VELOCITY = 1.0;  // TODO: fine tune velocity through testing
-//    public static final double ACCELERATION_GRAVITY = -32.17405;  // Acceleration of gravity ft/s^2
-//  }
+  public static final double AUTO_SPEED = 5; // FIXME: Add real values
 
   public static class Arm {
     // PID and SVA, used in motion magic
@@ -200,6 +251,7 @@ public final class Constants {
       public static final double SPEAKER_VOLTAGE = 11.0;  // volts
       public static final double TOP_AMP_VOLTAGE = 7.0;  // volts
       public static final double BOTTOM_AMP_VOLTAGE = 3.0;  // volts
+      public static final double LAUNCH_SPEED = 1669.756495; //ft/s
     }
 
     public static class Feeder {
@@ -208,6 +260,14 @@ public final class Constants {
       public static final double PREPARE_VOLTAGE = -1.5;  // volts
       public static final double LAUNCH_VOLTAGE = 12.0;  // volts
     }
+
+    public static class AutoAim {
+      public static final double ACCELERATION_GRAVITY = 32.17405; // acceleration of gravity, ft/s
+      public static final double ENTERING_SPEAKER_VELOCITY = 1.0; // ft/s value of the upwards velocity of the note when it enters the speaker
+      public static final double SPEAKER_HEIGHT = 6.8; // the ft height of the speaker entrance, where the bot is aiming
+      public static final double JOINT_HEIGHT = 1.72283; // how high the bot thinks it is shooting from
+      public static final double ANGLE_ERROR_FIX = 0.1; //FIX ME if we using this need to fine tune it
+    }
   }
 
   // Side of the field per-match
@@ -215,12 +275,6 @@ public final class Constants {
 
   private static Pose2d pose(double x, double y, double theta) {
     return new Pose2d(x, y, Rotation2d.fromDegrees(theta));
-  }
-
-  public static Pose2d allianceBasedPosition(Pose2d position) {
-    return (Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red)
-      ? pose(FIELD_LENGTH - position.getX(), position.getY(), position.getRotation().getDegrees() + 180)
-      : position;
   }
 
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
@@ -247,7 +301,6 @@ public final class Constants {
   public static final int DEFAULT_STARTING_POSITION = 0;
   public static Pose2d STARTING_POSITION;
 
-  public static String AUTO_START_POS;
   public static final int DEFAULT_AUTO = Constants.REGULAR_AUTOS_OFFSET + 0;  // Set first "regular" auto as default
 
   public static void UpdateSettings() {
@@ -261,8 +314,6 @@ public final class Constants {
         Constants.STARTING_POSITION = Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red
           ? new Pose2d(startingPosition.getX(), startingPosition.getY(), Rotation2d.fromDegrees(startingPosition.getRotation().getDegrees() * -1))
           : startingPosition;
-
-        Constants.AUTO_START_POS = positionString;
       } else {
         System.out.println("[ WARN ] The starting position was not updated properly: '" + positionString + "'");
       }

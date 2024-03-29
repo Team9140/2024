@@ -19,24 +19,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Path extends SubsystemBase {
-  private static Path instance;
   private final Drivetrain drive;
   private final Arm arm;
   private final Thrower thrower;
   private final Intake intake;
   private int autoChoice = Constants.DEFAULT_AUTO;
-
   private final HashMap<String, PathPlannerPath> autoPaths;
+  private final SendableChooser<Integer> autos = new SendableChooser<>();
 
-  private SendableChooser<Integer> autos = new SendableChooser<>();
-
-  public static Path getInstance() {
-    return Path.instance == null
-      ? Path.instance = new Path()
-      : Path.instance;
-  }
-
-  private Path() {
+  public Path() {
     SmartDashboard.putString("Current Auto", "Program resetting...");
     this.drive = Drivetrain.getInstance();
     this.arm = Arm.getInstance();
@@ -52,10 +43,6 @@ public class Path extends SubsystemBase {
     NamedCommands.registerCommand("e7", this.getIntakeOn());
     NamedCommands.registerCommand("e8", this.prepareOverhand());
     NamedCommands.registerCommand("e9", this.launch());
-//    NamedCommands.registerCommand("prepareLaunch", this.getPrepareOverhandLaunch());
-//    NamedCommands.registerCommand("launch", this.getOverhandLaunch());
-//    NamedCommands.registerCommand("intake", this.getIntakeOn());
-//    NamedCommands.registerCommand("intakeOff", this.getIntakeOff());
 
     this.autoPaths = new HashMap<>(Map.ofEntries(
 //      Map.entry("Blue Amp Side", PathPlannerPath.fromPathFile("BlueAmpSideTriple")),  // NOT WORKING
@@ -73,8 +60,8 @@ public class Path extends SubsystemBase {
       new HolonomicPathFollowerConfig(
         new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
         new PIDConstants(1.0, 0.0, 0.0),
-        Constants.Drivetrain.METERS_PER_SECOND,
-        Units.inchesToMeters(Constants.BASE_RADUS),
+        Constants.Drivetrain.LINEAR_VELOCITY,
+        Units.inchesToMeters(Constants.BASE_RADIUS),
         new ReplanningConfig()
       ),
       () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
@@ -83,11 +70,19 @@ public class Path extends SubsystemBase {
 
   }
 
+
+  /**
+    * Routinely updates the selected autonomous choice
+   **/
   @Override
   public void periodic() {
     this.getAutoChoice();
   }
 
+  /**
+    * Get the path constraints for the robot. Contains information such as max velocity and acceleration
+    * @return The path constraints
+   **/
   public PathConstraints getPathConstraints() {
     return new PathConstraints(
       3.0, 4.0,
@@ -95,10 +90,18 @@ public class Path extends SubsystemBase {
     );
   }
 
+  /**
+    * Prepares overhand.
+    * @return A command that sets the angle and launcher motors for launching, along with turning off the intake.
+   **/
   public Command prepareOverhand(){
     return this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()); // Adjust intake along with arm
   }
 
+  /**
+    * Sets up launching.
+    * @return A command that gives the note to the launch motors, launching the note. It then stows the arm after 1/4 second.
+   **/
   public Command launch() {
     return new SequentialCommandGroup(
       this.thrower.launch(),
@@ -107,22 +110,42 @@ public class Path extends SubsystemBase {
     );
   }
 
+  /**
+    * Sets the intake on for all required motors
+    * @return A command that turns all required intake motors to intake required voltage.
+   **/
   public Command getIntakeOn(){
     return this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake());
   }
 
+  /**
+    * Turns off all intake required motors
+    * @return A command that turns all required intake motors off
+   **/
   public Command getIntakeOff(){
     return this.thrower.off().alongWith(this.intake.off());
   }
 
+  /**
+    * Tells the robor to follow the path given by the name.
+    * @param path The filename of the requested path
+    * @return A command that follows the path.
+   **/
   public Command auto(String path) {
     return AutoBuilder.followPath(this.autoPaths.get(path));
   }
 
+  /**
+    * Follows the autonomous path that is selected
+    * @return A command that follows the path
+   **/
   public Command auto() {
     return this.auto(this.autoPaths.keySet().toArray()[this.autoChoice].toString());
   }
 
+  /**
+    * Places debug information on SmartDashbord
+   **/
   public void autoChooser() {
     for (int i = 0; i < this.autoPaths.size(); i++) {
       if (i == Constants.DEFAULT_AUTO) {
@@ -143,6 +166,10 @@ public class Path extends SubsystemBase {
     SmartDashboard.putData("Autos", this.autos);
   }
 
+  /**
+    * Sets the autoChoice to the selected auto on SmartDashboard
+    * @return The selected autonomous choice
+   **/
   public int getAutoChoice() {
     Integer choice = this.autos.getSelected();
     this.autoChoice = choice == null ? Constants.DEFAULT_AUTO : choice;
@@ -151,7 +178,12 @@ public class Path extends SubsystemBase {
     return this.autoChoice;
   }
 
-  public void pathFindToPose(Pose2d endPos) {
-    AutoBuilder.pathfindToPose(endPos, getPathConstraints());
+  /**
+    * Finds a path to the requested position
+    * @param endPos The requested final position of the bot
+    * @return A command that pathfinds to the requested position
+   **/
+  public Command pathFindToPose(Pose2d endPos) {
+    return AutoBuilder.pathfindToPose(endPos, getPathConstraints());
   }
 }

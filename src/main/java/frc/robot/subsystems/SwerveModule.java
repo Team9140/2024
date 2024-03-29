@@ -42,10 +42,9 @@ public class SwerveModule extends SubsystemBase {
     * Initializes one module for a swerve drive robot
     * @param drivePort The port ID of the drive motor's controller
     * @param turnPort The port ID of the rotation motor's controller
-    * @param kencoderOffset The initial offset value of the absolute encoder
     * @param niceName Pretty name for easier debugging
    **/
-  public SwerveModule(int drivePort, int turnPort, double kencoderOffset, String niceName) {
+  public SwerveModule(int drivePort, int turnPort, String niceName) {
     this.niceName = niceName;
 
     // TalonFX doesn't use RIO canbus, it uses its own
@@ -75,35 +74,10 @@ public class SwerveModule extends SubsystemBase {
     // Boilerplate configuration for the turn motor to prevent issues from arriving due to cached values
     this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
 
-//    do {
-      System.out.println("\n\n\nInitializing REVSpark for swerve module " + niceName + "...\n\n\n");
-//      this.turnMotor.restoreFactoryDefaults();
-
-//    this.turnMotor.getEncoder().setPosition(0);
-//      while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() - kencoderOffset) >= 0.0001) {
-//        this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
-//        System.out.println("\n\n\n\n\nWaiting for zero offset on swerve module " + niceName + "...\nExpected: " + kencoderOffset + ", Actual: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getZeroOffset() + "\n\n\n\n\n");
-//        try {
-//          Thread.sleep(250);
-//        } catch (InterruptedException e) {}
-//      }
-//      System.out.println("\n\n\n\n\n\nPOSITION BEFORE FACTOR ON " + niceName + ": " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-//    this.turnMotor.setInverted(true);
-//    this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setZeroOffset(kencoderOffset);
-//      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(2 * Math.PI);
-//      System.out.println("POSITION AFTER FACTOR: " + this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() + "\n\n\n\n\n\n");
-//      this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setVelocityConversionFactor(2 * Math.PI / 60.0);
-//      this.turnMotor.setSmartCurrentLimit(Constants.Drivetrain.TURN_CURRENT_LIMIT);
-//      this.turnMotor.getEncoder().setPositionConversionFactor(2 * Math.PI / Constants.Drivetrain.TURN_GEAR_RATIO);
-//      this.turnMotor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 60.0 / Constants.Drivetrain.TURN_GEAR_RATIO);
-//      this.turnMotor.burnFlash();
-//    } while (Math.abs(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition() - this.turnMotor.getEncoder().getPosition() % (2 * Math.PI)) > 0.05);
-
+    System.out.println("\n\n\nInitializing REVSpark for swerve module " + niceName + "...\n\n\n");
 
     this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-    try {
-      Thread.sleep(250);
-    } catch (InterruptedException e) {}
+    try { Thread.sleep(250); } catch (InterruptedException e) {}
     this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
 
     // Configure PID values & configuration for rotation motor
@@ -119,7 +93,7 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-    * Routinely updates the target velocity & angle and sends debugging information to SmartDashboard
+    * Routinely updates the target velocity and angle then sends debugging information to SmartDashboard
    **/
   @Override
   public void periodic() {
@@ -180,6 +154,11 @@ public class SwerveModule extends SubsystemBase {
     return this.driveMotor.getPosition().getValueAsDouble();
   }
 
+
+  /**
+   * Sets the position f the relative encoder in the drive motor
+   * @param position The position to set the motor to
+   **/
   public void setPositionMeters(double position) {
     this.driveMotor.setPosition(position);
   }

@@ -29,7 +29,7 @@ public class Thrower extends SubsystemBase {
   private double feederVolts;
 
   private Thrower() {
-      // Creates motors
+    // Creates motors
     this.topLauncher = new TalonFX(Constants.Ports.TOP_LAUNCHER, Constants.Ports.CTRE_CANBUS);
     this.bottomLauncher = new TalonFX(Constants.Ports.BOTTOM_LAUNCHER, Constants.Ports.CTRE_CANBUS);
     this.feeder = new WPI_TalonSRX(Constants.Ports.THROWER_FEEDER);
@@ -61,19 +61,34 @@ public class Thrower extends SubsystemBase {
     this.feeder.configContinuousCurrentLimit(Constants.Thrower.Feeder.MAX_CURRENT);
   }
 
+  /**
+    * Ensures there is only one Thrower instance to ensure that all calls will affect the same object
+    * @return A specific instance of the Thrower
+   **/
   public static Thrower getInstance() {
     return Thrower.instance == null ? Thrower.instance = new Thrower() : Thrower.instance;
   }
 
+  /**
+    * Is called periodically
+    * Sets the targets of each of the thrower motors to what they are set to
+   **/
   @Override
   public void periodic() {
     this.topLauncher.setControl(this.topLauncherController);
     this.bottomLauncher.setControl(this.bottomLauncherController);
     this.feeder.setVoltage(this.feederVolts);
+
+    this.feeder.getSupplyCurrent();
   }
 
 
-  // Creates command that repeatedly sets the provided launcher voltage
+  /**
+    * Creates command that repeatedly sets the provided launcher voltage
+    * @param topVoltage Voltage going to the top launcher roller
+    * @param bottomVoltage Voltage going to the bottom launcher roller
+    * @return A command that sets the provided launcher voltage
+   **/
   public Command setLauncherVoltage(double topVoltage, double bottomVoltage) {
     return this.runOnce(() -> {
       this.topLauncherController.withOutput(topVoltage);
@@ -81,38 +96,61 @@ public class Thrower extends SubsystemBase {
     });
   }
 
+  /**
+    * Sets the launcher voltage.
+    * @param voltage The requested voltage for the launcher rollers
+    * @return A command that sets the launcher voltages
+   **/
   public Command setLauncherVoltage(double voltage) {
     return this.setLauncherVoltage(voltage, voltage);
   }
 
-  // Creates command that repeatedly sets the provided feeder voltage
+  /**
+   * Creates command that repeatedly sets the provided feeder voltage
+   * @param voltage The requested voltage for the intake rollers
+   * @return A command that sets the voltage for the intake rollers
+   */
   public Command setFeederVoltage(double voltage) {
       return this.runOnce(() -> this.feederVolts = voltage);
   }
 
-  // Prepares launcher and feeder for intaking a note
+  /**
+    * Prepares launcher and feeder for intaking a note
+    * @return A command that intakes a note
+   **/
   public Command setIntake() {
     return this.setLauncherVoltage(Constants.Thrower.Launcher.INTAKE_VOLTAGE).andThen(this.setFeederVoltage(Constants.Thrower.Feeder.INTAKE_VOLTAGE));
   }
 
-  // Prepares launcher and feeder for launching to speaker
+  /**
+    * Prepares launcher and feeder for launching to speaker
+    * @return A command that prepares launcher for launching to speaker
+   **/
   public Command prepareSpeaker() {
     return this.setLauncherVoltage(Constants.Thrower.Launcher.SPEAKER_VOLTAGE).andThen(this.setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
   }
 
-  // Spins up Launchers at suitable speed for Amp and holds Feeder in place
+  /**
+    * Spins up Launchers at suitable speed for Amp and holds Feeder in place
+    * @return A command that spins up launchers
+   **/
   public Command prepareAmp() {
-      return this.setLauncherVoltage(Constants.Thrower.Launcher.TOP_AMP_VOLTAGE, Constants.Thrower.Launcher.BOTTOM_AMP_VOLTAGE);
+    return this.setLauncherVoltage(Constants.Thrower.Launcher.TOP_AMP_VOLTAGE, Constants.Thrower.Launcher.BOTTOM_AMP_VOLTAGE);
   }
 
-  // Pushes the note from the feeder to the Launchers
+  /**
+    * Pushes the note from the feeder to the Launchers
+    * @return A command that expels a note
+  * */
   public Command launch() {
       return this.setFeederVoltage(Constants.Thrower.Feeder.LAUNCH_VOLTAGE);
   }
 
-  // Stops Launchers and Feeder
+  /**
+    * Stops Launchers and Feeder
+    * @return A command that turns off the intake/launcher motors
+   **/
   public Command off() {
-    // TODO: replace andThen with alongWith?
     return this.setLauncherVoltage(0.0).andThen(this.setFeederVoltage(Constants.Thrower.Feeder.PREPARE_VOLTAGE));
   }
 }

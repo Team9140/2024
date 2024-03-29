@@ -18,25 +18,50 @@ import frc.robot.subsystems.*;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
+  /**
+    * The drivetrain instance
+   **/
   private Drivetrain drive;
-  //  private PhotonVision camera;
+  /**
+    * The intake instance
+   **/
   private Intake intake;
+  /**
+    * The arm instance
+   **/
   private Arm arm;
+  /**
+    * The thrower instance
+   **/
   private Thrower thrower;
+  /**
+    * The climber motor
+   **/
   private CANSparkMax climber;
-  private Path path;
+  /**
+    * The autonomous path class
+   **/
+  private final Path path = new Path();
 
-//  private Candle candleSystem
+  private final Candle candle = new Candle();
 
   // The input Xbox controller
   private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
+
+  private enum ClimberPosition {
+    Start,
+    Up,
+    Down,
+    Moving
+  }
+  private ClimberPosition climberPosition = ClimberPosition.Start;
 
   public Robot() {
     super(Constants.LOOP_INTERVAL);
   }
 
   /**
-    * Initialize the robot and prepare it for operation
+    * Initialize the robot and prepare it for operation.
    **/
   @Override
   public void robotInit() {
@@ -44,8 +69,9 @@ public class Robot extends LoggedRobot {
     // Silence verbose controller connection warnings
     DriverStation.silenceJoystickConnectionWarning(true);
 
+    this.candle.setAnimation(Candle.AnimationTypes.Fire);
+
 //    this.camera = PhotonVision.getInstance();
-    this.path = Path.getInstance();
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
     this.arm = Arm.getInstance();
@@ -54,6 +80,8 @@ public class Robot extends LoggedRobot {
     this.climber.setInverted(true);
     this.climber.setIdleMode(CANSparkBase.IdleMode.kBrake);
     //this.candleSystem = Candle.getInstance();
+
+    this.candle.setAnimation(Candle.AnimationTypes.Larson);
 
     // Make the robot drive in Teleoperated mode by default
     this.drive.setDefaultCommand(Commands.run(() -> {
@@ -64,13 +92,12 @@ public class Robot extends LoggedRobot {
 
       // Remove low, fluctuating values and drive at the input joystick as percentage of max velocity
       this.drive.swerveDrive(
-        leftJoystickY * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Forward (front-to-back) movement
-        leftJoystickX * Constants.Drivetrain.METERS_PER_SECOND * -1,  // Horizontal (side-to-side) movement
-        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_RADIANS_PER_SECOND * -1  // Rotation (squared to make larger values more sensitive)
+        leftJoystickY * Constants.Drivetrain.LINEAR_VELOCITY * -1,  // Forward (front-to-back) movement
+        leftJoystickX * Constants.Drivetrain.LINEAR_VELOCITY * -1,  // Horizontal (side-to-side) movement
+        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_VELOCITY * -1  // Rotation (squared to make larger values more sensitive)
       );
     }, this.drive));
 
-    // FIXME: Find a way to not duplicate long command things
     // Prepare underhand throw
     this.controller.a().onTrue(this.arm.setUnderhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()));
 
@@ -120,15 +147,26 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
 
-    if (this.controller.getHID().getXButton()) this.climber.set(this.controller.getHID().getLeftTriggerAxis());
-
     SmartDashboard.putString("** chassis speed", this.drive.getSpeed().toString());
     SmartDashboard.putString("** chassis position", this.drive.getPosition().toString());
   }
 
+  /**
+    * Routinely update settings while disabled. This fixes the issue from 2023 where the autonomous chooser would not
+    * properly update.
+   **/
   @Override
   public void disabledPeriodic() {
     Constants.UpdateSettings();
+    if (
+      !DriverStation.isJoystickConnected(Constants.Ports.INPUT_CONTROLLER)
+      || Math.abs(this.arm.getAngle() + 1.57) < Constants.Arm.AIM_ERROR
+      || Math.abs(this.drive.getGyroAngle() - Constants.STARTING_POSITION.getRotation().getDegrees()) < 20.0
+    ) {
+      this.candle.setAnimation(Candle.AnimationTypes.Error);
+    } else {
+      this.candle.setAnimation(Candle.AnimationTypes.Rainbow);
+    }
   }
 
   /**
@@ -215,8 +253,10 @@ public class Robot extends LoggedRobot {
 //          ));
       }).schedule();
     } else {
-      this.path.auto().schedule();  // FIXME: disabled for a match due to broken arm
+      this.path.auto().schedule();
     }
+
+    this.candle.setAnimation(Candle.AnimationTypes.Twinkle);
   }
 
   /**
@@ -225,6 +265,36 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     Constants.UpdateSettings();
+    if (Constants.alliance.isPresent() && Constants.alliance.get().equals(DriverStation.Alliance.Red)) {
+      // Red alliance
+      this.candle.setColor(255,0,0);
+    } else {
+      // Blue alliance
+      this.candle.setColor(0,0,255);
+    }
+  }
+
+  @Override
+  public void teleopPeriodic() {
+    // Begin climber rewrite
+//    if (this.controller.getHID().getXButton && this.controller.getHID().getLeftTriggerAxis() >= 0.1) {
+//      switch (this.climberPosition) {
+//        case Start:
+//          this.climberPosition = ClimberPosition.Up;
+//          break;
+//        case Up:
+//          if (this.climber.getEncoder().getPosition() >= Constants.Climber.CLIMBER_UP_POSITION) {
+//            this.climberPosition = ClimberPosition.Down;
+//          }
+//          break;
+//        default:
+//        case Moving:
+//        case Down:
+//          break;
+//      }
+//    }
+    if (this.controller.getHID().getXButton()) this.climber.set(this.controller.getHID().getLeftTriggerAxis());
+    SmartDashboard.putNumber("Climber angle", this.climber.getEncoder().getPosition());
   }
 
   private void addStartingPositions() {

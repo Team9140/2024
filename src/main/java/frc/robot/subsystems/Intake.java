@@ -50,19 +50,11 @@ public class Intake extends SubsystemBase {
     });
   }
 
-  public Command reverseIntake() {
-    return this.runOnce(() -> {
-      this.frontLeftVoltage = -Constants.FRONT_INTAKE_NOTE_VOLTS;
-      this.frontRightVoltage = -Constants.FRONT_INTAKE_NOTE_VOLTS;
-      this.backVoltage = -Constants.BACK_INTAKE_NOTE_VOLTS;
-    });
-  }
-
   /**
-    * Releases a note that has been grabbed
-    * Intake -> ground
+    * Reverses the intake to ejectify the note
+    * @return A command that ejectifies a note
    **/
-  public Command releaseNote() {
+  public Command reverseIntake() {
     return this.runOnce(() -> {
       this.frontLeftVoltage = -Constants.FRONT_INTAKE_NOTE_VOLTS;
       this.frontRightVoltage = -Constants.FRONT_INTAKE_NOTE_VOLTS;
@@ -80,6 +72,11 @@ public class Intake extends SubsystemBase {
       this.backVoltage = (0.0);
     });
   }
+
+  /**
+    * Continues to set the voltage to the ideal constantly
+    * NOROOMFORIMPERFECTION
+   **/
   @Override
   public void periodic(){
       this.frontLeftMotor.setVoltage(frontLeftVoltage);
