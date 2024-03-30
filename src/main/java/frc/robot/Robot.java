@@ -12,7 +12,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -39,9 +42,9 @@ public class Robot extends LoggedRobot {
    **/
   private CANSparkMax climber;
   /**
-    * The autonomous path class
+    * The autonomous auto class
    **/
-  private final Path path = new Path();
+  private final Auto auto = new Auto();
 
   private final Candle candle = new Candle();
 
@@ -136,8 +139,7 @@ public class Robot extends LoggedRobot {
     // Reset gyro
     this.controller.back().onTrue(this.drive.resetGyro());
 
-    this.path.autoChooser();
-    this.path.getAutoChoice();
+    this.auto.getSelectedAutoId();
     this.addStartingPositions();
   }
 
@@ -168,6 +170,8 @@ public class Robot extends LoggedRobot {
     } else {
       this.candle.setAnimation(Candle.AnimationTypes.Rainbow);
     }
+
+    SmartDashboard.putString("Current Auto", this.auto.getAutoName(this.auto.getSelectedAutoId()));
   }
 
   /**
@@ -178,9 +182,9 @@ public class Robot extends LoggedRobot {
     Constants.UpdateSettings();
     CommandScheduler.getInstance().cancelAll();
     this.drive.resetPosition(Constants.STARTING_POSITION);
-    int autoChoice = this.path.getAutoChoice();
-    if (autoChoice >= Constants.REGULAR_AUTOS_OFFSET) {
-      (switch (autoChoice - Constants.REGULAR_AUTOS_OFFSET) {
+    int autoChoice = this.auto.getSelectedAutoId();
+    if (autoChoice < Constants.CHOREO_AUTOS_OFFSET) {
+      (switch (autoChoice) {
         default:
           System.out.println("Error: autoChoice value " + autoChoice + " is invalid. Defaulting to 0.");
         case 0:
@@ -199,7 +203,7 @@ public class Robot extends LoggedRobot {
             new WaitCommand(0.25),
             this.thrower.off().alongWith(this.arm.setStow()),
             new WaitCommand(0.25),
-            this.path.auto("BlueAmpSideTriple"),
+            this.auto.getPathPlannerPath("BlueAmpSideTriple"),
             new WaitCommand(0.5),
             this.arm.setStow()
           );
@@ -249,12 +253,12 @@ public class Robot extends LoggedRobot {
             this.thrower.off().alongWith(this.arm.setStow())
           );
 //        case 4:  // Disabled for now
-//          yield this.path.auto("osdifhsodihg").alongWith(new SequentialCommandGroup(
+//          yield this.auto.auto("osdifhsodihg").alongWith(new SequentialCommandGroup(
 //            // Timed events go here
 //          ));
       }).schedule();
     } else {
-      this.path.auto().schedule();
+      this.auto.getAutoCommand(this.auto.getSelectedAutoId()).schedule();
     }
 
     this.candle.setAnimation(Candle.AnimationTypes.Twinkle);
@@ -277,35 +281,35 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopPeriodic() {
-    switch (this.climberPosition) {
-      case MovingUp:
-        this.climber.set(Constants.Climber.UP_VELOCITY);
-        if (this.climber.getEncoder().getPosition() >= Constants.Climber.UP_POSITION) {
-          this.climberPosition = ClimberPosition.Up;
-        }
-        break;
-      case MovingDown:
-        this.climber.set(Constants.Climber.DOWN_VELOCITY);
-        if (this.climber.getEncoder().getPosition() >= Constants.Climber.DOWN_POSITION) {
-          this.climberPosition = ClimberPosition.Down;
-        }
-        break;
-      case Start:
-        this.climber.set(0.0);
-        if (this.controller.getHID().getXButton() && this.controller.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
-          this.climberPosition = ClimberPosition.MovingUp;
-        }
-        break;
-      case Up:
-        this.climber.set(0.0);
-        if (this.controller.getHID().getXButton() && this.controller.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
-          this.climberPosition = ClimberPosition.MovingDown;
-        }
-        break;
-      case Down:
-        this.climber.set(0.0);
-        break;
-    }
+//    switch (this.climberPosition) {
+//      case MovingUp:
+//        this.climber.set(Constants.Climber.UP_VELOCITY);
+//        if (this.climber.getEncoder().getPosition() >= Constants.Climber.UP_POSITION) {
+//          this.climberPosition = ClimberPosition.Up;
+//        }
+//        break;
+//      case MovingDown:
+//        this.climber.set(Constants.Climber.DOWN_VELOCITY);
+//        if (this.climber.getEncoder().getPosition() >= Constants.Climber.DOWN_POSITION) {
+//          this.climberPosition = ClimberPosition.Down;
+//        }
+//        break;
+//      case Start:
+//        this.climber.set(0.0);
+//        if (this.controller.getHID().getXButton() && this.controller.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+//          this.climberPosition = ClimberPosition.MovingUp;
+//        }
+//        break;
+//      case Up:
+//        this.climber.set(0.0);
+//        if (this.controller.getHID().getXButton() && this.controller.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+//          this.climberPosition = ClimberPosition.MovingDown;
+//        }
+//        break;
+//      case Down:
+//        this.climber.set(0.0);
+//        break;
+//    }
     SmartDashboard.putString("Climber Target", this.climberPosition.toString());
     SmartDashboard.putNumber("Climber angle", this.climber.getEncoder().getPosition());
 

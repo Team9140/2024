@@ -304,12 +304,24 @@ public final class Constants {
     "2-note",
     "3-note"
   };
-  public static final int REGULAR_AUTOS_OFFSET = 100;  // Offset for Ids to make software not confuse with pathplanner
+  public static final HashMap<String, String> CHOREO_AUTOS = new HashMap<>(Map.ofEntries(
+    Map.entry("Abhinav's Test Auto", "auto1")
+  ));
+  public static final HashMap<String, String> PATHPLANNER_AUTOS = new HashMap<>(Map.ofEntries(
+//      Map.entry("Blue Amp Side", "BlueAmpSideTriple"),  // NOT WORKING
+//      Map.entry("Blue Mid Side", "BlueMidSideTriple"),  // NOT WORKING
+//      Map.entry("Blue Ref Side", "BlueRefSideTriple"),  // NOT WORKING
+//      Map.entry("Blue Leave Source", "LEAVE"),
+//      Map.entry("Red Amp Side", "RedAmpSideTriple")
+  ));
+
+  public static final int CHOREO_AUTOS_OFFSET = 100;
+  public static final int PATHPLANNER_AUTOS_OFFSET = 200;
 
   public static final int DEFAULT_STARTING_POSITION = 0;
   public static Pose2d STARTING_POSITION;
 
-  public static final int DEFAULT_AUTO = Constants.REGULAR_AUTOS_OFFSET + 0;  // Set first "regular" auto as default
+  public static final int DEFAULT_AUTO = 0;  // Set first "regular" auto as default
 
   public static void UpdateSettings() {
     Constants.alliance = DriverStation.getAlliance();

@@ -74,7 +74,7 @@ public class SwerveModule extends SubsystemBase {
     // Boilerplate configuration for the turn motor to prevent issues from arriving due to cached values
     this.turnMotor = new CANSparkMax(turnPort, CANSparkMax.MotorType.kBrushless);
 
-    System.out.println("\n\n\nInitializing REVSpark for swerve module " + niceName + "...\n\n\n");
+    System.out.println("Initializing swerve module " + niceName + "...");
 
     this.turnMotor.getEncoder().setPosition(this.turnMotor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
     try { Thread.sleep(250); } catch (InterruptedException e) {}
