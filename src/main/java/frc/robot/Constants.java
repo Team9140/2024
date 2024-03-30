@@ -270,6 +270,14 @@ public final class Constants {
     }
   }
 
+  public static class Climber {
+    public static final double UP_VELOCITY = 1.0;
+    public static final double DOWN_VELOCITY = 1.0;
+    public static final double ERROR = 1.0;
+    public static final double UP_POSITION = 0.0;  // FIXME
+    public static final double DOWN_POSITION = 0.0;  // FIXME
+  }
+
   // Side of the field per-match
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
 

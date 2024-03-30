@@ -29,7 +29,7 @@ public class Path extends SubsystemBase {
 
   public Path() {
     SmartDashboard.putString("Current Auto", "Program resetting...");
-    this.drive = Drivetrain.getInstance();
+     this.drive = Drivetrain.getInstance();
     this.arm = Arm.getInstance();
     this.thrower = Thrower.getInstance();
     this.intake = Intake.getInstance();

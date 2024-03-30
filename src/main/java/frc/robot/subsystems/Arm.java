@@ -96,12 +96,13 @@ public class Arm extends SubsystemBase {
     * Checks if the arm is at the requested position
     * @return true if the arm is at the requested position, false otherwise
    **/
-  public boolean isReady() {
-    return Math.abs(this.getAngle() - this.motionMagic.Position) < Constants.Arm.AIM_ERROR;
-  }
+//  public boolean isReady() {
+//    return Math.abs(this.getAngle() - this.motionMagic.Position) < Constants.Arm.AIM_ERROR;
+//  }
 
   /**
     * Get the arm position
+    * @return The arm's angle, in radians
    **/
   public double getAngle() {
     return this.motor.getPosition().getValueAsDouble();
@@ -157,20 +158,18 @@ public class Arm extends SubsystemBase {
 
   /**
     * Aim the launcher at the speaker and shoot a note
-    * This function assumes you are angled correctly to shoot directly into the amp.
-    * I can try to code a function that will do that for you, but ask the photonvision guys instead of me.
     * @param distance The distance of the speaker from the robot
    **/
-  private void speakerAimBot(double distance) {
-    double relativeHeight = Constants.Thrower.AutoAim.SPEAKER_HEIGHT - Constants.Thrower.AutoAim.JOINT_HEIGHT;
-
-    double vVertical = Math.sqrt(
-      Constants.Thrower.AutoAim.ENTERING_SPEAKER_VELOCITY * Constants.Thrower.AutoAim.ENTERING_SPEAKER_VELOCITY
-      + 2 * Constants.Thrower.AutoAim.ACCELERATION_GRAVITY * relativeHeight
-    );
-    double vHorizontal = (distance * Constants.Thrower.AutoAim.ACCELERATION_GRAVITY) / (vVertical - Constants.Thrower.AutoAim.ENTERING_SPEAKER_VELOCITY);
-
-    double theta = Math.asin(vVertical / Constants.Thrower.Launcher.LAUNCH_SPEED) - Constants.Thrower.AutoAim.ANGLE_ERROR_FIX;
-    this.setAngle(theta);
-  }
+//  private void speakerAimBot(double distance) {
+//    double relativeHeight = Constants.Thrower.AutoAim.SPEAKER_HEIGHT - Constants.Thrower.AutoAim.JOINT_HEIGHT;
+//
+//    double vVertical = Math.sqrt(
+//      Constants.Thrower.AutoAim.ENTERING_SPEAKER_VELOCITY * Constants.Thrower.AutoAim.ENTERING_SPEAKER_VELOCITY
+//      + 2 * Constants.Thrower.AutoAim.ACCELERATION_GRAVITY * relativeHeight
+//    );
+//    double vHorizontal = (distance * Constants.Thrower.AutoAim.ACCELERATION_GRAVITY) / (vVertical - Constants.Thrower.AutoAim.ENTERING_SPEAKER_VELOCITY);
+//
+//    double theta = Math.asin(vVertical / Constants.Thrower.Launcher.LAUNCH_SPEED) - Constants.Thrower.AutoAim.ANGLE_ERROR_FIX;
+//    this.setAngle(theta);
+//  }
 }

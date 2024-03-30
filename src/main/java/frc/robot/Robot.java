@@ -50,9 +50,10 @@ public class Robot extends LoggedRobot {
 
   private enum ClimberPosition {
     Start,
+    MovingUp,
     Up,
-    Down,
-    Moving
+    MovingDown,
+    Down
   }
   private ClimberPosition climberPosition = ClimberPosition.Start;
 
@@ -276,25 +277,39 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopPeriodic() {
-    // Begin climber rewrite
-//    if (this.controller.getHID().getXButton && this.controller.getHID().getLeftTriggerAxis() >= 0.1) {
-//      switch (this.climberPosition) {
-//        case Start:
-//          this.climberPosition = ClimberPosition.Up;
-//          break;
-//        case Up:
-//          if (this.climber.getEncoder().getPosition() >= Constants.Climber.CLIMBER_UP_POSITION) {
-//            this.climberPosition = ClimberPosition.Down;
-//          }
-//          break;
-//        default:
-//        case Moving:
-//        case Down:
-//          break;
-//      }
-//    }
-    if (this.controller.getHID().getXButton()) this.climber.set(this.controller.getHID().getLeftTriggerAxis());
+    switch (this.climberPosition) {
+      case MovingUp:
+        this.climber.set(Constants.Climber.UP_VELOCITY);
+        if (this.climber.getEncoder().getPosition() >= Constants.Climber.UP_POSITION) {
+          this.climberPosition = ClimberPosition.Up;
+        }
+        break;
+      case MovingDown:
+        this.climber.set(Constants.Climber.DOWN_VELOCITY);
+        if (this.climber.getEncoder().getPosition() >= Constants.Climber.DOWN_POSITION) {
+          this.climberPosition = ClimberPosition.Down;
+        }
+        break;
+      case Start:
+        this.climber.set(0.0);
+        if (this.controller.getHID().getXButton() && this.controller.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+          this.climberPosition = ClimberPosition.MovingUp;
+        }
+        break;
+      case Up:
+        this.climber.set(0.0);
+        if (this.controller.getHID().getXButton() && this.controller.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+          this.climberPosition = ClimberPosition.MovingDown;
+        }
+        break;
+      case Down:
+        this.climber.set(0.0);
+        break;
+    }
+    SmartDashboard.putString("Climber Target", this.climberPosition.toString());
     SmartDashboard.putNumber("Climber angle", this.climber.getEncoder().getPosition());
+
+    if (this.controller.getHID().getXButton()) this.climber.set(this.controller.getHID().getLeftTriggerAxis());
   }
 
   private void addStartingPositions() {
