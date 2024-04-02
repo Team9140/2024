@@ -2,6 +2,7 @@ package lib.util;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
@@ -29,5 +30,9 @@ public class Util {
 
   public static double getSparkVelocity(CANSparkMax motor, double lastVelocity) {
     return motor.getLastError().equals(REVLibError.kOk) ? motor.getEncoder().getPosition() : lastVelocity;
+  }
+
+  public static Pose2d pose(double x, double y, double theta) {
+    return new Pose2d(x, y, Rotation2d.fromDegrees(theta));
   }
 }

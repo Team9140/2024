@@ -13,6 +13,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import lib.util.Util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,14 @@ import java.util.Optional;
   * A class containing settings and values needed by several subsystems
  **/
 public final class Constants {
+  public enum SYSID {
+    Teleop,
+    RotationSysId,
+    StraightSysId,
+    ThrowerRollerSysId
+  };
+
+  public static final Constants.SYSID SYSID_MODE = SYSID.Teleop;
   /**
     * Periodic interval delay time in seconds
    **/
@@ -75,6 +84,10 @@ public final class Constants {
      **/
     public static final double TURN_DEADBAND = 0.15;
 
+    public static final double TURN_JOY_P = 0.1;
+    public static final double TURN_JOY_I = 0.0;
+    public static final double TURN_JOY_D = 0.0;
+
     /**
       * Max linear velocity in m/s
       */
@@ -93,17 +106,17 @@ public final class Constants {
       * The kS value. This is part of the drive motor controller's feedforward.
       * @see <a href="https://www.chiefdelphi.com/uploads/default/original/3X/d/8/d8c45602d966d596cd37b43017385db0b5a36bc7.pdf">Understanding Feedforward Models for FRC</a>
      **/
-    public static final double MODULE_S = 0.12844;
+//    public static final double MODULE_S = 0.12844;
     /**
       * The motor speed constant. This is part of the drive motor controller's feedforward.
       * @see <a href="https://www.chiefdelphi.com/uploads/default/original/3X/d/8/d8c45602d966d596cd37b43017385db0b5a36bc7.pdf">Understanding Feedforward Models for FRC</a>
      **/
-    public static final double MODULE_V = 2.1253;
+//    public static final double MODULE_V = 2.1253;
     /**
       * The kA value. This is part of the drive motor controller's feedforward.
       * @see <a href="https://www.chiefdelphi.com/uploads/default/original/3X/d/8/d8c45602d966d596cd37b43017385db0b5a36bc7.pdf">Understanding Feedforward Models for FRC</a>
      **/
-    public static final double MODULE_A = 0.27452;
+//    public static final double MODULE_A = 0.27452;
 
 
     /**
@@ -128,6 +141,7 @@ public final class Constants {
       * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
      **/
     public static final double DRIVE_P = 6.366;
+//    public static final double DRIVE_P = 7.5;
     /**
       * PID value for the drive motor controller
       * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
@@ -158,6 +172,45 @@ public final class Constants {
 
     // Distance to travel before rotation is attempted
 //    public static final double ROTATION_DELAY_METERS = 1.0;
+
+    public static final Pose2d WAIT_UNTIL_POSITION_ERROR = Util.pose(0.5, 0.5, 20.0);
+
+    public static class Limits {
+      public static double NORMAL_LIN = 1.0;
+      public static double NORMAL_ROT = 1.0;
+
+      public static double INTAKE_LIN = 0.8;
+      public static double INTAKE_ROT = 0.8;
+
+      public static double AMP_LIN = 0.6;
+      public static double AMP_ROT = 0.4;
+
+      public static double OVERHAND_LIN = 0.9;
+      public static double OVERHAND_ROT = 0.7;
+
+      public static double UNDERHAND_LIN = 1.0;
+      public static double UNDERHAND_ROT = 0.7;
+    }
+
+    public static class FF {
+      public static double FLS = 0.12844;
+      public static double FLV = 2.215 * 1.0141;
+      public static double FLA = 0.27452;
+
+      public static double FRS = 0.12844;
+      public static double FRV = 2.185 * 0.96;  // 0.96
+      public static double FRA = 0.27452 * 0.5;
+
+      public static double BLS = 0.12844;
+      public static double BLV = 2.136 * 1.0567;
+      public static double BLA = 0.27452;
+
+      public static double BRS = 0.12844;
+      public static double BRV = 2.09 * 0.96 * 1.0226;
+//      public static double BRV = 0.0;
+      public static double BRA = 0.27452 * 0.5;
+//      public static double BRA = 0.0;
+    }
   }
 
   /**
@@ -224,7 +277,7 @@ public final class Constants {
     public static final double S = 0.14178;
     public static final double V = 0.94316;
     public static final double A = 0.07;
-    public static final double MAX_CURRENT = 40.0;  // Amps
+    public static final double MAX_CURRENT = 48.0;  // Amps
     public static final double SENSOR_TO_MECHANISM_RATIO = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI);  // Radian rotations of arm
 
     // Motion Magic Specific Limits
@@ -237,18 +290,18 @@ public final class Constants {
     // Positions in radians
     public static class Positions {
       public static final double INTAKE = -1.69;
-      public static final double AMP = 1.95;
+      public static final double AMP = 2.00;
 
-      public static final double UNDERHAND = -1.4;
+      public static final double UNDERHAND = -Math.PI / 4;
       public static final double OVERHAND = 0.25 * Math.PI;
     }
   }
 
   public static class Thrower {
     public static class Launcher {
-      public static final double MAX_CURRENT = 30.0;  // amps
+      public static final double MAX_CURRENT = 80.0;  // amps
       public static final double INTAKE_VOLTAGE = -3.0;  // volts
-      public static final double SPEAKER_VOLTAGE = 11.0;  // volts
+      public static final double SPEAKER_VOLTAGE = 12.0;  // volts
       public static final double TOP_AMP_VOLTAGE = 7.0;  // volts
       public static final double BOTTOM_AMP_VOLTAGE = 3.0;  // volts
       public static final double LAUNCH_SPEED = 1669.756495; //ft/s
@@ -261,13 +314,13 @@ public final class Constants {
       public static final double LAUNCH_VOLTAGE = 12.0;  // volts
     }
 
-    public static class AutoAim {
-      public static final double ACCELERATION_GRAVITY = 32.17405; // acceleration of gravity, ft/s
-      public static final double ENTERING_SPEAKER_VELOCITY = 1.0; // ft/s value of the upwards velocity of the note when it enters the speaker
-      public static final double SPEAKER_HEIGHT = 6.8; // the ft height of the speaker entrance, where the bot is aiming
-      public static final double JOINT_HEIGHT = 1.72283; // how high the bot thinks it is shooting from
-      public static final double ANGLE_ERROR_FIX = 0.1; //FIX ME if we using this need to fine tune it
-    }
+//    public static class AutoAim {
+//      public static final double ACCELERATION_GRAVITY = 32.17405; // acceleration of gravity, ft/s
+//      public static final double ENTERING_SPEAKER_VELOCITY = 1.0; // ft/s value of the upwards velocity of the note when it enters the speaker
+//      public static final double SPEAKER_HEIGHT = 6.8; // the ft height of the speaker entrance, where the bot is aiming
+//      public static final double JOINT_HEIGHT = 1.72283; // how high the bot thinks it is shooting from
+//      public static final double ANGLE_ERROR_FIX = 0.1; //FIX ME if we using this need to fine tune it
+//    }
   }
 
   public static class Climber {
@@ -278,19 +331,17 @@ public final class Constants {
     public static final double DOWN_POSITION = 0.0;  // FIXME
   }
 
+  public static final double INTAKE_NOTIFY_CURRENT = 8.0;
+
   // Side of the field per-match
   public static Optional<DriverStation.Alliance> alliance = Optional.empty();
-
-  private static Pose2d pose(double x, double y, double theta) {
-    return new Pose2d(x, y, Rotation2d.fromDegrees(theta));
-  }
 
   public static final SendableChooser<Integer> positionChooser = new SendableChooser<>();
   public static final HashMap<String, Pose2d> STARTING_POSITIONS = new HashMap<>(Map.ofEntries(
     // Blue Alliance
-    Map.entry("Amp Side", pose(0.71, 6.69, 60.00)),
-    Map.entry("Mid Side", pose(1.63, 5.54, 0)),
-    Map.entry("Ref Side", pose(0.71, 4.37, -60.00))
+    Map.entry("Amp Side", Util.pose(0.71, 6.69, 60.00)),
+    Map.entry("Mid Side", Util.pose(1.63, 5.54, 0)),
+    Map.entry("Ref Side", Util.pose(0.71, 4.37, -60.00))
 //    Map.entry("Speaker Center",             pose(1.2813,  5.556972314, 0)),
 //    Map.entry("Inward-Side Speaker Corner", pose(1.2813,  4.667970536, 0)),
 //    Map.entry("Field Center",               pose(1.4997,  4.11480823,  0)),
@@ -300,12 +351,13 @@ public final class Constants {
 
   public static final String[] REGULAR_AUTOS = {
     "Shoot & drive",
-    "Amp-side 4-note",
-    "2-note",
-    "3-note"
+    "Middle 4-note",
+    "2-note"//,
+//    "3-note"
   };
   public static final HashMap<String, String> CHOREO_AUTOS = new HashMap<>(Map.ofEntries(
-    Map.entry("Abhinav's Test Auto", "auto1")
+    Map.entry("4-Note Path-Only", "auto1"),
+    Map.entry("Test straight 1m", "testStraightAuto")
   ));
   public static final HashMap<String, String> PATHPLANNER_AUTOS = new HashMap<>(Map.ofEntries(
 //      Map.entry("Blue Amp Side", "BlueAmpSideTriple"),  // NOT WORKING

@@ -88,6 +88,7 @@ public class Arm extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Arm Position", this.getAngle());
+    SmartDashboard.putNumber("Arm Current", this.motor.getStatorCurrent().getValueAsDouble());
     this.motor.setControl(this.motionMagic);
   }
 

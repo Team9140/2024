@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.Arm;
@@ -39,26 +40,20 @@ public class Auto {
     this.thrower = Thrower.getInstance();
     this.intake = Intake.getInstance();
 
-    NamedCommands.registerCommand("e1", this.intakeOnCommand());
-    NamedCommands.registerCommand("e2", this.armOverhandCommand());
-    NamedCommands.registerCommand("e3", this.launchCommand());
-    NamedCommands.registerCommand("e4", this.intakeOnCommand());
-    NamedCommands.registerCommand("e5", this.armOverhandCommand());
-    NamedCommands.registerCommand("e6", this.launchCommand());
-    NamedCommands.registerCommand("e7", this.intakeOnCommand());
-    NamedCommands.registerCommand("e8", this.armOverhandCommand());
-    NamedCommands.registerCommand("e9", this.launchCommand());
+    NamedCommands.registerCommand("intake", this.intakeOnCommand());
+    NamedCommands.registerCommand("overhand", this.armOverhandCommand());
+    NamedCommands.registerCommand("launch", this.launchCommand());
 
     this.choreoPID = Choreo.choreoSwerveController(
-      new PIDController(1.0, 0.0, 0.0),
-      new PIDController(1.0, 0.0, 0.0),
-      new PIDController(1.0, 0.0, 0.0)
+      new PIDController(4.8, 0.0, 0.93),
+      new PIDController(4.8, 0.0, 0.93),
+      new PIDController(7.0, 0.0, 0.5)
     );
 
     AutoBuilder.configureHolonomic(
       this.drive::getPosition,
       this.drive::resetPosition,
-      this.drive::getSpeed,
+      this.drive::getChassisSpeeds,
       this.drive::swerveDrive,
       new HolonomicPathFollowerConfig(
         new PIDConstants(1.0, 0.0, 0.0),
@@ -115,11 +110,84 @@ public class Auto {
     * @param choice The Id number
     * @return The command for the auto mode
    **/
-  public Command getAutoCommand(int choice) {
-    if (choice >= Constants.CHOREO_AUTOS_OFFSET) {
-      return this.getChoreoPath(Constants.CHOREO_AUTOS.get(Constants.CHOREO_AUTOS.keySet().toArray()[choice].toString()));
+  public Command getAutoCommand() {
+    int autoChoice = this.getSelectedAutoId();
+    if (autoChoice < Constants.CHOREO_AUTOS_OFFSET) {
+      return (switch (autoChoice) {
+        default:
+          System.out.println("Error: autoChoice value " + autoChoice + " is invalid. Defaulting to 0.");
+        case 0:  // Shoot & Drive
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            this.thrower.off().alongWith(this.arm.setStow()),
+            this.drive.goStraight(1, 2)
+          );
+        case 1:  // 4-Note
+          yield this.getChoreoPath("auto1").alongWith(new SequentialCommandGroup(
+//            this.intakeOnCommand(),
+            new InstantCommand(() -> System.out.println("intake")),
+            this.drive.waitUntilPositionCommand(3.255, 5.667, 0.0),
+//            this.armOverhandCommand(),
+            new InstantCommand(() -> System.out.println("overhand")),
+            this.drive.waitUntilPositionCommand(1.6, 5.5, 0.0),
+//            this.launchCommand(),
+            new InstantCommand(() -> System.out.println("launch")),
+            new WaitCommand(0.2),
+//            this.intakeOnCommand()
+            new InstantCommand(() -> System.out.println("intake"))
+          )).andThen(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
+        case 2:  // 2-Note
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            new WaitCommand(0.25),
+            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
+            new WaitCommand(1),
+            this.drive.goStraight(1.0, Units.inchesToMeters(50)),
+            new WaitCommand(0.25),
+            this.drive.goStraight(-1.0, Units.inchesToMeters(60)),
+            this.intake.off().alongWith(this.thrower.off()),
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch()
+          );
+        /*case 3:  // 3-Note
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            new WaitCommand(0.25),
+            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
+            new WaitCommand(1),
+            this.drive.goStraight(1.0, 0.0, Units.inchesToMeters(50)),
+            new WaitCommand(0.25),
+            this.drive.goStraight(-1.0, 0.0, Units.inchesToMeters(60)),
+            this.intake.off().alongWith(this.thrower.off()),
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            new WaitCommand(0.25),
+
+            // add a 3rd note driving diagonal to another one
+            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
+            new WaitCommand(1),
+            this.drive.goStraight(0.47, -0.57, Units.inchesToMeters(80)),
+            new WaitCommand(0.25),
+            this.drive.goStraight(-0.47, 0.57, Units.inchesToMeters(90)),
+            this.intake.off().alongWith(this.thrower.off()),
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            this.thrower.off().alongWith(this.arm.setStow())
+          );*/
+      });
+    } else if (autoChoice < Constants.PATHPLANNER_AUTOS_OFFSET) {
+      return this.getChoreoPath(Constants.CHOREO_AUTOS.get(Constants.CHOREO_AUTOS.keySet().toArray()[autoChoice - Constants.CHOREO_AUTOS_OFFSET].toString()));
     } else {
-      return this.getPathPlannerPath(Constants.PATHPLANNER_AUTOS.keySet().toArray()[this.autoChoice].toString());
+      return this.getPathPlannerPath(Constants.PATHPLANNER_AUTOS.keySet().toArray()[autoChoice - Constants.PATHPLANNER_AUTOS_OFFSET].toString());
     }
   }
 
@@ -194,7 +262,7 @@ public class Auto {
     * @return A command that turns on the intake motors
    **/
   public Command intakeOnCommand() {
-    return this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake());
+    return (new InstantCommand(() -> System.out.println("\n\n\n\n\n\n\n\n\n\n\n\ndsfiojdsgoijaoijadsoijsg"))).alongWith(this.intake.intakeNote()).alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake());
   }
 
   /**

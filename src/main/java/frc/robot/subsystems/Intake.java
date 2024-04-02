@@ -28,6 +28,13 @@ public class Intake extends SubsystemBase {
     this.backMotor.configContinuousCurrentLimit(Constants.BACK_INTAKE_CURRENT_LIMIT);
   }
 
+  @Override
+  public void periodic() {
+    this.frontLeftMotor.setVoltage(frontLeftVoltage);
+    this.frontRightMotor.setVoltage(frontRightVoltage);
+    this.backMotor.setVoltage(backVoltage);
+  }
+
   /**
     * Returns an initialized class of Intake if one exists, or create a new one if it doesn't (and return it).
     * @return The intake
@@ -71,16 +78,5 @@ public class Intake extends SubsystemBase {
       this.frontRightVoltage = (0.0);
       this.backVoltage = (0.0);
     });
-  }
-
-  /**
-    * Continues to set the voltage to the ideal constantly
-    * NOROOMFORIMPERFECTION
-   **/
-  @Override
-  public void periodic(){
-      this.frontLeftMotor.setVoltage(frontLeftVoltage);
-      this.frontRightMotor.setVoltage(frontRightVoltage);
-      this.backMotor.setVoltage(backVoltage);
   }
 }

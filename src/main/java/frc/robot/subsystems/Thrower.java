@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
-// import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -78,8 +77,10 @@ public class Thrower extends SubsystemBase {
     this.topLauncher.setControl(this.topLauncherController);
     this.bottomLauncher.setControl(this.bottomLauncherController);
     this.feeder.setVoltage(this.feederVolts);
+  }
 
-    this.feeder.getSupplyCurrent();
+  public double getFeederCurrent() {
+    return this.feeder.getSupplyCurrent();
   }
 
 

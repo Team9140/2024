@@ -44,7 +44,7 @@ public class SwerveModule extends SubsystemBase {
     * @param turnPort The port ID of the rotation motor's controller
     * @param niceName Pretty name for easier debugging
    **/
-  public SwerveModule(int drivePort, int turnPort, String niceName) {
+  public SwerveModule(String niceName, int drivePort, int turnPort, double DRIVE_FFS, double DRIVE_FFV, double DRIVE_FFA, boolean reverseDriveMotor) {
     this.niceName = niceName;
 
     // TalonFX doesn't use RIO canbus, it uses its own
@@ -57,9 +57,9 @@ public class SwerveModule extends SubsystemBase {
       .withKP(Constants.Drivetrain.DRIVE_P)
       .withKI(Constants.Drivetrain.DRIVE_I)
       .withKD(Constants.Drivetrain.DRIVE_D)
-      .withKS(Constants.Drivetrain.MODULE_S)
-      .withKV(Constants.Drivetrain.MODULE_V)
-      .withKA(Constants.Drivetrain.MODULE_A);
+      .withKS(DRIVE_FFS)
+      .withKV(DRIVE_FFV)
+      .withKA(DRIVE_FFA);
 
     this.driveMotor.setPosition(0.0);
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs().withStatorCurrentLimit(Constants.Drivetrain.DRIVE_CURRENT_LIMIT).withStatorCurrentLimitEnable(true);
@@ -68,7 +68,7 @@ public class SwerveModule extends SubsystemBase {
     FeedbackConfigs feedbackConfigs = new FeedbackConfigs().withSensorToMechanismRatio(Constants.Drivetrain.DRIVE_GEAR_RATIO / Units.inchesToMeters(Math.PI * Constants.Drivetrain.WHEEL_DIAMETER));
     TalonFXConfiguration driveMotorConfiguration = new TalonFXConfiguration().withCurrentLimits(currentLimits).withFeedback(feedbackConfigs).withSlot0(driveMotorSlot0);
     this.driveMotor.getConfigurator().apply(driveMotorConfiguration);
-    this.driveMotor.setInverted(true);
+    this.driveMotor.setInverted(reverseDriveMotor);
     this.driveMotor.setNeutralMode(NeutralModeValue.Brake);
 
     // Boilerplate configuration for the turn motor to prevent issues from arriving due to cached values
@@ -116,7 +116,6 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(this.niceName + " drive current", this.driveMotor.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putNumber(this.niceName + " turn encoder position", this.getTurnAngle());
     SmartDashboard.putNumber(this.niceName + " turn encoder position % 2pi", this.getTurnAngle() % (2 * Math.PI));
-    SmartDashboard.putNumber(this.niceName + " drive meters per second", this.driveMotor.getVelocity().getValueAsDouble());
   }
 
   //  Gets best way to turn to an angle without doing an extra rotation
