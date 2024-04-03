@@ -74,7 +74,7 @@ public final class Constants {
     /**
       * Diameter of each wheel in inches
      **/
-    public static final double WHEEL_DIAMETER = 4;
+    public static final double WHEEL_DIAMETER = 4.0;
     /**
       * Input deadband value for left joystick
      **/
@@ -84,7 +84,7 @@ public final class Constants {
      **/
     public static final double TURN_DEADBAND = 0.15;
 
-    public static final double TURN_JOY_P = 0.1;
+    public static final double TURN_JOY_P = 0.08;  // Was 0.1
     public static final double TURN_JOY_I = 0.0;
     public static final double TURN_JOY_D = 0.0;
 
@@ -123,7 +123,8 @@ public final class Constants {
       * PID value for the turn motor controller
       * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
      **/
-    public static final double TURN_P = 3.8069;
+//    public static final double TURN_P = 3.8069;
+    public static final double TURN_P = 1.97;
     /**
       * PID value for the turn motor controller
       * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
@@ -133,7 +134,8 @@ public final class Constants {
       * PID value for the turn motor controller
       * @see <a href="https://www.chiefdelphi.com/t/finally-i-understand-pid/450811">Finally I Understand PID! - chiefdelphi</a>
      **/
-    public static final double TURN_D = 0.15584;
+//    public static final double TURN_D = 0.15584;
+    public static final double TURN_D = 0.115;
 
 
     /**
@@ -173,7 +175,7 @@ public final class Constants {
     // Distance to travel before rotation is attempted
 //    public static final double ROTATION_DELAY_METERS = 1.0;
 
-    public static final Pose2d WAIT_UNTIL_POSITION_ERROR = Util.pose(0.5, 0.5, 20.0);
+    public static final Pose2d WAIT_UNTIL_POSITION_ERROR = Util.pose(0.25, 0.25, 20.0);
 
     public static class Limits {
       public static double NORMAL_LIN = 1.0;

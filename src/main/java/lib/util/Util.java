@@ -32,7 +32,7 @@ public class Util {
     return motor.getLastError().equals(REVLibError.kOk) ? motor.getEncoder().getPosition() : lastVelocity;
   }
 
-  public static Pose2d pose(double x, double y, double theta) {
-    return new Pose2d(x, y, Rotation2d.fromDegrees(theta));
+  public static Pose2d pose(double x, double y, double degrees) {
+    return new Pose2d(x, y, Rotation2d.fromDegrees(degrees));
   }
 }

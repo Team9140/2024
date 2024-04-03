@@ -30,7 +30,16 @@ public class Auto {
   private final Thrower thrower;
   private final Intake intake;
   private int autoChoice = Constants.DEFAULT_AUTO;
-  private final ChoreoControlFunction choreoPID;
+//  private final ChoreoControlFunction choreoPID = Choreo.choreoSwerveController(
+//    new PIDController(15.0, 0.0, 0.93),
+//    new PIDController(15.0, 0.0, 0.93),
+//    new PIDController(15.0, 0.0, 0.5)
+//  );
+  private final ChoreoControlFunction choreoPID = Choreo.choreoSwerveController(
+    new PIDController(8.9417, 0.0, 2.0872),
+    new PIDController(8.9417, 0.0, 2.0872),
+    new PIDController(5.2146, 0.0, 1.2374)
+  );
   private final SendableChooser<Integer> autonomousSendableChooser = new SendableChooser<>();
 
   public Auto() {
@@ -43,12 +52,6 @@ public class Auto {
     NamedCommands.registerCommand("intake", this.intakeOnCommand());
     NamedCommands.registerCommand("overhand", this.armOverhandCommand());
     NamedCommands.registerCommand("launch", this.launchCommand());
-
-    this.choreoPID = Choreo.choreoSwerveController(
-      new PIDController(4.8, 0.0, 0.93),
-      new PIDController(4.8, 0.0, 0.93),
-      new PIDController(7.0, 0.0, 0.5)
-    );
 
     AutoBuilder.configureHolonomic(
       this.drive::getPosition,
@@ -125,19 +128,37 @@ public class Auto {
             this.drive.goStraight(1, 2)
           );
         case 1:  // 4-Note
-          yield this.getChoreoPath("auto1").alongWith(new SequentialCommandGroup(
-//            this.intakeOnCommand(),
-            new InstantCommand(() -> System.out.println("intake")),
-            this.drive.waitUntilPositionCommand(3.255, 5.667, 0.0),
-//            this.armOverhandCommand(),
-            new InstantCommand(() -> System.out.println("overhand")),
-            this.drive.waitUntilPositionCommand(1.6, 5.5, 0.0),
-//            this.launchCommand(),
-            new InstantCommand(() -> System.out.println("launch")),
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(0.75),
+            this.thrower.launch(),
             new WaitCommand(0.2),
-//            this.intakeOnCommand()
-            new InstantCommand(() -> System.out.println("intake"))
-          )).andThen(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
+            this.getChoreoPath("auto1").alongWith(new SequentialCommandGroup(
+              this.intakeOnCommand(),
+              this.drive.waitUntilPositionCommand(3.255, 5.667, 0.0),
+              new WaitCommand(0.4),
+              this.armOverhandCommand(),
+              this.drive.waitUntilPositionCommand(1.6, 5.5, 0.0),
+              this.launchCommand(),
+              new WaitCommand(0.2),
+              this.intakeOnCommand(),
+              this.drive.waitUntilPositionCommand(2.7, 7.2, 0.0),
+              new WaitCommand(0.4),
+              this.armOverhandCommand(),
+              this.drive.waitUntilPositionCommand(1.6, 5.5, 0.0),
+              this.launchCommand(),
+              new WaitCommand(0.2),
+              this.intakeOnCommand(),
+              this.drive.waitUntilPositionCommand(2.9, 7.2, 0.0),
+              new WaitCommand(0.4),
+              this.armOverhandCommand(),
+              this.drive.waitUntilPositionCommand(1.6, 5.5, 0.0),
+              this.launchCommand(),
+              new WaitCommand(0.2),
+              this.thrower.off().alongWith(this.arm.setStow())
+            )),
+            this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0)
+          );
         case 2:  // 2-Note
           yield new SequentialCommandGroup(
             this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),

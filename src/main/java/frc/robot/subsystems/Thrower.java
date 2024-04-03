@@ -69,8 +69,7 @@ public class Thrower extends SubsystemBase {
   }
 
   /**
-    * Is called periodically
-    * Sets the targets of each of the thrower motors to what they are set to
+    * Periodically sets the requested motor voltages to the target voltages
    **/
   @Override
   public void periodic() {

@@ -253,7 +253,7 @@ public class Drivetrain extends SubsystemBase {
    **/
   public void swerveDrive(ChassisSpeeds movement) {
     movement = ChassisSpeeds.discretize(
-      new ChassisSpeeds(movement.vxMetersPerSecond, movement.vyMetersPerSecond, movement.omegaRadiansPerSecond + this.turnJoyPID.calculate(this.getRotationalVelocity(), movement.omegaRadiansPerSecond)),
+      new ChassisSpeeds(movement.vxMetersPerSecond, movement.vyMetersPerSecond, movement.omegaRadiansPerSecond),
       Constants.LOOP_INTERVAL
     );
 
