@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
+import java.util.*;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -19,7 +20,10 @@ public final class Constants {
   public static final double LOOP_INTERVAL = 0.010;  // Periodic interval delay time FIXME: unknown units
   public static final double TRACK_WIDTH = Units.inchesToMeters(23.75);  // Horizontal (side-to-side) distance between wheels
   public static final double WHEEL_BASE = Units.inchesToMeters(20.75);  // Front-to-back distance between wheels
-  public static final double scoringRange = 120.0;  // FIXME: Unknown
+  public static final double scoringRange = 4.0;  // FIXME: Unknown
+  public static final double cameraRange = 5.0;
+
+  public static HashMap<Integer, Double> anglesFromRange;
 
   // Full-body dimensions
   public static final int WIDTH = 29;  // Inches, side-to-side width
