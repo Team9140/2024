@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
@@ -48,9 +46,7 @@ public class Drivetrain extends SubsystemBase {
   private double linearMultiplier = 1.0;
   private double rotationalMultiplier = 1.0;
   private Field2d dashboardField = new Field2d();
-  private Field2d targetPositionField = new Field2d();
-  private Pose2d targetPosition = new Pose2d(0.0, 0.0, new Rotation2d());
-  private PIDController turnJoyPID = new PIDController(Constants.Drivetrain.TURN_JOY_P, Constants.Drivetrain.TURN_JOY_I, Constants.Drivetrain.TURN_JOY_D, Constants.LOOP_INTERVAL);
+//  private PIDController turnJoyPID = new PIDController(Constants.Drivetrain.TURN_JOY_P, Constants.Drivetrain.TURN_JOY_I, Constants.Drivetrain.TURN_JOY_D, Constants.LOOP_INTERVAL);
 
   /**
    * Returns an initialized class of Drivetrain if one exists, or create a new one if it doesn't (and return it).
@@ -68,10 +64,10 @@ public class Drivetrain extends SubsystemBase {
 
     // Create the SwerveDriveKinematics object
     this.swerveKinematics = new SwerveDriveKinematics(
-      new Translation2d(Constants.FRONT_OFFSET, Constants.LEFT_OFFSET),  // Front Left
-      new Translation2d(Constants.FRONT_OFFSET, Constants.RIGHT_OFFSET),  // Front Right
-      new Translation2d(Constants.BACK_OFFSET, Constants.LEFT_OFFSET),  // Back Left
-      new Translation2d(Constants.BACK_OFFSET, Constants.RIGHT_OFFSET)  // Back Right
+      new Translation2d(Constants.Drivetrain.FRONT_OFFSET, Constants.Drivetrain.LEFT_OFFSET),  // Front Left
+      new Translation2d(Constants.Drivetrain.FRONT_OFFSET, Constants.Drivetrain.RIGHT_OFFSET),  // Front Right
+      new Translation2d(Constants.Drivetrain.BACK_OFFSET, Constants.Drivetrain.LEFT_OFFSET),  // Back Left
+      new Translation2d(Constants.Drivetrain.BACK_OFFSET, Constants.Drivetrain.RIGHT_OFFSET)  // Back Right
     );
 
     this.swerveStateGenerator = new SwerveSetpointGenerator(this.swerveKinematics);
@@ -122,11 +118,10 @@ public class Drivetrain extends SubsystemBase {
       new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)) // Starting Position
     );
 
-    // FIXME: unclear
+    // Make setpoint values to the initial state
     this.prevSetpoint = new SwerveSetpoint(this.getChassisSpeeds(), swerveKinematics.toSwerveModuleStates(this.getChassisSpeeds()));
 
     SmartDashboard.putData("Field", this.dashboardField);
-    SmartDashboard.putData("Target Position", this.targetPositionField);
   }
 
   /**
@@ -144,9 +139,6 @@ public class Drivetrain extends SubsystemBase {
 
     Pose2d position = this.getPosition();
     this.dashboardField.setRobotPose(new Pose2d(position.getX() + 0.8, position.getY(), position.getRotation()));
-
-//    Shuffleboard.
-//    this.positionEstimator.addVisionMeasurement(Pose2d position, double timestamp);
   }
 
   /**
@@ -175,24 +167,20 @@ public class Drivetrain extends SubsystemBase {
    * @param position The new offset/position of the robot
    **/
   public void resetPosition(Pose2d position) {
-    this.targetPosition = new Pose2d(position.getX() + 0.8, position.getY(), position.getRotation());
-    this.targetPositionField.setRobotPose(this.targetPosition);
+    this.resetGyro(position.getRotation().getDegrees());
     this.positionEstimator.resetPosition(
       Rotation2d.fromDegrees(gyro.getAngle()),
       this.getPositionArray(),
       position
     );
-    this.resetGyro(position.getRotation().getDegrees());
-    // Causes odd dragging movement
-//    this.gyro.setGyroAngle(this.gyro.getYawAxis(), position.getRotation().getDegrees());
   }
 
   public Command waitUntilPositionCommand(double x, double y, double theta) {
     return new WaitUntilCommand(() -> {
       Pose2d position = this.getPosition();
-      return Math.abs(position.getX() - x) < Constants.Drivetrain.WAIT_UNTIL_POSITION_ERROR.getX()
-        && Math.abs(position.getY() - y) < Constants.Drivetrain.WAIT_UNTIL_POSITION_ERROR.getY()
-        && Math.abs(position.getRotation().getDegrees() - theta) % (2 * Math.PI) < Constants.Drivetrain.WAIT_UNTIL_POSITION_ERROR.getRotation().getDegrees();
+      return Math.abs(position.getX() - x) < Constants.Auto.WAIT_UNTIL_POSITION_ERROR.getX()
+        && Math.abs(position.getY() - y) < Constants.Auto.WAIT_UNTIL_POSITION_ERROR.getY()
+        && Math.abs(position.getRotation().getDegrees() - theta) % (2 * Math.PI) < Constants.Auto.WAIT_UNTIL_POSITION_ERROR.getRotation().getDegrees();
     });
   }
 
@@ -230,10 +218,10 @@ public class Drivetrain extends SubsystemBase {
    **/
   public Command resetGyro() {
 //    return Commands.run(this.gyro::reset);
-    return this.runOnce(() -> this.gyro.setGyroAngle(this.gyro.getYawAxis(), 0.0));
+    return this.resetGyro(0.0);
   }
-  public void resetGyro(double degrees) {
-    this.gyro.setGyroAngle(this.gyro.getYawAxis(), degrees);
+  public Command resetGyro(double degrees) {
+    return this.runOnce(() -> this.gyro.setGyroAngle(this.gyro.getYawAxis(), degrees));
   }
 
   public double getLinearVelocity() {
@@ -261,60 +249,26 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("drive vy", movement.vyMetersPerSecond);
     SmartDashboard.putNumber("drive omega", movement.omegaRadiansPerSecond);
 
-    this.targetPosition = new Pose2d(
-      this.targetPosition.getX() + movement.vxMetersPerSecond * Constants.LOOP_INTERVAL,
-      this.targetPosition.getY() + movement.vyMetersPerSecond * Constants.LOOP_INTERVAL,
-      Rotation2d.fromRadians(this.targetPosition.getRotation().getRadians() + movement.omegaRadiansPerSecond * Constants.LOOP_INTERVAL)
-    );
-    this.targetPositionField.setRobotPose(this.targetPosition);
+    this.prevSetpoint = this.swerveStateGenerator.generateSetpoint(this.limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
 
-    double EPSILON = 0.01;
-    if (Math.abs(movement.vxMetersPerSecond) <= EPSILON && Math.abs(movement.vyMetersPerSecond) <= EPSILON && Math.abs(movement.omegaRadiansPerSecond) <= EPSILON) {
-      this.prevSetpoint = this.swerveStateGenerator.generateSetpoint(this.limits, this.prevSetpoint, new ChassisSpeeds(0.0, 0.0, 0.0), Constants.LOOP_INTERVAL);
-    } else {
-      this.prevSetpoint = this.swerveStateGenerator.generateSetpoint(this.limits, this.prevSetpoint, movement, Constants.LOOP_INTERVAL);
-    }
-
-    SwerveModuleState[] moduleStates = this.prevSetpoint.mModuleStates;
-    this.frontLeft.setTarget(moduleStates[0]);
-    this.frontRight.setTarget(moduleStates[1]);
-    this.backLeft.setTarget(moduleStates[2]);
-    this.backRight.setTarget(moduleStates[3]);
-  }
-
-  /**
-    * Move the robot based on the current controller joystick values
-    * @param vx Forward velocity (positive is forward)
-    * @param vy Horizontal velocity (positive is left)
-    * @param omega Rotational velocity (positive is ccw)
-   **/
-  public void swerveDrive(double vx, double vy, double omega) {
-    SmartDashboard.putNumber("drive vx", vx);
-    SmartDashboard.putNumber("drive vy", vy);
-    SmartDashboard.putNumber("drive omega", omega);
-    SmartDashboard.putNumber("drive velocity", Math.hypot(vx, vy));
-    SmartDashboard.putNumber("heading", this.gyro.getAngle());
-
-    if (this.fieldRelative) {
-      this.swerveDrive(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(this.gyro.getAngle())));
-    } else {
-      this.swerveDrive(new ChassisSpeeds(vx, vy, omega));
-    }
+    this.frontLeft.setTarget(this.prevSetpoint.mModuleStates[0]);
+    this.frontRight.setTarget(this.prevSetpoint.mModuleStates[1]);
+    this.backLeft.setTarget(this.prevSetpoint.mModuleStates[2]);
+    this.backRight.setTarget(this.prevSetpoint.mModuleStates[3]);
   }
 
   public Command swerveDrive(Supplier<Double> getLeftJoyY, Supplier<Double> getLeftJoyX, Supplier<Double> getRightJoyX) {
     return this.run(() -> {
-      // Remove low, fluctuating values from rotation input joystick
-      double leftJoystickY = MathUtil.applyDeadband(getLeftJoyY.get(), Constants.Drivetrain.DRIVE_DEADBAND);
-      double leftJoystickX = MathUtil.applyDeadband(getLeftJoyX.get(), Constants.Drivetrain.DRIVE_DEADBAND);
+      double vx = -MathUtil.applyDeadband(getLeftJoyY.get(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.LINEAR_VELOCITY * this.linearMultiplier;  // Forward (front-to-back) movement
+      double vy = -MathUtil.applyDeadband(getLeftJoyX.get(), Constants.Drivetrain.DRIVE_DEADBAND) * Constants.Drivetrain.LINEAR_VELOCITY * this.linearMultiplier;  // Horizontal (side-to-side) movement
       double rightJoystickX = MathUtil.applyDeadband(getRightJoyX.get(), Constants.Drivetrain.TURN_DEADBAND);
+      double omega = -rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_VELOCITY * this.rotationalMultiplier;  // Rotation (squared to make larger values more sensitive)
 
-      // Remove low, fluctuating values and drive at the input joystick as percentage of max velocity
-      this.swerveDrive(
-        leftJoystickY * Constants.Drivetrain.LINEAR_VELOCITY * -1 * this.linearMultiplier,  // Forward (front-to-back) movement
-        leftJoystickX * Constants.Drivetrain.LINEAR_VELOCITY * -1 * this.linearMultiplier,  // Horizontal (side-to-side) movement
-        rightJoystickX * Math.abs(rightJoystickX) * Constants.Drivetrain.ROTATION_VELOCITY * -1 * this.rotationalMultiplier  // Rotation (squared to make larger values more sensitive)
-      );
+      if (this.fieldRelative) {
+        this.swerveDrive(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(this.gyro.getAngle())));
+      } else {
+        this.swerveDrive(new ChassisSpeeds(vx, vy, omega));
+      }
     });
   }
 
@@ -331,17 +285,6 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-    * Sets the position of the relative encoders in the drive motors
-    * @param position The position to set the motors to
-   **/
-  public void setPositionMeters(double position) {
-    this.frontLeft.setPositionMeters(position);
-    this.frontRight.setPositionMeters(position);
-    this.backLeft.setPositionMeters(position);
-    this.backRight.setPositionMeters(position);
-  }
-
-  /**
     * Goes forward
     * @param speed How fast to go forward
     * @param distance How far to go forward
@@ -351,27 +294,6 @@ public class Drivetrain extends SubsystemBase {
     return new WaitCommand(Math.abs(distance / speed))
       .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(speed, 0.0, 0.0)))
       .andThen(() -> swerveDrive(new ChassisSpeeds(0, 0, 0))));
-//    this.setPositionMeters(0);
-//    return this.run(() -> swerveDrive(new ChassisSpeeds(speed, 0.0, 0.0)))
-//      .until(() -> (Math.abs(this.frontLeft.getPosition().distanceMeters) >= Math.abs(distance)))
-//      .andThen(this.runOnce(() -> swerveDrive(new ChassisSpeeds(0, 0, 0))));
-  }
-
-  /**
-    * Goes forward
-    * @param vx_field Field relative x velocity
-    * @param vy_field Field relative y velocity
-    * @param distance how far to go
-    * @return A command that goes strait for the requested velocities and distance
-   **/
-  public Command goStraight(double vx_field, double vy_field, double distance){
-//    return new WaitCommand(distance / speed)
-//      .deadlineWith(this.run(() -> swerveDrive(new ChassisSpeeds(speed, 0.0, 0.0)))
-//        .andThen(() -> swerveDrive(new ChassisSpeeds(0, 0, 0)));
-    this.setPositionMeters(0);
-    return this.run(() -> swerveDrive(vx_field, vy_field, 0.0))
-      .until(() -> (Math.abs(this.frontLeft.getPosition().distanceMeters) >= Math.abs(distance)))
-      .andThen(this.runOnce(() -> swerveDrive(new ChassisSpeeds(0, 0, 0))));
   }
 
   /**

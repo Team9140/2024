@@ -14,6 +14,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
@@ -24,7 +25,6 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Thrower;
-import org.littletonrobotics.junction.LoggedRobot;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -32,36 +32,19 @@ import java.util.function.Supplier;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-public class Robot extends LoggedRobot {
-  /**
-    * The drivetrain instance
-   **/
-  private Drivetrain drive;
-  /**
-    * The intake instance
-   **/
-  private Intake intake;
-  /**
-    * The arm instance
-   **/
-  private Arm arm;
-  /**
-    * The thrower instance
-   **/
-  private Thrower thrower;
-  /**
-    * The climber motor
-   **/
-  private CANSparkMax climber;
-  /**
-    * The autonomous auto class
-   **/
-  private final Auto auto = new Auto();
+public class Robot extends TimedRobot {
+  private Drivetrain drive;  // The drivetrain instance
+  private Intake intake;  // The intake instance
+  private Arm arm;  // The arm instance
+  private Thrower thrower;  // The thrower instance
+  private CANSparkMax climber;  // The climber motor
+  private final Auto auto = new Auto();  // The autonomous class
 
 //  private final Candle candle = new Candle();
 
   // The input Xbox controller
-  private final CommandXboxController controller = new CommandXboxController(Constants.Ports.INPUT_CONTROLLER);
+  private final CommandXboxController driverController = new CommandXboxController(Constants.Ports.DRIVER_CONTROLLER);
+  private final CommandXboxController auxController = new CommandXboxController(Constants.Ports.AUXILIARY_CONTROLLER);
 
   private enum ClimberPosition {
     Start,
@@ -75,22 +58,16 @@ public class Robot extends LoggedRobot {
 
   private SysIdRoutine sysIdRoutine;
 
-
-  public Robot() {
-    super(Constants.LOOP_INTERVAL);
-  }
-
   /**
     * Initialize the robot and prepare it for operation.
    **/
   @Override
   public void robotInit() {
-    Constants.UpdateSettings();
+    Globals.UpdateSettings();
     // Silence verbose controller connection warnings
     DriverStation.silenceJoystickConnectionWarning(true);
 //    this.candle.setAnimation(Candle.AnimationTypes.Fire);
 
-//    this.camera = PhotonVision.getInstance();
     this.drive = Drivetrain.getInstance();
     this.intake = Intake.getInstance();
     this.arm = Arm.getInstance();
@@ -98,30 +75,29 @@ public class Robot extends LoggedRobot {
     this.climber = new CANSparkMax(Constants.Ports.CLIMBER, CANSparkLowLevel.MotorType.kBrushless);
     this.climber.setInverted(true);
     this.climber.setIdleMode(CANSparkBase.IdleMode.kBrake);
-    //this.candleSystem = Candle.getInstance();
 
 //    this.candle.setAnimation(Candle.AnimationTypes.Larson);
 
     // Eject everything
-    this.controller.leftBumper()
+    this.driverController.leftBumper()
       .onTrue(this.intake.reverseIntake().alongWith(this.thrower.setLauncherVoltage(12.0)).andThen(this.thrower.setFeederVoltage(12.0)))
       .onFalse(this.intake.off().alongWith(this.thrower.off()));
 
     // Reset gyro
-    this.controller.back().onTrue(this.drive.resetGyro());
+    this.driverController.back().onTrue(this.drive.resetGyro());
 
     switch (Constants.SYSID_MODE) {
       default:
       case Teleop:
         // Make the robot drive in Teleoperated mode by default
         this.drive.setDefaultCommand(this.drive.swerveDrive(
-          this.controller.getHID()::getLeftY,
-          this.controller.getHID()::getLeftX,
-          this.controller.getHID()::getRightX
+          this.driverController.getHID()::getLeftY,
+          this.driverController.getHID()::getLeftX,
+          this.driverController.getHID()::getRightX
         ));
 
         // Prepare underhand throw
-        this.controller.a().onTrue(
+        this.driverController.a().onTrue(
           this.arm.setUnderhand()
             .alongWith(this.thrower.prepareSpeaker())
             .alongWith(this.intake.off())
@@ -132,7 +108,7 @@ public class Robot extends LoggedRobot {
         );
 
         // Prepare overhand throw
-        this.controller.y().onTrue(
+        this.driverController.y().onTrue(
           this.arm.setOverhand()
             .alongWith(this.thrower.prepareSpeaker())
             .alongWith(this.intake.off())
@@ -143,7 +119,7 @@ public class Robot extends LoggedRobot {
         );
 
         // Prepare amp throw
-        this.controller.b().onTrue(
+        this.driverController.b().onTrue(
           this.arm.setAmp()
             .alongWith(this.thrower.prepareAmp())
             .alongWith(this.intake.off())
@@ -154,7 +130,7 @@ public class Robot extends LoggedRobot {
         );
 
         // Stow TODO: Maybe not turn the intake off?
-        this.controller.x().onTrue(
+        this.driverController.x().onTrue(
           this.arm.setStow()
             .alongWith(this.intake.off())
             .alongWith(this.thrower.off())
@@ -165,7 +141,7 @@ public class Robot extends LoggedRobot {
         );
 
         // Intake Note
-        this.controller.rightBumper()
+        this.driverController.rightBumper()
           .onTrue(
             this.intake.intakeNote()
             .alongWith(this.arm.setIntake())
@@ -178,7 +154,7 @@ public class Robot extends LoggedRobot {
           .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
 
         // Throw note
-        this.controller.rightTrigger()
+        this.driverController.rightTrigger()
           .onTrue(this.thrower.launch())
           .onFalse(new SequentialCommandGroup(
             this.thrower.launch(),
@@ -187,7 +163,7 @@ public class Robot extends LoggedRobot {
           ));
 
         // Toggle field-relative drive
-        this.controller.start().onTrue(this.drive.toggleFieldRelative());
+        this.driverController.start().onTrue(this.drive.toggleFieldRelative());
 
         break;
       case RotationSysId:
@@ -210,18 +186,18 @@ public class Robot extends LoggedRobot {
 
     if (Constants.SYSID_MODE != Constants.SYSID.Teleop) {
       SignalLogger.setPath("/media/sda1/");
-      this.controller.a().whileTrue(this.sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse)).onFalse(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
-      this.controller.y().whileTrue(this.sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward)).onFalse(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
-      this.controller.x().whileTrue(this.sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse)).onFalse(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
-      this.controller.b().whileTrue(this.sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward)).onFalse(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
+      this.driverController.a().whileTrue(this.sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse)).onFalse(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
+      this.driverController.y().whileTrue(this.sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward)).onFalse(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
+      this.driverController.x().whileTrue(this.sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse)).onFalse(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
+      this.driverController.b().whileTrue(this.sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward)).onFalse(this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0));
     }
 
     this.auto.getSelectedAutoId();
-    this.addStartingPositions();
+    Globals.addStartingPositions();
 
     (new Trigger(() -> this.thrower.getFeederCurrent() >= Constants.INTAKE_NOTIFY_CURRENT && this.isTeleop()))
-      .onTrue(new InstantCommand(() -> this.controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.6)))
-      .onFalse(new InstantCommand(() -> this.controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)));
+      .onTrue(new InstantCommand(() -> this.driverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.6)))
+      .onFalse(new InstantCommand(() -> this.driverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)));
   }
 
   private void setSysIdRoutine(
@@ -254,7 +230,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void disabledInit() {
-    this.controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
+    this.driverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
     if (Constants.SYSID_MODE != Constants.SYSID.Teleop) SignalLogger.stop();
   }
 
@@ -264,11 +240,10 @@ public class Robot extends LoggedRobot {
    **/
   @Override
   public void disabledPeriodic() {
-    Constants.UpdateSettings();
+    Globals.UpdateSettings();
     if (
-      !DriverStation.isJoystickConnected(Constants.Ports.INPUT_CONTROLLER)
+      !DriverStation.isJoystickConnected(Constants.Ports.DRIVER_CONTROLLER)
       || Math.abs(this.arm.getAngle() + 1.57) < Constants.Arm.AIM_ERROR
-//      || Math.abs(this.drive.getGyroAngle() - Constants.STARTING_POSITION.getRotation().getDegrees()) < 20.0
     ) {
 //      this.candle.setAnimation(Candle.AnimationTypes.Error);
     } else {
@@ -283,9 +258,8 @@ public class Robot extends LoggedRobot {
    **/
   @Override
   public void autonomousInit() {
-    Constants.UpdateSettings();
     CommandScheduler.getInstance().cancelAll();
-    this.drive.resetPosition(Constants.STARTING_POSITION);
+    this.drive.resetPosition(Globals.STARTING_POSITION);
     this.auto.getAutoCommand().schedule();
 
 //    this.candle.setAnimation(Candle.AnimationTypes.Twinkle);
@@ -296,9 +270,9 @@ public class Robot extends LoggedRobot {
    **/
   @Override
   public void teleopInit() {
-    Constants.UpdateSettings();
+    Globals.UpdateSettings();
     if (Constants.SYSID_MODE != Constants.SYSID.Teleop) SignalLogger.start();
-    if (Constants.alliance.isPresent() && Constants.alliance.get().equals(DriverStation.Alliance.Red)) {
+    if (Globals.alliance == DriverStation.Alliance.Red) {
       // Red alliance
 //      this.candle.setColor(255,0,0);
     } else {
@@ -324,13 +298,13 @@ public class Robot extends LoggedRobot {
 //        break;
 //      case Start:
 //        this.climber.set(0.0);
-//        if (this.controller.getHID().getXButton() && this.controller.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+//        if (this.driverController.getHID().getXButton() && this.driverController.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
 //          this.climberPosition = ClimberPosition.MovingUp;
 //        }
 //        break;
 //      case Up:
 //        this.climber.set(0.0);
-//        if (this.controller.getHID().getXButton() && this.controller.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+//        if (this.driverController.getHID().getXButton() && this.driverController.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
 //          this.climberPosition = ClimberPosition.MovingDown;
 //        }
 //        break;
@@ -341,31 +315,11 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putString("Climber Target", this.climberPosition.toString());
     SmartDashboard.putNumber("Climber angle", this.climber.getEncoder().getPosition());
 
-    if (this.controller.getHID().getXButton()) this.climber.set(this.controller.getHID().getLeftTriggerAxis());
-  }
-
-  private void addStartingPositions() {
-    Object[] startingPositions = Constants.STARTING_POSITIONS.keySet().toArray();
-
-    for (int i = 0; i < startingPositions.length; i++) {
-      if (i == Constants.DEFAULT_STARTING_POSITION) {
-        Constants.positionChooser.setDefaultOption("[Position] " + startingPositions[i].toString() + " (Default)", i);
-      } else {
-        Constants.positionChooser.addOption("[Position] " + startingPositions[i].toString(), i);
-      }
+    if (this.driverController.getHID().getXButton()) {
+      this.climber.set(this.driverController.getHID().getLeftTriggerAxis());
+    } else {
+      this.climber.set(0.0);
     }
-
-    SmartDashboard.putData("Positions", Constants.positionChooser);
-  }
-
-  @Override
-  public void simulationInit() {
-    this.autonomousInit();
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    this.autonomousPeriodic();
   }
 
   @Override

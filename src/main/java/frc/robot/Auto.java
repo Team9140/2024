@@ -1,7 +1,5 @@
 package frc.robot;
 
-import com.choreo.lib.Choreo;
-import com.choreo.lib.ChoreoControlFunction;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
@@ -9,7 +7,6 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -19,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.commands.ChoreoPathCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
@@ -29,17 +27,6 @@ public class Auto {
   private final Arm arm;
   private final Thrower thrower;
   private final Intake intake;
-  private int autoChoice = Constants.DEFAULT_AUTO;
-//  private final ChoreoControlFunction choreoPID = Choreo.choreoSwerveController(
-//    new PIDController(15.0, 0.0, 0.93),
-//    new PIDController(15.0, 0.0, 0.93),
-//    new PIDController(15.0, 0.0, 0.5)
-//  );
-  private final ChoreoControlFunction choreoPID = Choreo.choreoSwerveController(
-    new PIDController(8.9417, 0.0, 2.0872),
-    new PIDController(8.9417, 0.0, 2.0872),
-    new PIDController(5.2146, 0.0, 1.2374)
-  );
   private final SendableChooser<Integer> autonomousSendableChooser = new SendableChooser<>();
 
   public Auto() {
@@ -48,10 +35,6 @@ public class Auto {
     this.arm = Arm.getInstance();
     this.thrower = Thrower.getInstance();
     this.intake = Intake.getInstance();
-
-    NamedCommands.registerCommand("intake", this.intakeOnCommand());
-    NamedCommands.registerCommand("overhand", this.armOverhandCommand());
-    NamedCommands.registerCommand("launch", this.launchCommand());
 
     AutoBuilder.configureHolonomic(
       this.drive::getPosition,
@@ -62,22 +45,23 @@ public class Auto {
         new PIDConstants(1.0, 0.0, 0.0),
         new PIDConstants(1.0, 0.0, 0.0),
         Constants.Drivetrain.LINEAR_VELOCITY,
-        Units.inchesToMeters(Constants.BASE_RADIUS),
+        Units.inchesToMeters(Constants.Auto.BASE_RADIUS),
         new ReplanningConfig()
       ),
-      () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
+      () -> Globals.alliance == DriverStation.Alliance.Red,
       this.drive
     );
 
-    this.recursiveAddAutos("Auto", Constants.REGULAR_AUTOS, 0);
-    this.recursiveAddAutos("Choreo", Constants.CHOREO_AUTOS.keySet().toArray(), Constants.CHOREO_AUTOS_OFFSET);
-    this.recursiveAddAutos("PathPlanner", Constants.PATHPLANNER_AUTOS.keySet().toArray(), Constants.PATHPLANNER_AUTOS_OFFSET);
+    this.recursiveAddAutos("Auto", Constants.Auto.REGULAR, 0);
+    this.recursiveAddAutos("Choreo", Constants.Auto.CHOREO.keySet().toArray(), Constants.Auto.CHOREO_OFFSET);
+    this.recursiveAddAutos("PathPlanner", Constants.Auto.PATHPLANNER.keySet().toArray(), Constants.Auto.PATHPLANNER_OFFSET);
+    this.autonomousSendableChooser.addOption("[Disabled] DISABLE AUTONOMOUS", Constants.Auto.DISABLED_ID);
     SmartDashboard.putData("Autos", this.autonomousSendableChooser);
   }
 
   private void recursiveAddAutos(String name, Object[] array, int offset) {
     for (int i = 0; i < array.length; i++) {
-      if (i + offset == Constants.DEFAULT_AUTO) {
+      if (i + offset == Constants.Auto.DEFAULT_MODE) {
         this.autonomousSendableChooser.setDefaultOption("[" + name + "] " + array[i].toString() + " (Default)", i + offset);
       } else {
         this.autonomousSendableChooser.addOption("[" + name + "] " + array[i].toString(), i + offset);
@@ -91,7 +75,7 @@ public class Auto {
    **/
   public int getSelectedAutoId() {
     Integer choice = this.autonomousSendableChooser.getSelected();
-    return this.autoChoice = choice == null ? Constants.DEFAULT_AUTO : choice;
+    return choice == null ? Constants.Auto.DEFAULT_MODE : choice;
   }
 
   /**
@@ -99,23 +83,24 @@ public class Auto {
    * @return The friendly human-readable name of the currently selected autonomous mode
    **/
   public String getAutoName(int choice) {
-    if (choice >= Constants.PATHPLANNER_AUTOS_OFFSET) {
-      return Constants.PATHPLANNER_AUTOS.keySet().toArray()[choice - Constants.PATHPLANNER_AUTOS_OFFSET].toString();
-    } else if (choice >= Constants.CHOREO_AUTOS_OFFSET) {
-      return Constants.CHOREO_AUTOS.keySet().toArray()[choice - Constants.CHOREO_AUTOS_OFFSET].toString();
+    if (choice >= Constants.Auto.PATHPLANNER_OFFSET) {
+      return Constants.Auto.PATHPLANNER.keySet().toArray()[choice - Constants.Auto.PATHPLANNER_OFFSET].toString();
+    } else if (choice >= Constants.Auto.CHOREO_OFFSET) {
+      return Constants.Auto.CHOREO.keySet().toArray()[choice - Constants.Auto.CHOREO_OFFSET].toString();
     } else {
-      return Constants.REGULAR_AUTOS[choice];
+      return Constants.Auto.REGULAR[choice];
     }
   }
 
   /**
     * Gets the auto command from a specified autonomous Id
-    * @param choice The Id number
     * @return The command for the auto mode
    **/
   public Command getAutoCommand() {
+    Globals.UpdateSettings();
     int autoChoice = this.getSelectedAutoId();
-    if (autoChoice < Constants.CHOREO_AUTOS_OFFSET) {
+    if (autoChoice == Constants.Auto.DISABLED_ID) return new InstantCommand(() -> System.out.println("auto disabled"));
+    if (autoChoice < Constants.Auto.CHOREO_OFFSET) {
       return (switch (autoChoice) {
         default:
           System.out.println("Error: autoChoice value " + autoChoice + " is invalid. Defaulting to 0.");
@@ -127,88 +112,53 @@ public class Auto {
             this.thrower.off().alongWith(this.arm.setStow()),
             this.drive.goStraight(1, 2)
           );
-        case 1:  // 4-Note
+        case 1:  // 4.5-Note
           yield new SequentialCommandGroup(
-            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
-            new WaitCommand(0.75),
+            this.armPositionCommand(0.25 * Math.PI),
+            new WaitCommand(0.5),
             this.thrower.launch(),
-            new WaitCommand(0.2),
-            this.getChoreoPath("auto1").alongWith(new SequentialCommandGroup(
-              this.intakeOnCommand(),
-              this.drive.waitUntilPositionCommand(3.255, 5.667, 0.0),
-              new WaitCommand(0.4),
+            new WaitCommand(0.25),
+            this.arm.setStow().alongWith(this.intake.off()),
+            new WaitCommand(0.25),
+            this.getChoreoPath("4note").alongWith(new SequentialCommandGroup(  // TODO: REPLACE WITH CHEESE
+              this.intake.intakeNote().alongWith(this.thrower.setIntake()),
+              new WaitCommand(2.2),
               this.armOverhandCommand(),
-              this.drive.waitUntilPositionCommand(1.6, 5.5, 0.0),
-              this.launchCommand(),
+              new WaitCommand(0.6),
+              this.thrower.launch(),  // throw 1
               new WaitCommand(0.2),
-              this.intakeOnCommand(),
-              this.drive.waitUntilPositionCommand(2.7, 7.2, 0.0),
-              new WaitCommand(0.4),
+              this.intakeCommand(),
+              new WaitCommand(1.4),
               this.armOverhandCommand(),
-              this.drive.waitUntilPositionCommand(1.6, 5.5, 0.0),
-              this.launchCommand(),
+              new WaitCommand(0.7),
+              this.thrower.launch(),  // throw 2
+              new WaitCommand(0.4),
+              this.intakeCommand(),
+              new WaitCommand(1.7),
+              this.armPositionCommand(0.25 * Math.PI + 0.1),
+              new WaitCommand(0.7),
+              this.thrower.launch(),  // throw 3
               new WaitCommand(0.2),
-              this.intakeOnCommand(),
-              this.drive.waitUntilPositionCommand(2.9, 7.2, 0.0),
-              new WaitCommand(0.4),
-              this.armOverhandCommand(),
-              this.drive.waitUntilPositionCommand(1.6, 5.5, 0.0),
-              this.launchCommand(),
+              this.thrower.off().alongWith(this.arm.setStow()))
+            ),
+            this.getChoreoPath("5note").alongWith(new SequentialCommandGroup(  // TODO: REPLACE WITH BUTGER
+              new WaitCommand(2.0),
+              this.intake.intakeNote().alongWith(this.thrower.setIntake()),
+              new WaitCommand(1.5),
+              this.intake.off().alongWith(this.thrower.off()),
+              new WaitCommand(1.5),
+              this.thrower.prepareSpeaker().alongWith(this.arm.setOverhand()),
+              new WaitCommand(1.0),
+              this.thrower.launch(),
               new WaitCommand(0.2),
               this.thrower.off().alongWith(this.arm.setStow())
-            )),
-            this.drive.swerveDrive(() -> 0.0, () -> 0.0, () -> 0.0)
+            ))
           );
-        case 2:  // 2-Note
-          yield new SequentialCommandGroup(
-            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
-            new WaitCommand(1),
-            this.thrower.launch(),
-            new WaitCommand(0.25),
-            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
-            new WaitCommand(1),
-            this.drive.goStraight(1.0, Units.inchesToMeters(50)),
-            new WaitCommand(0.25),
-            this.drive.goStraight(-1.0, Units.inchesToMeters(60)),
-            this.intake.off().alongWith(this.thrower.off()),
-            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
-            new WaitCommand(1),
-            this.thrower.launch()
-          );
-        /*case 3:  // 3-Note
-          yield new SequentialCommandGroup(
-            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
-            new WaitCommand(1),
-            this.thrower.launch(),
-            new WaitCommand(0.25),
-            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
-            new WaitCommand(1),
-            this.drive.goStraight(1.0, 0.0, Units.inchesToMeters(50)),
-            new WaitCommand(0.25),
-            this.drive.goStraight(-1.0, 0.0, Units.inchesToMeters(60)),
-            this.intake.off().alongWith(this.thrower.off()),
-            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
-            new WaitCommand(1),
-            this.thrower.launch(),
-            new WaitCommand(0.25),
-
-            // add a 3rd note driving diagonal to another one
-            this.intake.intakeNote().alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake()),
-            new WaitCommand(1),
-            this.drive.goStraight(0.47, -0.57, Units.inchesToMeters(80)),
-            new WaitCommand(0.25),
-            this.drive.goStraight(-0.47, 0.57, Units.inchesToMeters(90)),
-            this.intake.off().alongWith(this.thrower.off()),
-            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
-            new WaitCommand(1),
-            this.thrower.launch(),
-            this.thrower.off().alongWith(this.arm.setStow())
-          );*/
       });
-    } else if (autoChoice < Constants.PATHPLANNER_AUTOS_OFFSET) {
-      return this.getChoreoPath(Constants.CHOREO_AUTOS.get(Constants.CHOREO_AUTOS.keySet().toArray()[autoChoice - Constants.CHOREO_AUTOS_OFFSET].toString()));
+    } else if (autoChoice < Constants.Auto.PATHPLANNER_OFFSET) {
+      return this.getChoreoPath(Constants.Auto.PATHPLANNER.get(Constants.Auto.CHOREO.keySet().toArray()[autoChoice - Constants.Auto.CHOREO_OFFSET].toString()));
     } else {
-      return this.getPathPlannerPath(Constants.PATHPLANNER_AUTOS.keySet().toArray()[autoChoice - Constants.PATHPLANNER_AUTOS_OFFSET].toString());
+      return this.getPathPlannerPath(Constants.Auto.PATHPLANNER.keySet().toArray()[autoChoice - Constants.Auto.PATHPLANNER_OFFSET].toString());
     }
   }
 
@@ -218,14 +168,7 @@ public class Auto {
     * @return A command that follows the path
    **/
   public Command getChoreoPath(String path) {
-    return Choreo.choreoSwerveCommand(
-      Choreo.getTrajectory(path),
-      this.drive::getPosition,
-      this.choreoPID,
-      this.drive::swerveDrive,
-      () -> Constants.alliance.isPresent() && Constants.alliance.get() == DriverStation.Alliance.Red,
-      this.drive
-    );
+    return new ChoreoPathCommand(path);
   }
 
   /**
@@ -239,58 +182,38 @@ public class Auto {
 
   /**
    * Finds a path to the requested position
-   * @param endPos The requested final position of the bot
+   * @param end The requested final position of the bot
    * @return A command that finds a path to the requested position
    **/
-  public Command findPathToPosition(Pose2d endPos) {
-    return AutoBuilder.pathfindToPose(endPos, getPathPlannerConstraints());
-  }
-
-  /**
-   * Get constraints for PathPlanner
-   * @return The path constraints
-   **/
-  private PathConstraints getPathPlannerConstraints() {
-    return new PathConstraints(
+  public Command findPathToPosition(Pose2d end) {
+    return AutoBuilder.pathfindToPose(end, new PathConstraints(
       3.0, 4.0,
       Units.degreesToRadians(540), Units.degreesToRadians(720)
-    );
+    ));
   }
 
-
   /**
-    * Turns off the intake and sets the arm to the overhand position
-    * @return A command that moves the arm to the overhand position
+    * Sets the arm to the overhand position and prepares to launch in the speaker
+    * @return A command that moves the arm and prepares to launch
    **/
   public Command armOverhandCommand() {
-    return this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()).alongWith(this.intake.off()); // Adjust intake along with arm
+    return this.intake.off().alongWith(this.thrower.prepareSpeaker()).alongWith(this.arm.setOverhand()); // Adjust intake along with arm
   }
 
   /**
-    * Launch a note then moves the arm to the stow position
-    * @return A command that launches the note
+    * Sets the arm to a specified position and prepares to launch in the speaker
+    * @param angle The requested angle in radians
+    * @return A command that moves the arm and prepares to launch
    **/
-  public Command launchCommand() {
-    return new SequentialCommandGroup(
-      this.thrower.launch(),
-      new WaitCommand(0.25),
-      this.arm.setStow()
-    );
+  public Command armPositionCommand(double angle) {
+    return this.intake.off().alongWith(this.thrower.prepareSpeaker()).alongWith(this.arm.setAngle(angle));
   }
 
   /**
     * Turns on the intake motors
     * @return A command that turns on the intake motors
    **/
-  public Command intakeOnCommand() {
-    return (new InstantCommand(() -> System.out.println("\n\n\n\n\n\n\n\n\n\n\n\ndsfiojdsgoijaoijadsoijsg"))).alongWith(this.intake.intakeNote()).alongWith(this.arm.setIntake()).alongWith(this.thrower.setIntake());
-  }
-
-  /**
-    * Turns off the intake motors
-    * @return A command that turns off the intake motors
-   **/
-  public Command intakeOffCommand() {
-    return this.thrower.off().alongWith(this.intake.off());
+  public Command intakeCommand() {
+    return this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow());
   }
 }
