@@ -48,10 +48,6 @@ wpi.java.debugJni = false
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
 
-configurations.all {
-  exclude group: "edu.wpi.first.wpilibj"
-}
-
 //task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
 //    mainClass = "org.littletonrobotics.junction.CheckInstall"
 //    classpath = sourceSets.main.runtimeClasspath
