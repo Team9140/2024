@@ -1,7 +1,8 @@
 package frc.robot;
 
+import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoTrajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -10,6 +11,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,12 +24,17 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Thrower;
 
+import java.util.HashMap;
+import java.util.function.Supplier;
+
 public class Auto {
   private final Drivetrain drive;
   private final Arm arm;
   private final Thrower thrower;
   private final Intake intake;
   private final SendableChooser<Integer> autonomousSendableChooser = new SendableChooser<>();
+  private static final HashMap<String, ChoreoTrajectory> trajectories = new HashMap<>();
+  public final ChoreoPathCommand tempAutoCommand;
 
   public Auto() {
     SmartDashboard.putString("Current Auto", "Program resetting...");
@@ -57,6 +64,13 @@ public class Auto {
     this.recursiveAddAutos("PathPlanner", Constants.Auto.PATHPLANNER.keySet().toArray(), Constants.Auto.PATHPLANNER_OFFSET);
     this.autonomousSendableChooser.addOption("[Disabled] DISABLE AUTONOMOUS", Constants.Auto.DISABLED_ID);
     SmartDashboard.putData("Autos", this.autonomousSendableChooser);
+
+    Auto.NamedCommands.addCommand("intake", this::intakeCommand);
+    Auto.NamedCommands.addCommand("launch", this.thrower::launch);
+    Auto.NamedCommands.addCommand("overhand", this::armOverhandCommand);
+    Auto.NamedCommands.addCommand("speakerShot", () -> this.armPositionCommand(Constants.Arm.Positions.OVERHAND + 0.125));
+
+    this.tempAutoCommand = this.getChoreoPath("testStraightAuto");
   }
 
   private void recursiveAddAutos(String name, Object[] array, int offset) {
@@ -97,9 +111,13 @@ public class Auto {
     * @return The command for the auto mode
    **/
   public Command getAutoCommand() {
+    System.out.println(Timer.getFPGATimestamp() + " update settings");
     Globals.UpdateSettings();
+    System.out.println(Timer.getFPGATimestamp() + " get selected auto id");
     int autoChoice = this.getSelectedAutoId();
+    System.out.println(Timer.getFPGATimestamp() + " check if disabled");
     if (autoChoice == Constants.Auto.DISABLED_ID) return new InstantCommand(() -> System.out.println("auto disabled"));
+    System.out.println(Timer.getFPGATimestamp() + " main switch case");
     if (autoChoice < Constants.Auto.CHOREO_OFFSET) {
       return (switch (autoChoice) {
         default:
@@ -112,27 +130,28 @@ public class Auto {
             this.thrower.off().alongWith(this.arm.setStow()),
             this.drive.goStraight(1, 2)
           );
-        case 1:  // 4.5-Note
+        case 1:  // 4-Note
           yield new SequentialCommandGroup(
-            this.armPositionCommand(0.25 * Math.PI),
+            new InstantCommand(() -> System.out.println(Timer.getFPGATimestamp() + " starting auto")),
+            this.armOverhandCommand(),
             new WaitCommand(0.5),
             this.thrower.launch(),
             new WaitCommand(0.25),
             this.arm.setStow().alongWith(this.intake.off()),
             new WaitCommand(0.25),
-            this.getChoreoPath("4note").alongWith(new SequentialCommandGroup(  // TODO: REPLACE WITH CHEESE
+            this.tempAutoCommand.alongWith(new SequentialCommandGroup(
               this.intake.intakeNote().alongWith(this.thrower.setIntake()),
               new WaitCommand(2.2),
-              this.armOverhandCommand(),
-              new WaitCommand(0.6),
+              this.armPositionCommand(Constants.Arm.Positions.OVERHAND + 0.125),
+              new WaitCommand(0.85),
               this.thrower.launch(),  // throw 1
-              new WaitCommand(0.2),
+              new WaitCommand(0.1),
               this.intakeCommand(),
-              new WaitCommand(1.4),
-              this.armOverhandCommand(),
+              new WaitCommand(1.45),
+              this.armPositionCommand(Constants.Arm.Positions.OVERHAND + 0.125),
               new WaitCommand(0.7),
               this.thrower.launch(),  // throw 2
-              new WaitCommand(0.4),
+              new WaitCommand(0.2),
               this.intakeCommand(),
               new WaitCommand(1.7),
               this.armPositionCommand(0.25 * Math.PI + 0.1),
@@ -140,8 +159,8 @@ public class Auto {
               this.thrower.launch(),  // throw 3
               new WaitCommand(0.2),
               this.thrower.off().alongWith(this.arm.setStow()))
-            ),
-            this.getChoreoPath("5note").alongWith(new SequentialCommandGroup(  // TODO: REPLACE WITH BUTGER
+            )/*,
+            this.getChoreoPath("5note").alongWith(new SequentialCommandGroup(
               new WaitCommand(2.0),
               this.intake.intakeNote().alongWith(this.thrower.setIntake()),
               new WaitCommand(1.5),
@@ -152,7 +171,15 @@ public class Auto {
               this.thrower.launch(),
               new WaitCommand(0.2),
               this.thrower.off().alongWith(this.arm.setStow())
-            ))
+            ))*/
+          );
+        case 2:  // TODO: ADD STATIONARY SHOOT TO DRIVERSTATION & FINISH AUTO MODE
+          yield new SequentialCommandGroup(
+            this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
+            new WaitCommand(1),
+            this.thrower.launch(),
+            new WaitCommand(0.2),
+            this.thrower.off().alongWith(this.arm.setStow())
           );
       });
     } else if (autoChoice < Constants.Auto.PATHPLANNER_OFFSET) {
@@ -167,8 +194,62 @@ public class Auto {
     * @param path The filename of the requested path
     * @return A command that follows the path
    **/
-  public Command getChoreoPath(String path) {
-    return new ChoreoPathCommand(path);
+  public ChoreoPathCommand getChoreoPath(String path) {
+    System.out.println(Timer.getFPGATimestamp() + " create choreo path");
+    ChoreoPathCommand command = new ChoreoPathCommand(path);
+    /*System.out.println(Timer.getFPGATimestamp() + " read file");
+    Scanner file;
+
+    File folder = new File("home/lvuser");
+    for (File f : folder.listFiles()) {
+      System.out.println(f.getName());
+    }
+    System.out.println(Timer.getFPGATimestamp() + " check path file");
+    try {
+//      file = new Scanner(new File("choreo/" + path + ".traj"));
+      file = new Scanner(new File("src/main/deploy/choreo/" + path + ".traj"));
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+      return command;
+    }
+
+    System.out.println(Timer.getFPGATimestamp() + " parse json");
+    StringBuilder JSONString = new StringBuilder();
+    while (file.hasNextLine()) {
+      JSONString.append(file.nextLine());
+    }
+
+    JSONObject json;
+    try {
+      json = (JSONObject) (new JSONParser()).parse(JSONString.toString());
+    } catch (ParseException e) {
+      e.printStackTrace();
+      return command;
+    }
+
+    System.out.println(Timer.getFPGATimestamp() + " get event markers");
+
+    for (Object o : (JSONArray) json.get("eventMarkers")) {
+      JSONObject event = (JSONObject) o;
+      Set<String> keys = event.keySet();
+      if (!keys.contains("command")) {
+        continue;
+      }
+
+      JSONObject eventCommand = (JSONObject) event.get("command");
+      if (!eventCommand.get("type").equals("named")) {
+        continue;
+      }
+
+      Double timestamp = (Double) event.get("timestamp");
+      if (timestamp == null) {
+        continue;
+      }
+
+      command.addEventMarker(timestamp, (String) ((JSONObject) eventCommand.get("data")).get("name"));
+    }*/
+
+    return command;
   }
 
   /**
@@ -197,7 +278,7 @@ public class Auto {
     * @return A command that moves the arm and prepares to launch
    **/
   public Command armOverhandCommand() {
-    return this.intake.off().alongWith(this.thrower.prepareSpeaker()).alongWith(this.arm.setOverhand()); // Adjust intake along with arm
+    return this.intake.off().alongWith(this.thrower.prepareSpeaker()).alongWith(this.arm.setOverhand());
   }
 
   /**
@@ -215,5 +296,31 @@ public class Auto {
    **/
   public Command intakeCommand() {
     return this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow());
+  }
+
+  public static ChoreoTrajectory getChoreoTrajectory(String name) {
+    if (Auto.trajectories.containsKey(name)) {
+      return Auto.trajectories.get(name);
+    } else {
+      ChoreoTrajectory trajectory = Choreo.getTrajectory(name);
+      Auto.trajectories.put(name, trajectory);
+      return trajectory;
+    }
+  }
+
+  public static class NamedCommands {
+    private static final HashMap<String, Supplier<Command>> commands = new HashMap<>();
+
+    public static Command getCommand(String name) {
+      if (Auto.NamedCommands.commands.containsKey(name)) {
+        return Auto.NamedCommands.commands.get(name).get();
+      } else {
+        return new InstantCommand(() -> System.out.println("Scheduled command " + name + " could not be found."));
+      }
+    }
+
+    public static void addCommand(String name, Supplier<Command> command) {
+      Auto.NamedCommands.commands.put(name, command);
+    }
   }
 }

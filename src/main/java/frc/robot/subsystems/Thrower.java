@@ -143,6 +143,7 @@ public class Thrower extends SubsystemBase {
     * @return A command that expels a note
   * */
   public Command launch() {
+//      return this.setFeederVoltage(this.topLauncherController.Output <= 0.0 ? Constants.Thrower.Feeder.PREPARE_VOLTAGE : Constants.Thrower.Feeder.LAUNCH_VOLTAGE);
       return this.setFeederVoltage(Constants.Thrower.Feeder.LAUNCH_VOLTAGE);
   }
 

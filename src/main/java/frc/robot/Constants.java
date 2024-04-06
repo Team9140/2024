@@ -165,10 +165,10 @@ public final class Constants {
   public static final double CANDLE_BRIGHTNESS = 1.0;
 
   // Electric current limits for intake motors
-  public static final int FRONT_INTAKE_CURRENT_LIMIT = 20;
-  public static final int BACK_INTAKE_CURRENT_LIMIT = 20;
+  public static final int FRONT_INTAKE_CURRENT_LIMIT = 15;
+  public static final int BACK_INTAKE_CURRENT_LIMIT = 15;
   public static final double FRONT_INTAKE_NOTE_VOLTS = 9.0;
-  public static final double BACK_INTAKE_NOTE_VOLTS = 9.0;
+  public static final double BACK_INTAKE_NOTE_VOLTS = 7.0;
 
   public static class Arm {
     // PID and SVA, used in motion magic
@@ -183,32 +183,32 @@ public final class Constants {
 
     // Motion Magic Specific Limits
     public static final double CRUISE_VELOCITY = 24.0;  // Radians per second
-    public static final double ACCELERATION = 36.0;  // Radians per second per second
+    public static final double ACCELERATION = 36.0;  // Radians per second per secon
     public static final double FEED_FORWARD = 0.0;  // FIXME: for later
     public static final double INITIAL_VARIANCE = Units.degreesToRadians(5);  // Radians
     public static final double AIM_ERROR = Math.toRadians(1.0);
 
     // Positions in radians
     public static class Positions {
-      public static final double INTAKE = -1.69;
+      public static final double INTAKE = -1.7;
       public static final double AMP = 2.00;
 
       public static final double UNDERHAND = -Math.PI / 3.5;
-      public static final double OVERHAND = 0.25 * Math.PI + 0.125;
+      public static final double OVERHAND = 0.25 * Math.PI;
     }
   }
 
   public static class Thrower {
     public static class Launcher {
       public static final double MAX_CURRENT = 60.0;  // amps
-      public static final double INTAKE_VOLTAGE = -3.0;  // volts
-      public static final double SPEAKER_VOLTAGE = 11.0;  // volts
+      public static final double INTAKE_VOLTAGE = -6.0;  // volts
+      public static final double SPEAKER_VOLTAGE = 12.0;  // volts
       public static final double TOP_AMP_VOLTAGE = 4.0;  // volts
       public static final double BOTTOM_AMP_VOLTAGE = 2.0;  // volts
     }
 
     public static class Feeder {
-      public static final int MAX_CURRENT = 0;  // amps FIXME: ACTUALLY PUT A VALUE
+      public static final int MAX_CURRENT = 20;  // amps FIXME: ACTUALLY PUT A VALUE
       public static final double INTAKE_VOLTAGE = -4.0;  // volts
       public static final double PREPARE_VOLTAGE = -1.5;  // volts
       public static final double LAUNCH_VOLTAGE = 12.0;  // volts
@@ -217,32 +217,30 @@ public final class Constants {
 
   public static class Climber {
     public static final double UP_VELOCITY = 1.0;
-    public static final double DOWN_VELOCITY = 1.0;
     public static final double ERROR = 1.0;
-    public static final double UP_POSITION = 0.0;  // FIXME
-    public static final double DOWN_POSITION = 0.0;  // FIXME
+    public static final double UP_POSITION = 113.0;  // FIXME
+    public static final double DOWN_POSITION = 240.0;  // FIXME
   }
 
   public static class Auto {
-    public static final int DEFAULT_POSITION = 1;
+    public static final int DEFAULT_POSITION = 0;
     public static final HashMap<String, Pose2d> POSITIONS = new HashMap<>(Map.ofEntries(
       // Blue Alliance
-      Map.entry("Amp Side",        Util.pose(0.71,  6.69,  60.00)),
-      Map.entry("Mid Side 4-Note", Util.pose(1.369, 5.552, 0.0)),
-      Map.entry("Mid Side",        Util.pose(1.63,  5.54,  0.0)),
-      Map.entry("Ref Side",        Util.pose(0.71,  4.37,  -60.00))
+      Map.entry("Amp Side", Util.pose(0.71,  6.69,  60.00)),
+      Map.entry("Mid Side", Util.pose(1.369, 5.552, 0.0)),
+      Map.entry("Ref Side", Util.pose(0.71,  4.37,  -60.00))
     ));
 
     public static final int DEFAULT_MODE = 1;  // Set 4-note auto as default
     public static final int DISABLED_ID = 999;
     public static final String[] REGULAR = {
       "Shoot & drive",
-      "Middle 4.5-note"
+      "Middle 4-Note"
     };
 
     public static final int CHOREO_OFFSET = 100;
     public static final HashMap<String, String> CHOREO = new HashMap<>(Map.ofEntries(
-      Map.entry("Test straight 1m", "testStraightAuto")
+      Map.entry("Test", "testStraightAuto")
     ));
 
     public static final int PATHPLANNER_OFFSET = 200;

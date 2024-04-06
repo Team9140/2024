@@ -258,8 +258,11 @@ public class Robot extends TimedRobot {
    **/
   @Override
   public void autonomousInit() {
+    System.out.println(Timer.getFPGATimestamp() + " cancelling commands");
     CommandScheduler.getInstance().cancelAll();
+    System.out.println(Timer.getFPGATimestamp() + " resetting position");
     this.drive.resetPosition(Globals.STARTING_POSITION);
+    System.out.println(Timer.getFPGATimestamp() + " run auto");
     this.auto.getAutoCommand().schedule();
 
 //    this.candle.setAnimation(Candle.AnimationTypes.Twinkle);
@@ -283,43 +286,42 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-//    switch (this.climberPosition) {
-//      case MovingUp:
-//        this.climber.set(Constants.Climber.UP_VELOCITY);
-//        if (this.climber.getEncoder().getPosition() >= Constants.Climber.UP_POSITION) {
-//          this.climberPosition = ClimberPosition.Up;
-//        }
-//        break;
-//      case MovingDown:
-//        this.climber.set(Constants.Climber.DOWN_VELOCITY);
-//        if (this.climber.getEncoder().getPosition() >= Constants.Climber.DOWN_POSITION) {
-//          this.climberPosition = ClimberPosition.Down;
-//        }
-//        break;
-//      case Start:
-//        this.climber.set(0.0);
-//        if (this.driverController.getHID().getXButton() && this.driverController.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
-//          this.climberPosition = ClimberPosition.MovingUp;
-//        }
-//        break;
-//      case Up:
-//        this.climber.set(0.0);
-//        if (this.driverController.getHID().getXButton() && this.driverController.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
-//          this.climberPosition = ClimberPosition.MovingDown;
-//        }
-//        break;
-//      case Down:
-//        this.climber.set(0.0);
-//        break;
-//    }
-    SmartDashboard.putString("Climber Target", this.climberPosition.toString());
-    SmartDashboard.putNumber("Climber angle", this.climber.getEncoder().getPosition());
-
-    if (this.driverController.getHID().getXButton()) {
-      this.climber.set(this.driverController.getHID().getLeftTriggerAxis());
-    } else {
-      this.climber.set(0.0);
+    switch (this.climberPosition) {
+      case MovingUp:
+        this.climber.set(Constants.Climber.UP_VELOCITY);
+        if (this.climber.getEncoder().getPosition() >= Constants.Climber.UP_POSITION) {
+          this.climberPosition = ClimberPosition.Up;
+        }
+        break;
+      case MovingDown:
+        this.climber.set(this.driverController.getLeftTriggerAxis());
+        if (this.climber.getEncoder().getPosition() >= Constants.Climber.DOWN_POSITION) {
+          this.climberPosition = ClimberPosition.Down;
+        }
+        break;
+      case Start:
+        this.climber.set(0.0);
+        if (this.driverController.getHID().getXButton() && this.driverController.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+          this.climberPosition = ClimberPosition.MovingUp;
+        }
+        break;
+      case Up:
+        this.climber.set(0.0);
+        if (this.driverController.getHID().getXButton() && this.driverController.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+          this.climberPosition = ClimberPosition.MovingDown;
+        }
+        break;
+      case Down:
+        this.climber.set(0.0);
+        break;
     }
+    SmartDashboard.putString("Climber Target", this.climberPosition.toString());
+
+//    if (this.driverController.getHID().getXButton()) {
+//      this.climber.set(this.driverController.getHID().getLeftTriggerAxis());
+//    } else {
+//      this.climber.set(0.0);
+//    }
   }
 
   @Override
