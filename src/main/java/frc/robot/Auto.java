@@ -34,7 +34,7 @@ public class Auto {
   private final Intake intake;
   private final SendableChooser<Integer> autonomousSendableChooser = new SendableChooser<>();
   private static final HashMap<String, ChoreoTrajectory> trajectories = new HashMap<>();
-  public final ChoreoPathCommand tempAutoCommand;
+  public final ChoreoPathCommand tempAutoCommand;  // TODO: implement properly
 
   public Auto() {
     SmartDashboard.putString("Current Auto", "Program resetting...");
@@ -173,7 +173,7 @@ public class Auto {
               this.thrower.off().alongWith(this.arm.setStow())
             ))*/
           );
-        case 2:  // TODO: ADD STATIONARY SHOOT TO DRIVERSTATION & FINISH AUTO MODE
+        case 2:
           yield new SequentialCommandGroup(
             this.arm.setOverhand().alongWith(this.thrower.prepareSpeaker()),
             new WaitCommand(1),

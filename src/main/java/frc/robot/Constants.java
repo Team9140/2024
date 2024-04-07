@@ -5,7 +5,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import lib.util.Util;
 
@@ -35,6 +37,9 @@ public final class Constants {
   // Size of the field
   //  public static final double fieldx = Units.inchesToMeters(501);
   //  public static final double fieldy = Units.inchesToMeters(323.28);
+
+  public static final double CAMERA_RANGE = 10.0;
+  public static final double SCORING_RANGE = 120.0;
 
   public static final class Drivetrain {
     // The offsets for swerve kinematics
@@ -159,6 +164,8 @@ public final class Constants {
     public static final int FRONT_LEFT_INTAKE = 33;
     public static final int FRONT_RIGHT_INTAKE = 30;
     public static final int BACK_INTAKE = 31;
+
+    public static final String CAMERA = "limelight";
   }
 
   public static final int CANDLE_LEDS_PER_ANIMATION = 30;  // FIXME: Placeholder value
@@ -222,6 +229,15 @@ public final class Constants {
     public static final double DOWN_POSITION = 240.0;  // FIXME
   }
 
+  public static final class Camera {
+    public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
+    public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
+    public static final AprilTagFieldLayout field = null;  // FIXME: add json file
+
+    // Position of camera relative to the robot
+    public static final Transform3d cameraToRobot = new Transform3d();
+  }
+
   public static class Auto {
     public static final int DEFAULT_POSITION = 0;
     public static final HashMap<String, Pose2d> POSITIONS = new HashMap<>(Map.ofEntries(
@@ -235,7 +251,8 @@ public final class Constants {
     public static final int DISABLED_ID = 999;
     public static final String[] REGULAR = {
       "Shoot & drive",
-      "Middle 4-Note"
+      "Middle 4-Note",
+      "Preloaded stationary"
     };
 
     public static final int CHOREO_OFFSET = 100;
